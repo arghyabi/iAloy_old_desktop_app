@@ -1,0 +1,96 @@
+Key points : Product Key, Pi_id, Authentication key / Password,
+Guest user, OTP
+Pi_id : Raspberry Pi Serial Number
+
+............................................................
+1)		     iAloy Setup Guide
+		     Date : 17-09-2018
+		    Update : 11-02-2020
+............................................................
+1. Buy pi and setup OS
+2. Connect with Internet
+3. Insert Program and run it
+	3.a. Insert super_user(su) mail_id
+	3.b. Request to server with Pi_id and su mail_id
+	3.c. Validate Pi over web server[not available->3.d. else 3.i]
+		3.d. Insert product_id
+		3.e. Request to server with Pi_id and product_id & mail_id
+		3.f. Send generated OTP to the su mail_id
+		3.g. Login in Pi_account & enter OTP to activate
+		3.h. Set su password
+	3.i. Dashboard
+
+[
+Network : 3 : HTTPS
+	  7 : TCP(CO)
+Interface : 1, 2, 3(a, b, d, e, i) : Pi
+	    3(c, f, g, h, i) : Web
+]
+.............................................................
+	   		End Section (1)
+.............................................................
+
+
+
+.............................................................
+2)			iAloy Work flow
+		       Date : 18-09-2018
+.............................................................
+
+1. Power on Pi
+2. Connect with Internet
+3. Start Program from Pi
+	3.a. #initial=>validation and connect
+	3.b. #loop=>infinity
+	3.c. control
+
+[
+Network : 3 : TCP(CO)
+Interface : 1, 2, 3(a,b) : Pi
+	    3(c) : Web
+]
+
+.............................................................
+	   		End Section(2)
+.............................................................
+
+
+.............................................................
+3)		   iAloy Permanent User SignIn
+			Date : 18-09-2018
+.............................................................
+
+1. Using google authentication token signIn
+2. Select Pi account (use cookie + session)
+3. Dashboard
+.............................................................
+	   		End Section(3)
+.............................................................
+
+
+.............................................................
+4)		   iAloy Permanent User SignUp
+			Date : 18-09-2018
+.............................................................
+
+1. SU invitation for permanent user
+2. Login with mail_link & set password
+3. Dashboard
+
+.............................................................
+	   		End Section(5)
+.............................................................
+
+
+.............................................................
+(5)		   iAloy invite new Guest User
+			Date : 18-09-2018
+.............................................................
+
+1. SU invitation for guest user with proper specification
+2. Login with mail_link
+3. Specified dashboard
+.............................................................
+	   		End Section(5)
+.............................................................
+
