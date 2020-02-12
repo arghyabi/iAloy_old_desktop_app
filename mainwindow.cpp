@@ -16,7 +16,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::addBgImange()
 {
-    QPixmap bkgnd("back.jpg");
+    QPixmap bkgnd("/usr/share/iAloy/back.jpg");
     bkgnd = bkgnd.scaled(this->width(),this->height());
     QPalette palette;
     palette.setBrush(QPalette::Background, bkgnd);
