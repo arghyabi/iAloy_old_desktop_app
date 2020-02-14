@@ -1,0 +1,4 @@
+url = http://ialoy.arghyabiswas.com/iAloy_req_mngr.php?u=2&rc=1&email=admin@arghyabiswas.com&u_pwd=1234
+
+
+compilation_command = sudo g++ -o http2 test_2.cpp -lPocoNet -lPocoFoundation

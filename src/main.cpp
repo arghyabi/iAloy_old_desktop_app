@@ -13,6 +13,6 @@ int main(int argc, char *argv[])
     w.showFullScreen();
 
     w.show();
-
+//    print_name();
     return a.exec();
 }

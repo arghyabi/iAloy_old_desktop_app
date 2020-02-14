@@ -18,7 +18,7 @@ SHLIB	=	/usr/lib/x86_64-linux-gnu/libQt5Widgets.so \
 CPPFILE	= main.cpp mainwindow.cpp
 OBJFILE	= main.o mainwindow.o
 
-all: main mainwindow moc_predefs moc_mainwindow_cpp moc_mainwindow_o main_bin
+all: connect_init main mainwindow moc_predefs moc_mainwindow_cpp moc_mainwindow_o main_bin
 
 moc_predefs:
 	g++ -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
@@ -31,6 +31,9 @@ main: main.cpp
 
 mainwindow: mainwindow.cpp
 	$(GPP) $(CGLAG) $(QTLIB) -o mainwindow.o mainwindow.cpp
+
+connect_init: connect_init.cpp
+	$(GPP) $(CGLAG) -o connect_init.o connect_init.cpp -lPocoNet -lPocoFoundation
 
 moc_mainwindow_o: moc_mainwindow.cpp
 	$(GPP) $(CGLAG) $(QTLIB) -o moc_mainwindow.o moc_mainwindow.cpp

@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "connect_init.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -16,10 +18,10 @@ public:
     void addBgImange();
     ~MainWindow();
 
-private slots:
-    void on_pushButton_clicked();
+//private slots:
 
-    void on_push_Button_2_clicked();
+private slots:
+    void on_SuEmailSubmit_clicked();
 
 private:
     Ui::MainWindow *ui;
