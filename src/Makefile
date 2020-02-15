@@ -13,10 +13,12 @@ QTLIB 	= 	-isystem /usr/include/x86_64-linux-gnu/qt5 \
 SHLIB	=	/usr/lib/x86_64-linux-gnu/libQt5Widgets.so \
 			/usr/lib/x86_64-linux-gnu/libQt5Gui.so \
 			/usr/lib/x86_64-linux-gnu/libQt5Core.so \
+			/usr/local/lib/libPocoNet.so\
+			/usr/local/lib/libPocoFoundationd.so\
 			/usr/lib/x86_64-linux-gnu/libGL.so -lpthread
 
 CPPFILE	= main.cpp mainwindow.cpp
-OBJFILE	= main.o mainwindow.o
+OBJFILE	= main.o mainwindow.o connect_init.o
 
 all: connect_init main mainwindow moc_predefs moc_mainwindow_cpp moc_mainwindow_o main_bin
 
@@ -50,7 +52,6 @@ uninstall:
 clean:
 	rm -f moc_predefs.h
 	rm -f moc_mainwindow.cpp
-	rm -f ui_mainwindow.h
 	rm -f *.o
 	rm -f *~ core *.core
 	rm -f $(TARGET)

@@ -8,6 +8,7 @@ install:
 	sudo cp photos/back.jpg $(DEST_RESOURCE_LOC)
 
 clean:
+	rm -f ../src/ui_mainwindow.h
 	
 uninstall:
 	sudo rm -r $(DEST_RESOURCE_LOC)
