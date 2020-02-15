@@ -1,3 +1,5 @@
+include ../Makefile_h
+
 GPP 	= g++
 UIC 	= uic
 CGLAG 	= -c -fPIC
@@ -5,17 +7,17 @@ TARGET 	= iAloy_Desktop_App
 
 DEST_BIN_LOC 	= /usr/bin/
 
-QTLIB 	= 	-isystem /usr/include/x86_64-linux-gnu/qt5 \
-			-isystem /usr/include/x86_64-linux-gnu/qt5/QtWidgets \
-			-isystem /usr/include/x86_64-linux-gnu/qt5/QtGui \
-			-isystem /usr/include/x86_64-linux-gnu/qt5/QtCore
+QTLIB 	= 	-isystem /usr/include/$(SYS_ARC)/qt5 \
+			-isystem /usr/include/$(SYS_ARC)/qt5/QtWidgets \
+			-isystem /usr/include/$(SYS_ARC)/qt5/QtGui \
+			-isystem /usr/include/$(SYS_ARC)/qt5/QtCore
 
-SHLIB	=	/usr/lib/x86_64-linux-gnu/libQt5Widgets.so \
-			/usr/lib/x86_64-linux-gnu/libQt5Gui.so \
-			/usr/lib/x86_64-linux-gnu/libQt5Core.so \
+SHLIB	=	/usr/lib/$(SYS_ARC)/libQt5Widgets.so \
+			/usr/lib/$(SYS_ARC)/libQt5Gui.so \
+			/usr/lib/$(SYS_ARC)/libQt5Core.so \
 			/usr/local/lib/libPocoNet.so\
 			/usr/local/lib/libPocoFoundationd.so\
-			/usr/lib/x86_64-linux-gnu/libGL.so -lpthread
+			/usr/lib/$(SYS_ARC)/libGL.so -lpthread
 
 CPPFILE	= main.cpp mainwindow.cpp
 OBJFILE	= main.o mainwindow.o connect_init.o
@@ -23,7 +25,7 @@ OBJFILE	= main.o mainwindow.o connect_init.o
 all: connect_init main mainwindow moc_predefs moc_mainwindow_cpp moc_mainwindow_o main_bin
 
 moc_predefs:
-	g++ -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
+	g++ -E -o moc_predefs.h /usr/lib/$(SYS_ARC)/qt5/mkspecs/features/data/dummy.cpp
 
 moc_mainwindow_cpp:moc_predefs.h
 	moc --include moc_predefs.h mainwindow.h -o moc_mainwindow.cpp
