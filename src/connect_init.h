@@ -16,7 +16,7 @@ using namespace Poco::Net;
 using namespace Poco;
 using namespace std;
 
-static string url = "http://ialoy.arghyabiswas.com/iAloy_req_mngr.php";
+static string url = "http://ialoy.arghyabiswas.com/desktop_api/req_mngr.php";
 
 string call_web_api(int input_stat, string email, string product_id);
 string req_web_api(string url);

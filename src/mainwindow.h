@@ -11,20 +11,20 @@ class MainWindow;
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    void addBgImange();
-    ~MainWindow();
+	explicit MainWindow(QWidget *parent = nullptr);
+	void addBgImange();
+	~MainWindow();
 
 //private slots:
 
 private slots:
-    void on_SuEmailSubmit_clicked();
+	void on_SuEmailSubmit_clicked();
 
 private:
-    Ui::MainWindow *ui;
+	Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H

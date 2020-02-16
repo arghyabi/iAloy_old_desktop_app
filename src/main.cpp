@@ -4,15 +4,15 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
+	QApplication a(argc, argv);
+	MainWindow w;
 
-    QSize size = qApp->screens()[0]->size();
-    w.resize(size);
-    w.addBgImange();
-    w.showFullScreen();
+	QSize size = qApp->screens()[0]->size();
+	w.resize(size);
+	w.addBgImange();
+	w.showFullScreen();
 
-    w.show();
+	w.show();
 //    print_name();
-    return a.exec();
+	return a.exec();
 }
