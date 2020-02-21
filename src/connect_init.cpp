@@ -77,7 +77,6 @@ string ialoy_web_api::req_web_api(){
 	}catch(Exception &ex){
 		return ex.displayText();
 	}
-
 }
 
 string ialoy_web_api::check_email_pi_connection()
@@ -98,7 +97,6 @@ string ialoy_web_api::check_email_pi_connection()
 
 string ialoy_web_api::check_product_id()
 {
-
 	if(this->product_id != "")
 	{
 		this->req_url = this->url+"?aco=1&prod_id="+this->product_id;
@@ -109,12 +107,10 @@ string ialoy_web_api::check_product_id()
 		string err_msg = "Product Id can't be blank.";
 		return err_msg;
 	}
-
 }
 
-string ialoy_web_api::login()
+int ialoy_web_api::login()
 {
-
 	if((this->email != "") && (this->password != ""))
 	{
 		this->req_url = this->url+"?aco=2&email="+this->email+"&pi_add="+this->pi_add+"&password="+this->password;
@@ -122,20 +118,22 @@ string ialoy_web_api::login()
 		cout << "Login Stat: " << login_stat << endl;
 
 		char* c = const_cast<char*>(login_stat.c_str());
+
 		if(!strncmp(c, "1", 1))
 		{
 			cout << "Login success..." << endl;
+			return true;
 		}
 		else
 		{
 			cout << "Login failed..." << endl;
+			return false;
 		}
-		return login_stat;
+		//return login_stat;
 	}
 	else
 	{
 		string err_msg = "Email and password can't be blank.";
-		return err_msg;
+		return false;
 	}
-
 }

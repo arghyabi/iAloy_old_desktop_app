@@ -16,7 +16,8 @@ using namespace Poco::Net;
 using namespace Poco;
 using namespace std;
 
-class ialoy_web_api{
+class ialoy_web_api
+{
 
 private:
 
@@ -35,8 +36,7 @@ public:
 	string req_web_api();
 	string check_email_pi_connection();
 	string check_product_id();
-	string login();
-
+	int login();
 };
 
 #endif //CONNECT_INIT_H

@@ -36,7 +36,7 @@ class MainWindow : public QMainWindow, public ialoy_web_api
 
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
-	void addBgImange();
+	void addBgImage();
 	ialoy_web_api api;
 	~MainWindow();
 

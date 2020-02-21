@@ -1,9 +1,10 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include<iostream>
 #include<QMessageBox>
 
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
 #include "connect_init.h"
+#include "main.h"
 
 using namespace std;
 
@@ -15,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->SuEmailLabel->hide();
-//	MainWindow::api;
 }
 
 MainWindow::~MainWindow()
@@ -25,7 +25,7 @@ MainWindow::~MainWindow()
 
 // string email_data, product_key_data, password_data;
 
-void MainWindow::addBgImange()
+void MainWindow::addBgImage()
 {
 	QString pic_add = "/usr/share/iAloy/back.jpg";
 	QPixmap bkgnd(pic_add);
@@ -112,7 +112,6 @@ void MainWindow::on_SuEmailSubmit_clicked()
 				cout << "Invalid product key entered... Check again" << endl;
 				ui->SetUpLineEdit->setText("");
 			}
-
 		}
 		else
 		{
@@ -127,8 +126,13 @@ void MainWindow::on_SuEmailSubmit_clicked()
 		{
 			string password = ui->SetUpLineEdit->text().toStdString();
 			MainWindow::set_password(password);
-			string resp = MainWindow::login();
+			int resp = MainWindow::login();
 			cout << resp << endl;
+			if(resp)
+			{
+				dashboard_window_show(true);
+				main_window_show(false);
+			}
 		}
 		else
 		{

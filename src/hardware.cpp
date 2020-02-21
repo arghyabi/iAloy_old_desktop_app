@@ -1,6 +1,6 @@
-// 
-#include<iostream>
+ #include<iostream>
 #include<fstream>
+
 #include "hardware.h"
 
 using namespace std;
@@ -16,10 +16,7 @@ string get_serial()
 	system("rm tms.txt");
 
 	if(line == "")
-	{
 		line = "0123456789ABCDEF";
-		//cout << "Intel architechture" << endl;
-	}
 
 	return line;
 }
