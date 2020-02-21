@@ -1,7 +1,6 @@
 include ../Makefile_h
 
 GPP 	= g++
-UIC 	= uic
 CGLAG 	= -c -fPIC
 TARGET 	= iAloy_Desktop_App
 
@@ -19,28 +18,19 @@ SHLIB	=	/usr/lib/$(SYS_ARC)/libQt5Widgets.so \
 			/usr/local/lib/libPocoFoundationd.so\
 			/usr/lib/$(SYS_ARC)/libGL.so -lpthread
 
-CPPFILE	= main.cpp mainwindow.cpp
+CPPFILE	= main.cpp mainwindow.cpp connect_init.cpp hardware.cpp
 OBJFILE	= main.o mainwindow.o connect_init.o hardware.o
 
-all: hardware connect_init main mainwindow moc_predefs moc_mainwindow_cpp moc_mainwindow_o main_bin
+all: moc_predefs moc_mainwindow_cpp moc_mainwindow_o $(OBJFILE) main_bin
+
+%.o: %.cpp
+	$(GPP) $(CGLAG) $(QTLIB) $< -o $@
 
 moc_predefs:
 	g++ -E -o moc_predefs.h /usr/lib/$(SYS_ARC)/qt5/mkspecs/features/data/dummy.cpp
 
 moc_mainwindow_cpp:moc_predefs.h
 	moc --include moc_predefs.h mainwindow.h -o moc_mainwindow.cpp
-
-main: main.cpp
-	$(GPP) $(CGLAG) $(QTLIB) -o main.o main.cpp
-
-mainwindow: mainwindow.cpp
-	$(GPP) $(CGLAG) $(QTLIB) -o mainwindow.o mainwindow.cpp
-
-connect_init: connect_init.cpp
-	$(GPP) $(CGLAG) -o connect_init.o connect_init.cpp -lPocoNet -lPocoFoundation
-
-hardware:hardware.cpp
-	$(GPP) $(CGLAG) -o hardware.o hardware.cpp
 
 moc_mainwindow_o: moc_mainwindow.cpp
 	$(GPP) $(CGLAG) $(QTLIB) -o moc_mainwindow.o moc_mainwindow.cpp
