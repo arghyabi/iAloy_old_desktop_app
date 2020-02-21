@@ -16,10 +16,27 @@ using namespace Poco::Net;
 using namespace Poco;
 using namespace std;
 
-static string url = "http://ialoy.arghyabiswas.com/desktop_api/req_mngr.php";
+class ialoy_web_api{
 
-string call_web_api(int input_stat, string email, string product_id);
-string req_web_api(string url);
+private:
 
+	string url = "http://ialoy.arghyabiswas.com/desktop_api/req_mngr.php";
+	string req_url, pi_add, email, product_id, password;
+
+public:
+
+	// setter methods for private variables.
+	void set_pi_add();
+	void set_email(string email_id);
+	void set_product_id(string prod_id);
+	void set_password(string pass);
+
+	// main operational functions.
+	string req_web_api();
+	string check_email_pi_connection();
+	string check_product_id();
+	string login();
+
+};
 
 #endif //CONNECT_INIT_H

@@ -20,9 +20,9 @@ SHLIB	=	/usr/lib/$(SYS_ARC)/libQt5Widgets.so \
 			/usr/lib/$(SYS_ARC)/libGL.so -lpthread
 
 CPPFILE	= main.cpp mainwindow.cpp
-OBJFILE	= main.o mainwindow.o connect_init.o
+OBJFILE	= main.o mainwindow.o connect_init.o hardware.o
 
-all: connect_init main mainwindow moc_predefs moc_mainwindow_cpp moc_mainwindow_o main_bin
+all: hardware connect_init main mainwindow moc_predefs moc_mainwindow_cpp moc_mainwindow_o main_bin
 
 moc_predefs:
 	g++ -E -o moc_predefs.h /usr/lib/$(SYS_ARC)/qt5/mkspecs/features/data/dummy.cpp
@@ -38,6 +38,9 @@ mainwindow: mainwindow.cpp
 
 connect_init: connect_init.cpp
 	$(GPP) $(CGLAG) -o connect_init.o connect_init.cpp -lPocoNet -lPocoFoundation
+
+hardware:hardware.cpp
+	$(GPP) $(CGLAG) -o hardware.o hardware.cpp
 
 moc_mainwindow_o: moc_mainwindow.cpp
 	$(GPP) $(CGLAG) $(QTLIB) -o moc_mainwindow.o moc_mainwindow.cpp

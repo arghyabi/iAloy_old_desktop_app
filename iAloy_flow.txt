@@ -1,5 +1,4 @@
-Key points : Product Key, Pi_id, Authentication key / Password,
-Guest user, OTP
+Key points : Product Key, Pi_id, Authentication key / Password, Guest user, OTP
 Pi_id : Raspberry Pi Serial Number
 
 ............................................................
@@ -14,11 +13,12 @@ Pi_id : Raspberry Pi Serial Number
 	3.b. Request to server with Pi_id and su mail_id
 	3.c. Validate Pi over web server[not available->3.d. else 3.i]
 		3.d. Insert product_id
-		3.e. Request to server with Pi_id and product_id & mail_id
+		3.e. Request to server with Pi_id, product_id & mail_id
 		3.f. Send generated OTP to the su mail_id
 		3.g. Login in Pi_account & enter OTP to activate
 		3.h. Set su password
-	3.i. Dashboard
+	3.i. Enter password
+4. Dashboard
 
 [
 Network : 3 : HTTPS

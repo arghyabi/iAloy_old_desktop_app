@@ -9,40 +9,42 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <stdlib.h>
 
 #include "connect_init.h"
+#include "hardware.h"
 
 using namespace std;
 
-string call_web_api(int input_stat, string email, string product_id = ""){
-
-	string pi_id = "456";
-
-	if(input_stat == 0){
-		url += "?aco="+to_string(input_stat)+"&email="+email+"&pi_id="+pi_id;
-		cout << "URL : " << url << endl;
-		string response = req_web_api(url);
-		return response;
-	}else if(input_stat == 1){
-		url += "?email="+email+"&pi_id="+pi_id+"&prod_id="+product_id;
-		cout << "URL : " << url << endl;
-		string response = req_web_api(url);
-		return response;
-	}else{
-		cout << "URL : " << url << endl;
-		string response = req_web_api(url);
-		return response;
-	}
-
+void ialoy_web_api::set_email(string email_id)
+{
+	this->email = email_id;
+	cout << "Email : " << this->email << endl;
 }
 
-string req_web_api(string url){
+void ialoy_web_api::set_product_id(string prod_id)
+{
+	this->product_id = prod_id;
+}
+
+void ialoy_web_api::set_password(string pass)
+{
+	this->password = pass;
+}
+
+void ialoy_web_api::set_pi_add()
+{
+	this->pi_add = get_serial();
+	cout << "Pi address : " << this->pi_add << endl;
+}
+
+string ialoy_web_api::req_web_api(){
 
 	try
 	{
-		/* code */
 		//prepare session
-		URI uri(url);
+		cout << this->req_url << endl;
+		URI uri(this->req_url);
 		HTTPClientSession session(uri.getHost(), uri.getPort());
 
 		// prepare path
@@ -73,9 +75,67 @@ string req_web_api(string url){
 		return data;
 
 	}catch(Exception &ex){
-		string err_msg = ex.displayText();
+		return ex.displayText();
+	}
+
+}
+
+string ialoy_web_api::check_email_pi_connection()
+{
+	this->set_pi_add();
+	if((this->email != "") && (this->pi_add != ""))
+	{
+		this->req_url = this->url+"?aco=0&email="+this->email+"&pi_add="+this->pi_add;
+		return this->req_web_api();
+	}
+	else
+	{
+		string err_msg = "Email can't be blank.";
 		return err_msg;
 	}
 
 }
 
+string ialoy_web_api::check_product_id()
+{
+
+	if(this->product_id != "")
+	{
+		this->req_url = this->url+"?aco=1&prod_id="+this->product_id;
+		return this->req_web_api();
+	}
+	else
+	{
+		string err_msg = "Product Id can't be blank.";
+		return err_msg;
+	}
+
+}
+
+string ialoy_web_api::login()
+{
+
+	if((this->email != "") && (this->password != ""))
+	{
+		this->req_url = this->url+"?aco=2&email="+this->email+"&pi_add="+this->pi_add+"&password="+this->password;
+		string login_stat =  this->req_web_api();
+		cout << "Login Stat: " << login_stat << endl;
+
+		char* c = const_cast<char*>(login_stat.c_str());
+		if(!strncmp(c, "1", 1))
+		{
+			cout << "Login success..." << endl;
+		}
+		else
+		{
+			cout << "Login failed..." << endl;
+		}
+		return login_stat;
+	}
+	else
+	{
+		string err_msg = "Email and password can't be blank.";
+		return err_msg;
+	}
+
+}
