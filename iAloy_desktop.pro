@@ -27,14 +27,19 @@ CONFIG += c++11
 SOURCES += \
         src/main.cpp \
         src/mainwindow.cpp \
-        src/connect_init.cpp
+	src/connect_init.cpp \
+	src/hardware.cpp \
+	src/dashboard.cpp \
 
 HEADERS += \
         src/mainwindow.h \
-        src/connect_init.h
+	src/connect_init.h \
+	src/hardware.h \
+	src/dashboard.h\
 
 FORMS += \
-    resource/ui/mainwindow.ui
+	resource/ui/mainwindow.ui \
+	resource/ui/dashboard.ui \
 
 
 # Default rules for deployment.

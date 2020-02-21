@@ -6,7 +6,7 @@ all: ui/mainwindow.ui ui/dashboard.ui
 
 install:
 	sudo mkdir -p $(DEST_RESOURCE_LOC)
-	sudo cp photos/back.jpg $(DEST_RESOURCE_LOC)
+	sudo cp photos/* $(DEST_RESOURCE_LOC)
 
 clean:
 	rm -f ../src/ui_mainwindow.h
