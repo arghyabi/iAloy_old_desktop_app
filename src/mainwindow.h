@@ -43,7 +43,7 @@ public:
 //private slots:
 
 private slots:
-	void on_SuEmailSubmit_clicked();
+	void on_submit_button_clicked();
 
 private:
 	Ui::MainWindow *ui;
