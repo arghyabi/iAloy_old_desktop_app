@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>728</width>
-    <height>472</height>
+    <height>527</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -348,6 +348,20 @@ font-size: 25px;
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>SetUpLineEdit</tabstop>
+  <tabstop>submit_button</tabstop>
+  <tabstop>f_name_edit</tabstop>
+  <tabstop>l_name_edit</tabstop>
+  <tabstop>email_id_edit</tabstop>
+  <tabstop>password_edit</tabstop>
+  <tabstop>c_password_edit</tabstop>
+  <tabstop>passsword_toggle</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>form_next_btn</tabstop>
+  <tabstop>form_back_btn</tabstop>
+  <tabstop>form_reset_btn</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

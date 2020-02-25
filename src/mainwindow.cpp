@@ -1,6 +1,7 @@
 #include<iostream>
 #include<QMessageBox>
 #include<QString>
+#include<regex>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -32,6 +33,12 @@ void MainWindow::status_label_set_text(string text, string color)
 {
 	ui->status_label->setText("<font color='"+QString::fromStdString(color)+"'>" \
 		+QString::fromStdString(text)+"</font>");
+}
+
+bool MainWindow::emailCheck(string email)
+{
+	const regex pattern("(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+");
+    return regex_match(email,pattern);
 }
 
 void MainWindow::show_reg_form()
@@ -89,49 +96,59 @@ void MainWindow::on_submit_button_clicked()
 		// Email id proccessing section
 		if (ui->SetUpLineEdit->text() != "")
 		{
-			ui->status_label->setText("Checking account...");
-			MainWindow::set_email(ui->SetUpLineEdit->text().toStdString());
-			int resp = stoi(MainWindow::check_email_pi_connection());
-			cout << "RESP : " << resp << endl;
+			// check email is right formatted or not
+			if(emailCheck(ui->SetUpLineEdit->text().toStdString()))
+			{
+				ui->status_label->setText("Checking account...");
+				MainWindow::set_email(ui->SetUpLineEdit->text().toStdString());
+				int resp = stoi(MainWindow::check_email_pi_connection());
+				cout << "RESP : " << resp << endl;
 
-			if (resp == SUPER_USER_EMAIL)
-			{
-				cout << MainWindow::get_email() << " is a super user account" << endl;
-				status_label_set_text(MainWindow::get_email()+" is a super user account", "green");
-				ui->SetUpLineEdit->setText("");
-				ui->passsword_toggle->show();
-				ui->SetUpLineEdit->setPlaceholderText("Enter password");
-				ui->SetUpLineEdit->setEchoMode(QLineEdit::Password);
-				ui->submit_button->setText("Login");
-				SetUpLineEdit_stat = GET_INPUT_PASSWORD_MODE;
-			}
-			else if(resp == PERMANENT_USER_EMAIL)
-			{
-				cout << MainWindow::get_email() << " is a permanent user account" << endl;
-				status_label_set_text(MainWindow::get_email()+" is a permanent user account", "green");
-				ui->SetUpLineEdit->setText("");
-				ui->passsword_toggle->show();
-				ui->SetUpLineEdit->setPlaceholderText("Enter password");
-				ui->SetUpLineEdit->setEchoMode(QLineEdit::Password);
-				ui->submit_button->setText("Login");
-				SetUpLineEdit_stat = GET_INPUT_PASSWORD_MODE;
-			}
-			else
-			{
-				MainWindow::set_pi_add();
-				if(stoi(MainWindow::pi_reg_status()) == PI_REGISTERED)
+				if (resp == SUPER_USER_EMAIL)
 				{
-					// Pi registered.
-					cout << MainWindow::get_email() << " invalid user of this Pi" << endl;
+					cout << MainWindow::get_email() << " is a super user account" << endl;
+					status_label_set_text(MainWindow::get_email()+" is a super user account", "green");
 					ui->SetUpLineEdit->setText("");
-					status_label_set_text(MainWindow::get_email()+" invalid user of this Pi", "red");
+					ui->passsword_toggle->show();
+					ui->SetUpLineEdit->setPlaceholderText("Enter password");
+					ui->SetUpLineEdit->setEchoMode(QLineEdit::Password);
+					ui->submit_button->setText("Login");
+					SetUpLineEdit_stat = GET_INPUT_PASSWORD_MODE;
+				}
+				else if(resp == PERMANENT_USER_EMAIL)
+				{
+					cout << MainWindow::get_email() << " is a permanent user account" << endl;
+					status_label_set_text(MainWindow::get_email()+" is a permanent user account", "green");
+					ui->SetUpLineEdit->setText("");
+					ui->passsword_toggle->show();
+					ui->SetUpLineEdit->setPlaceholderText("Enter password");
+					ui->SetUpLineEdit->setEchoMode(QLineEdit::Password);
+					ui->submit_button->setText("Login");
+					SetUpLineEdit_stat = GET_INPUT_PASSWORD_MODE;
 				}
 				else
 				{
-					// Pi not registered yet... register to continue
-					show_reg_form();
+					MainWindow::set_pi_add();
+					if(stoi(MainWindow::pi_reg_status()) == PI_REGISTERED)
+					{
+						// Pi registered.
+						cout << MainWindow::get_email() << " invalid user of this Pi" << endl;
+						ui->SetUpLineEdit->setText("");
+						status_label_set_text(MainWindow::get_email()+" invalid user of this Pi", "red");
+					}
+					else
+					{
+						// Pi not registered yet... register to continue
+						show_reg_form();
+					}
 				}
 			}
+			else
+			{
+				ui->SetUpLineEdit->setText("");
+				status_label_set_text("This is not an valid email... ", "red");
+			}
+			
 		}
 		else
 		{
@@ -231,7 +248,6 @@ void MainWindow::on_submit_button_clicked()
 		cout << "OTP : " << ui->SetUpLineEdit->text().toStdString() << endl;
 		if(ui->SetUpLineEdit->text().toStdString() == MainWindow::otp)
 		{
-			// setDatas
 			cout << "OTP matched..." << endl;
 			MainWindow::set_f_name(ui->f_name_edit->text().toStdString());
 			MainWindow::set_l_name(ui->l_name_edit->text().toStdString());
@@ -290,4 +306,12 @@ void MainWindow::on_form_reset_btn_clicked()
 	ui->password_edit->setText("");
 	ui->c_password_edit->setText("");
 	ui->form_status_label->setText("");
+}
+
+void MainWindow::on_passsword_toggle_stateChanged(int arg1)
+{
+	if(arg1 == 2)
+		ui->SetUpLineEdit->setEchoMode(QLineEdit::Normal);
+	else if (arg1 == 0)
+		ui->SetUpLineEdit->setEchoMode(QLineEdit::Password);
 }

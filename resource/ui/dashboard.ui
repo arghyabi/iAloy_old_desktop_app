@@ -238,5 +238,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>dashboard</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>280</x>
+     <y>162</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>380</x>
+     <y>156</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
