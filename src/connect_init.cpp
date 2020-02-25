@@ -32,10 +32,40 @@ void ialoy_web_api::set_password(string pass)
 	this->password = pass;
 }
 
+void ialoy_web_api::set_f_name(string f_name)
+{
+	this->f_name = f_name;
+}
+
+void ialoy_web_api::set_l_name(string l_name)
+{
+	this->l_name = l_name;
+}
+
+void ialoy_web_api::set_phone(string phone)
+{
+	this->phone = phone;
+}
+
+void ialoy_web_api::set_otp(string otp)
+{
+	this->otp = otp;
+}
+
 void ialoy_web_api::set_pi_add()
 {
 	this->pi_add = get_serial();
 	cout << "Pi address : " << this->pi_add << endl;
+}
+
+string ialoy_web_api::get_email()
+{
+	return this->email;
+}
+
+string ialoy_web_api::get_product_id()
+{
+	return this->product_id;
 }
 
 string ialoy_web_api::req_web_api(){
@@ -92,7 +122,13 @@ string ialoy_web_api::check_email_pi_connection()
 		string err_msg = "Email can't be blank.";
 		return err_msg;
 	}
+}
 
+string ialoy_web_api::pi_reg_status()
+{
+	if(this->pi_add != "")
+		this->req_url = this->url+"?aco=4&pi_add="+this->pi_add;
+	return this->req_web_api();
 }
 
 string ialoy_web_api::check_product_id()
@@ -136,4 +172,29 @@ int ialoy_web_api::login()
 		string err_msg = "Email and password can't be blank.";
 		return false;
 	}
+}
+
+int ialoy_web_api::send_otp()
+{
+	this->req_url = this->url+"?aco=3&su_mail="+this->email;
+	string send_otp_resp = this->req_web_api();
+	char* c = const_cast<char*>(send_otp_resp.c_str());
+	if(!strncmp(c, "1", 1))
+	{
+		this->otp = send_otp_resp.substr(1,send_otp_resp.length()-1);
+		return 1;
+	}
+	else
+		return 0;
+}
+
+int ialoy_web_api::reg_new_pi()
+{
+	this->req_url = this->url+"?aco=5&prod_key="+this->product_id+"&pi_add="+this->pi_add+"&su_mail="+this->email+ \
+					"&f_name="+this->f_name+"&l_name="+this->l_name+"&password="+this->password;
+	string reg_resp = this->req_web_api() ;	
+	if(reg_resp == "1")
+		return 1;
+	else
+		return 0;
 }
