@@ -131,6 +131,21 @@ string ialoy_web_api::pi_reg_status()
 	return this->req_web_api();
 }
 
+bool ialoy_web_api::email_reg_status()
+{
+	this->req_url = this->url+"?aco=6&email="+this->email;
+	if(this->req_web_api() == "1")
+		return true;
+	else
+		return false;
+}
+
+string ialoy_web_api::get_user_details()
+{
+	this->req_url = this->url+"?aco=7&email="+this->email;
+	return this->req_web_api();
+}
+
 string ialoy_web_api::check_product_id()
 {
 	if(this->product_id != "")
@@ -188,13 +203,38 @@ int ialoy_web_api::send_otp()
 		return 0;
 }
 
+void ialoy_web_api::set_user_type(int type)
+{
+	this->reg_user_type = type;
+}
+
+void ialoy_web_api::set_pi_name(string piName)
+{
+	this->pi_name = piName;
+}
+
 int ialoy_web_api::reg_new_pi()
 {
-	this->req_url = this->url+"?aco=5&prod_key="+this->product_id+"&pi_add="+this->pi_add+"&su_mail="+this->email+ \
-					"&f_name="+this->f_name+"&l_name="+this->l_name+"&password="+this->password;
-	string reg_resp = this->req_web_api() ;	
-	if(reg_resp == "1")
-		return 1;
+	if(this->reg_user_type)
+	{
+		this->req_url = this->url+"?aco=5&type="+to_string(this->reg_user_type)+"&prod_key="+this->product_id+"&pi_add="+this->pi_add+"&su_mail="+this->email+ \
+					"&pi_name="+this->pi_name+"&f_name="+this->f_name+"&l_name="+this->l_name+"&password="+this->password;
+		string reg_resp = this->req_web_api() ;	
+		if(reg_resp == "1")
+			return 1;
+		else
+			return 0;
+	}
 	else
-		return 0;
+	{
+		this->req_url = this->url+"?aco=5&type="+to_string(this->reg_user_type)+"&prod_key="+this->product_id+"&pi_add="+this->pi_add+"&su_mail="+this->email+ \
+					"&pi_name="+this->pi_name;
+		string reg_resp = this->req_web_api() ;	
+		if(reg_resp == "1")
+			return 1;
+		else
+			return 0;
+	}
+	
 }
+

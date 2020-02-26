@@ -18,7 +18,8 @@ enum setUpLineEditStat
 	GET_INPUT_EMAIL_MODE = 0,
 	GET_INPUT_PROD_KEY_MODE,
 	GET_INPUT_PASSWORD_MODE,
-	GET_INPUT_OTP_MODE	
+	GET_INPUT_OTP_MODE,
+	GET_INPUT_PI_NAME_MODE	
 };
 
 enum prodKey_status
@@ -32,6 +33,12 @@ enum pi_reg_status
 {
 	PI_UNREGISTERED = 0,
 	PI_REGISTERED
+};
+
+enum user_type
+{
+	EXISTING_USER = 0,
+	NEW_USER
 };
 
 namespace Ui {

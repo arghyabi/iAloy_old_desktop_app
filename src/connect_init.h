@@ -22,7 +22,8 @@ class ialoy_web_api
 private:
 
 	string url = "http://ialoy.arghyabiswas.com/desktop_api/req_mngr.php";
-	string req_url, pi_add, email, product_id, password, f_name, l_name, phone;
+	string req_url, pi_add, pi_name, email, product_id, password, f_name, l_name, phone;
+	int reg_user_type;
 
 public:
 
@@ -37,6 +38,8 @@ public:
 	void set_l_name(string l_name);
 	void set_phone(string phone);
 	void set_otp(string otp);
+	void set_user_type(int type);
+	void set_pi_name(string pi_name);
 
 	string get_email();
 	string get_product_id();
@@ -47,6 +50,8 @@ public:
 	string check_product_id();
 	int login();
 	string pi_reg_status();
+	bool email_reg_status();
+	string get_user_details();
 	int send_otp();
 	int reg_new_pi();
 };

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-static int SetUpLineEdit_stat = 0;
+static int SetUpLineEdit_stat = 0, user_type = 0;
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -43,22 +43,57 @@ bool MainWindow::emailCheck(string email)
 
 void MainWindow::show_reg_form()
 {
-	status_label_set_text("<center>This Pi is not registered & don't have Super User. \
+	MainWindow::set_email(ui->SetUpLineEdit->text().toStdString());
+	if(MainWindow::email_reg_status())
+	{
+		user_type = EXISTING_USER;
+		string user_details = MainWindow::get_user_details();
+		int loc = user_details.find_first_of(",");
+		string first_name = user_details.substr(0, loc);
+		string last_name = user_details.substr(loc+1, user_details.find_first_of(",", loc+1));
+		cout << "Email : " << MainWindow::get_email() << "F_name : " << first_name << "L_name : " << last_name << endl;
+
+		status_label_set_text("<center>This Pi is not registered & don't have Super User. \
 		<br>Fill the Super User details to register the Pi<center>", "#53ed11");
-	ui->SetUpLineEdit->hide();
-	ui->submit_button->hide();
-	ui->f_name_edit->show();
-	ui->l_name_edit->show();
-	ui->email_id_edit->show();
-	ui->password_edit->show();
-	ui->c_password_edit->show();
-	ui->form_status_label->show();
-	ui->form_back_btn->show();
-	ui->form_reset_btn->show();
-	ui->form_next_btn->show();
-	ui->form_status_label->setText("");
-	ui->email_id_edit->setText(QString::fromStdString(MainWindow::get_email()));
-	ui->email_id_edit->setDisabled(1);
+		ui->SetUpLineEdit->hide();
+		ui->submit_button->hide();
+		ui->f_name_edit->show();
+		ui->f_name_edit->setText(QString::fromStdString(first_name));
+		ui->l_name_edit->show();
+		ui->l_name_edit->setText(QString::fromStdString(last_name));
+		ui->email_id_edit->show();
+		ui->email_id_edit->setText(QString::fromStdString(MainWindow::get_email()));
+		ui->form_status_label->show();
+		ui->form_back_btn->show();
+		ui->form_reset_btn->show();
+		ui->form_next_btn->show();
+		ui->form_status_label->setText("You will be the Super User of this Pi... Please continue.");
+		ui->email_id_edit->setText(QString::fromStdString(MainWindow::get_email()));
+		ui->email_id_edit->setDisabled(1);
+	}
+	else
+	{
+		user_type = NEW_USER;
+		status_label_set_text("<center>This Pi is not registered & don't have Super User. \
+		<br>Fill the Super User details to register the Pi<center>", "#53ed11");
+		ui->SetUpLineEdit->hide();
+		ui->submit_button->hide();
+		ui->f_name_edit->show();
+		ui->f_name_edit->setText("");
+		ui->l_name_edit->show();
+		ui->f_name_edit->setText("");
+		ui->email_id_edit->show();
+		ui->password_edit->show();
+		ui->c_password_edit->show();
+		ui->form_status_label->show();
+		ui->form_back_btn->show();
+		ui->form_reset_btn->show();
+		ui->form_next_btn->show();
+		ui->form_status_label->setText("");
+		ui->email_id_edit->setText(QString::fromStdString(MainWindow::get_email()));
+		ui->email_id_edit->setDisabled(1);
+	}
+	
 }
 
 void MainWindow::hide_reg_form()
@@ -248,23 +283,45 @@ void MainWindow::on_submit_button_clicked()
 		cout << "OTP : " << ui->SetUpLineEdit->text().toStdString() << endl;
 		if(ui->SetUpLineEdit->text().toStdString() == MainWindow::otp)
 		{
-			cout << "OTP matched..." << endl;
-			MainWindow::set_f_name(ui->f_name_edit->text().toStdString());
-			MainWindow::set_l_name(ui->l_name_edit->text().toStdString());
-			MainWindow::set_password(ui->password_edit->text().toStdString());
-
-			if(MainWindow::reg_new_pi())
+			if(user_type == NEW_USER)
 			{
-				cout << "Registered..." << endl;
-				status_label_set_text("Registered successfully.", "green");
-				ui->SetUpLineEdit->hide();
-				ui->submit_button->setText("Dash Board");
+				cout << "OTP matched..." << endl;
+				MainWindow::set_user_type(NEW_USER);
+				MainWindow::set_f_name(ui->f_name_edit->text().toStdString());
+				MainWindow::set_l_name(ui->l_name_edit->text().toStdString());
+				MainWindow::set_password(ui->password_edit->text().toStdString());
+
+				if(MainWindow::reg_new_pi())
+				{
+					cout << "Registered..." << endl;
+					status_label_set_text("Registered successfully.", "green");
+					ui->SetUpLineEdit->hide();
+					ui->submit_button->setText("Dash Board");
+				}
+				else
+				{
+					cout << "Registration failed..." << endl;
+					status_label_set_text("Registration failed.", "red");
+				}
 			}
 			else
 			{
-				cout << "Registration failed..." << endl;
-				status_label_set_text("Registration failed.", "red");
+				cout << "OTP matched..." << endl;
+				MainWindow::set_user_type(EXISTING_USER);
+				if(MainWindow::reg_new_pi())
+				{
+					cout << "Registered..." << endl;
+					status_label_set_text("Registered successfully.", "green");
+					ui->SetUpLineEdit->hide();
+					ui->submit_button->setText("Dash Board");
+				}
+				else
+				{
+					cout << "Registration failed..." << endl;
+					status_label_set_text("Registration failed.", "red");
+				}
 			}
+			
 
 		}
 		else
@@ -274,7 +331,20 @@ void MainWindow::on_submit_button_clicked()
 			status_label_set_text("OTP mismatched...", "red");
 		}
 		
-		
+	}
+	else if(SetUpLineEdit_stat == GET_INPUT_PI_NAME_MODE)
+	{
+		if(ui->SetUpLineEdit->text() != "")
+		{
+			MainWindow::set_pi_name(ui->SetUpLineEdit->text().toStdString());
+			// show product_key enter field
+			status_label_set_text("Enter 16 digit product key to register", "black");
+			ui->SetUpLineEdit->setPlaceholderText("Enter Product Key...");
+			ui->SetUpLineEdit->setText("");
+			ui->SetUpLineEdit->setMaxLength(16);
+			ui->submit_button->setText("Procced");
+			SetUpLineEdit_stat = GET_INPUT_PROD_KEY_MODE;
+		}
 	}
 }
 
@@ -290,12 +360,17 @@ void MainWindow::on_form_back_btn_clicked()
 void MainWindow::on_form_next_btn_clicked()
 {
 	// show product_key enter field
-	status_label_set_text("Enter 16 digit product key to register", "black");
-	ui->SetUpLineEdit->setPlaceholderText("Enter Product Key...");
+	// status_label_set_text("Enter 16 digit product key to register", "black");
+	// ui->SetUpLineEdit->setPlaceholderText("Enter Product Key...");
+	// ui->SetUpLineEdit->setText("");
+	// ui->SetUpLineEdit->setMaxLength(16);
+	// ui->submit_button->setText("Procced");
+	status_label_set_text("Set a Pi Name", "black");
+	ui->SetUpLineEdit->setPlaceholderText("Enter Pi Name...");
 	ui->SetUpLineEdit->setText("");
-	ui->SetUpLineEdit->setMaxLength(16);
+	ui->SetUpLineEdit->setMaxLength(40);
 	ui->submit_button->setText("Procced");
-	SetUpLineEdit_stat = GET_INPUT_PROD_KEY_MODE;
+	SetUpLineEdit_stat = GET_INPUT_PI_NAME_MODE;
 	hide_reg_form();
 }
 
