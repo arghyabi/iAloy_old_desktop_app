@@ -116,7 +116,7 @@ void MainWindow::hide_reg_form()
 
 void MainWindow::addBgImage()
 {
-	QString pic_add = "/usr/share/iAloy/back.jpg";
+	QString pic_add = "/usr/share/iAloy/photos/back.jpg";
 	QPixmap bkgnd(pic_add);
 	bkgnd = bkgnd.scaled(this->width(),this->height());
 	QPalette palette;

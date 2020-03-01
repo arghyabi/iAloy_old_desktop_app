@@ -48,7 +48,7 @@ dashboard::~dashboard()
 
 void dashboard::addBgImage()
 {
-	QString pic_add = "/usr/share/iAloy/dashboard.jpg";
+	QString pic_add = "/usr/share/iAloy/photos/dashboard.jpg";
 	QPixmap bkgnd(pic_add);
 	bkgnd = bkgnd.scaled(this->width(),this->height());
 	QPalette palette;

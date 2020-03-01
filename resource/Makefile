@@ -1,16 +1,21 @@
-DEST_RESOURCE_LOC 	= /usr/share/iAloy/
+include ../filelist
 
-all: ui/mainwindow.ui ui/dashboard.ui
-	uic ui/mainwindow.ui -o ../src/ui_mainwindow.h
-	uic ui/dashboard.ui -o ../src/ui_dashboard.h
+DEST_RESOURCE_LOC 	= /usr/share/iAloy/photos/
+
+SRC_DIR = ui/
+DEST_DIR = ../src/
+
+all: $(UIMHFILE)
+
+ui_%.h: $(SRC_DIR)%.ui
+	uic $< -o $(DEST_DIR)$@
 
 install:
 	sudo mkdir -p $(DEST_RESOURCE_LOC)
 	sudo cp photos/* $(DEST_RESOURCE_LOC)
 
-clean:
-	rm -f ../src/ui_mainwindow.h
-	rm -f ../src/ui_dashboard.h
+clean: $(addprefix $(DEST_DIR), $(UIMHFILE))
+	rm -f $(addprefix $(DEST_DIR), $(UIMHFILE))
 	
 uninstall:
 	sudo rm -r $(DEST_RESOURCE_LOC)

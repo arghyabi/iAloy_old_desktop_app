@@ -1,0 +1,11 @@
+CPPFILE 	= main.cpp connect_init.cpp hardware.cpp 
+UICPPFILE 	= mainwindow.cpp dashboard.cpp
+CPPOBJFILE	= main.o connect_init.o hardware.o
+
+UIFILE 		= mainwindow.ui dashboard.ui
+UIHFILE 	= mainwindow.h dashboard.h
+UIMHFILE 	= ui_mainwindow.h ui_dashboard.h
+UIMOCCPP 	= moc_mainwindow.cpp moc_dashboard.cpp
+
+UIMOCOBJ 	= moc_mainwindow.o moc_dashboard.o
+UIOBJFILE 	= mainwindow.o dashboard.o
