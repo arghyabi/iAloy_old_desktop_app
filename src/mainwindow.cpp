@@ -18,6 +18,18 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->status_label->setText("");
+	string pi_name = MainWindow::get_pi_name();
+	if(pi_name == "Pi not registered.")
+	{
+		cout << pi_name << endl;
+		ui->pi_name_label->setText(QString::fromStdString(pi_name));
+		ui->SetUpLineEdit->setPlaceholderText("Enter email to register");
+	}
+	else
+	{
+		cout << "Pi_name : " << pi_name << endl;
+		ui->pi_name_label->setText(QString::fromStdString("Welcome to "+pi_name));
+	}
 	ui->passsword_toggle->hide();
 	ui->password_edit->setEchoMode(QLineEdit::Password);
 	ui->c_password_edit->setEchoMode(QLineEdit::Password);
@@ -38,7 +50,7 @@ void MainWindow::status_label_set_text(string text, string color)
 bool MainWindow::emailCheck(string email)
 {
 	const regex pattern("(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+");
-    return regex_match(email,pattern);
+	return regex_match(email,pattern);
 }
 
 void MainWindow::show_reg_form()
@@ -53,8 +65,9 @@ void MainWindow::show_reg_form()
 		string last_name = user_details.substr(loc+1, user_details.find_first_of(",", loc+1));
 		cout << "Email : " << MainWindow::get_email() << "F_name : " << first_name << "L_name : " << last_name << endl;
 
-		status_label_set_text("<center>This Pi is not registered & don't have Super User. \
-		<br>Fill the Super User details to register the Pi<center>", "#53ed11");
+		status_label_set_text("<center>This Pi is not registered \
+		<br>You will be the Super User of this Pi... \
+		<br>Please fillup the details & continue.<center>", "#184d80");
 		ui->SetUpLineEdit->hide();
 		ui->submit_button->hide();
 		ui->f_name_edit->show();
@@ -67,21 +80,22 @@ void MainWindow::show_reg_form()
 		ui->form_back_btn->show();
 		ui->form_reset_btn->show();
 		ui->form_next_btn->show();
-		ui->form_status_label->setText("You will be the Super User of this Pi... Please continue.");
+		ui->form_status_label->setText("");
 		ui->email_id_edit->setText(QString::fromStdString(MainWindow::get_email()));
 		ui->email_id_edit->setDisabled(1);
 	}
 	else
 	{
 		user_type = NEW_USER;
-		status_label_set_text("<center>This Pi is not registered & don't have Super User. \
-		<br>Fill the Super User details to register the Pi<center>", "#53ed11");
+		status_label_set_text("<center>This Pi is not registered \
+		<br>You will be the Super User of this Pi... \
+		<br>Please fillup the details & continue.<center>", "#184d80");
 		ui->SetUpLineEdit->hide();
 		ui->submit_button->hide();
 		ui->f_name_edit->show();
 		ui->f_name_edit->setText("");
 		ui->l_name_edit->show();
-		ui->f_name_edit->setText("");
+		ui->l_name_edit->setText("");
 		ui->email_id_edit->show();
 		ui->password_edit->show();
 		ui->c_password_edit->show();
@@ -93,14 +107,12 @@ void MainWindow::show_reg_form()
 		ui->email_id_edit->setText(QString::fromStdString(MainWindow::get_email()));
 		ui->email_id_edit->setDisabled(1);
 	}
-	
 }
 
 void MainWindow::hide_reg_form()
 {
 	ui->status_label->setText("");
 	ui->SetUpLineEdit->show();
-	//ui->SetUpLineEdit->setEchoMode(QLineEdit::Text);
 	ui->submit_button->show();
 	ui->f_name_edit->hide();
 	ui->l_name_edit->hide();
@@ -112,7 +124,6 @@ void MainWindow::hide_reg_form()
 	ui->form_reset_btn->hide();
 	ui->form_next_btn->hide();
 }
-// string email_data, product_key_data, password_data;
 
 void MainWindow::addBgImage()
 {
@@ -131,10 +142,10 @@ void MainWindow::on_submit_button_clicked()
 		// Email id proccessing section
 		if (ui->SetUpLineEdit->text() != "")
 		{
+			ui->status_label->setText("Checking account...");
 			// check email is right formatted or not
 			if(emailCheck(ui->SetUpLineEdit->text().toStdString()))
 			{
-				ui->status_label->setText("Checking account...");
 				MainWindow::set_email(ui->SetUpLineEdit->text().toStdString());
 				int resp = stoi(MainWindow::check_email_pi_connection());
 				cout << "RESP : " << resp << endl;
@@ -183,7 +194,6 @@ void MainWindow::on_submit_button_clicked()
 				ui->SetUpLineEdit->setText("");
 				status_label_set_text("This is not an valid email... ", "red");
 			}
-			
 		}
 		else
 		{
@@ -201,22 +211,18 @@ void MainWindow::on_submit_button_clicked()
 			if(MainWindow::get_product_id().length()==16)
 			{
 				status_label_set_text("Product key validating...", "black");
-				// MainWindow::set_product_id(prod_key);
 				int resp = stoi(MainWindow::check_product_id());
 				cout << "RESP : " << resp << endl;
 
 				if(resp == PRODUCT_KEY_AVAILABLE)
 				{
 					cout << "Product key is available... Its ok" << endl;
-					// status_label_set_text("Product key applied successfully.", "green");
 
 					if(MainWindow::send_otp())
 					{
 						ui->SetUpLineEdit->setText("");
 						ui->SetUpLineEdit->setPlaceholderText("Enter OTP");
-						// ui->SetUpLineEdit->setEchoMode(QLineEdit::Normal);
 						ui->SetUpLineEdit->setMaxLength(6);
-						// ui->submit_button->setText("SUBMIT");
 						SetUpLineEdit_stat = GET_INPUT_OTP_MODE;
 					}
 					else
@@ -240,7 +246,7 @@ void MainWindow::on_submit_button_clicked()
 			}
 			else
 			{
-				status_label_set_text("Product key must be 16 digit long", "black");
+				status_label_set_text("Product key must be 16 digit long", "red");
 				ui->SetUpLineEdit->setText("");
 			}
 		}
@@ -321,8 +327,6 @@ void MainWindow::on_submit_button_clicked()
 					status_label_set_text("Registration failed.", "red");
 				}
 			}
-			
-
 		}
 		else
 		{
@@ -330,7 +334,6 @@ void MainWindow::on_submit_button_clicked()
 			ui->SetUpLineEdit->setText("");
 			status_label_set_text("OTP mismatched...", "red");
 		}
-		
 	}
 	else if(SetUpLineEdit_stat == GET_INPUT_PI_NAME_MODE)
 	{
@@ -359,12 +362,6 @@ void MainWindow::on_form_back_btn_clicked()
 
 void MainWindow::on_form_next_btn_clicked()
 {
-	// show product_key enter field
-	// status_label_set_text("Enter 16 digit product key to register", "black");
-	// ui->SetUpLineEdit->setPlaceholderText("Enter Product Key...");
-	// ui->SetUpLineEdit->setText("");
-	// ui->SetUpLineEdit->setMaxLength(16);
-	// ui->submit_button->setText("Procced");
 	status_label_set_text("Set a Pi Name", "black");
 	ui->SetUpLineEdit->setPlaceholderText("Enter Pi Name...");
 	ui->SetUpLineEdit->setText("");

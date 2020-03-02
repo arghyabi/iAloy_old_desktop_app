@@ -21,7 +21,12 @@ class ialoy_web_api
 
 private:
 
-	string url = "http://ialoy.arghyabiswas.com/desktop_api/req_mngr.php";
+	string protocol = "http://";
+	string sub_domain = "ialoy";
+	string domain = "arghyabiswas.com";
+	string folder = "desktop_api";
+	string req_manager = "req_mngr.php";
+	string url = protocol+sub_domain+"."+domain+"/"+folder+"/"+req_manager;
 	string req_url, pi_add, pi_name, email, product_id, password, f_name, l_name, phone;
 	int reg_user_type;
 
@@ -43,6 +48,7 @@ public:
 
 	string get_email();
 	string get_product_id();
+	string get_pi_name();
 
 	// main operational functions.
 	string req_web_api();

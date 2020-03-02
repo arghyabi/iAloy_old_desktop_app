@@ -109,6 +109,16 @@ string ialoy_web_api::req_web_api(){
 	}
 }
 
+string ialoy_web_api::get_pi_name()
+{
+	if(this->pi_add == "")
+	{
+		this->set_pi_add();
+	}
+	this->req_url = this->url+"?aco=8&pi_add="+this->pi_add;
+	return this->req_web_api();
+}
+
 string ialoy_web_api::check_email_pi_connection()
 {
 	this->set_pi_add();
@@ -167,7 +177,6 @@ int ialoy_web_api::login()
 		this->req_url = this->url+"?aco=2&email="+this->email+"&pi_add="+this->pi_add+"&password="+this->password;
 		string login_stat =  this->req_web_api();
 		cout << "Login Stat: " << login_stat << endl;
-
 		char* c = const_cast<char*>(login_stat.c_str());
 
 		if(!strncmp(c, "1", 1))
@@ -235,6 +244,5 @@ int ialoy_web_api::reg_new_pi()
 		else
 			return 0;
 	}
-	
 }
 
