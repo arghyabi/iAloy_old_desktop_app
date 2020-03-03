@@ -3,10 +3,11 @@
 #include<QString>
 #include<regex>
 
+#include "main.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "connect_init.h"
-#include "main.h"
+#include "ialoy_data.h"
 
 using namespace std;
 
@@ -18,17 +19,18 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->status_label->setText("");
-	string pi_name = MainWindow::get_pi_name();
-	if(pi_name == "Pi not registered.")
+	cout << this->get_pi_add() << endl;
+	this->set_pi_name(MainWindow::fetch_pi_name());
+	if(this->get_pi_name() == "Pi not registered.")
 	{
-		cout << pi_name << endl;
-		ui->pi_name_label->setText(QString::fromStdString(pi_name));
+		cout << this->get_pi_name() << endl;
+		ui->pi_name_label->setText(QString::fromStdString(this->get_pi_name()));
 		ui->SetUpLineEdit->setPlaceholderText("Enter email to register");
 	}
 	else
 	{
-		cout << "Pi_name : " << pi_name << endl;
-		ui->pi_name_label->setText(QString::fromStdString("Welcome to "+pi_name));
+		cout << "Pi_name : " << this->get_pi_name() << endl;
+		ui->pi_name_label->setText(QString::fromStdString("Welcome to "+this->get_pi_name()));
 	}
 	ui->passsword_toggle->hide();
 	ui->password_edit->setEchoMode(QLineEdit::Password);
@@ -59,7 +61,7 @@ void MainWindow::show_reg_form()
 	if(MainWindow::email_reg_status())
 	{
 		user_type = EXISTING_USER;
-		string user_details = MainWindow::get_user_details();
+		string user_details = MainWindow::fetch_user_details();
 		int loc = user_details.find_first_of(",");
 		string first_name = user_details.substr(0, loc);
 		string last_name = user_details.substr(loc+1, user_details.find_first_of(",", loc+1));
@@ -287,14 +289,14 @@ void MainWindow::on_submit_button_clicked()
 	else if(SetUpLineEdit_stat == GET_INPUT_OTP_MODE)
 	{
 		cout << "OTP : " << ui->SetUpLineEdit->text().toStdString() << endl;
-		if(ui->SetUpLineEdit->text().toStdString() == MainWindow::otp)
+		if(ui->SetUpLineEdit->text().toStdString() == MainWindow::get_otp())
 		{
 			if(user_type == NEW_USER)
 			{
 				cout << "OTP matched..." << endl;
 				MainWindow::set_user_type(NEW_USER);
-				MainWindow::set_f_name(ui->f_name_edit->text().toStdString());
-				MainWindow::set_l_name(ui->l_name_edit->text().toStdString());
+				MainWindow::set_first_name(ui->f_name_edit->text().toStdString());
+				MainWindow::set_last_name(ui->l_name_edit->text().toStdString());
 				MainWindow::set_password(ui->password_edit->text().toStdString());
 
 				if(MainWindow::reg_new_pi())

@@ -2,9 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include<iostream>
+#include <iostream>
 
 #include "connect_init.h"
+#include "ialoy_data.h"
 
 enum email_status
 {
@@ -50,15 +51,13 @@ class MainWindow : public QMainWindow, public ialoy_web_api
 	Q_OBJECT
 
 public:
-	// std::string email;
-	std::string prod_key;
+
 	explicit MainWindow(QWidget *parent = nullptr);
 	void addBgImage();
 	void status_label_set_text(string text, string color);
 	void show_reg_form();
 	void hide_reg_form();
 	bool emailCheck(string email);
-	ialoy_web_api api;
 	~MainWindow();
 
 //private slots:

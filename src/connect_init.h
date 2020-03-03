@@ -12,54 +12,37 @@
 #include <string>
 #include <fstream>
 
+#include "ialoy_data.h"
+
 using namespace Poco::Net;
 using namespace Poco;
 using namespace std;
 
-class ialoy_web_api
+class ialoy_web_api : public ialoy_main_data
 {
 
 private:
-
 	string protocol = "http://";
 	string sub_domain = "ialoy";
 	string domain = "arghyabiswas.com";
-	string folder = "desktop_api";
+	string api = "desktop_api";
 	string req_manager = "req_mngr.php";
-	string url = protocol+sub_domain+"."+domain+"/"+folder+"/"+req_manager;
-	string req_url, pi_add, pi_name, email, product_id, password, f_name, l_name, phone;
-	int reg_user_type;
+	string url = protocol+sub_domain+"."+domain+"/"+api+"/"+req_manager;
+	string req_url;
 
 public:
-
-	string otp;
-
-	// setter methods for private variables.
-	void set_pi_add();
-	void set_email(string email_id);
-	void set_product_id(string prod_id);
-	void set_password(string pass);
-	void set_f_name(string f_name);
-	void set_l_name(string l_name);
-	void set_phone(string phone);
-	void set_otp(string otp);
-	void set_user_type(int type);
-	void set_pi_name(string pi_name);
-
-	string get_email();
-	string get_product_id();
-	string get_pi_name();
-
 	// main operational functions.
 	string req_web_api();
+	string fetch_pi_name();
 	string check_email_pi_connection();
 	string check_product_id();
 	int login();
 	string pi_reg_status();
 	bool email_reg_status();
-	string get_user_details();
+	string fetch_user_details();
 	int send_otp();
 	int reg_new_pi();
+
 };
 
 #endif //CONNECT_INIT_H

@@ -12,61 +12,10 @@
 #include <stdlib.h>
 
 #include "connect_init.h"
+#include "main.h"
 #include "hardware.h"
 
 using namespace std;
-
-void ialoy_web_api::set_email(string email_id)
-{
-	this->email = email_id;
-	cout << "Email : " << this->email << endl;
-}
-
-void ialoy_web_api::set_product_id(string prod_id)
-{
-	this->product_id = prod_id;
-}
-
-void ialoy_web_api::set_password(string pass)
-{
-	this->password = pass;
-}
-
-void ialoy_web_api::set_f_name(string f_name)
-{
-	this->f_name = f_name;
-}
-
-void ialoy_web_api::set_l_name(string l_name)
-{
-	this->l_name = l_name;
-}
-
-void ialoy_web_api::set_phone(string phone)
-{
-	this->phone = phone;
-}
-
-void ialoy_web_api::set_otp(string otp)
-{
-	this->otp = otp;
-}
-
-void ialoy_web_api::set_pi_add()
-{
-	this->pi_add = get_serial();
-	cout << "Pi address : " << this->pi_add << endl;
-}
-
-string ialoy_web_api::get_email()
-{
-	return this->email;
-}
-
-string ialoy_web_api::get_product_id()
-{
-	return this->product_id;
-}
 
 string ialoy_web_api::req_web_api(){
 
@@ -109,22 +58,22 @@ string ialoy_web_api::req_web_api(){
 	}
 }
 
-string ialoy_web_api::get_pi_name()
+string ialoy_web_api::fetch_pi_name()
 {
-	if(this->pi_add == "")
+	if(this->get_pi_add() == "")
 	{
 		this->set_pi_add();
 	}
-	this->req_url = this->url+"?aco=8&pi_add="+this->pi_add;
+	this->req_url = this->url+"?aco=8&pi_add="+this->get_pi_add();
 	return this->req_web_api();
 }
 
 string ialoy_web_api::check_email_pi_connection()
 {
 	this->set_pi_add();
-	if((this->email != "") && (this->pi_add != ""))
+	if((this->get_email() != "") && (this->get_pi_add() != ""))
 	{
-		this->req_url = this->url+"?aco=0&email="+this->email+"&pi_add="+this->pi_add;
+		this->req_url = this->url+"?aco=0&email="+this->get_email()+"&pi_add="+this->get_pi_add();
 		return this->req_web_api();
 	}
 	else
@@ -136,45 +85,44 @@ string ialoy_web_api::check_email_pi_connection()
 
 string ialoy_web_api::pi_reg_status()
 {
-	if(this->pi_add != "")
-		this->req_url = this->url+"?aco=4&pi_add="+this->pi_add;
+	if(this->get_pi_add() != "")
+		this->req_url = this->url+"?aco=4&pi_add="+this->get_pi_add();
 	return this->req_web_api();
 }
 
 bool ialoy_web_api::email_reg_status()
 {
-	this->req_url = this->url+"?aco=6&email="+this->email;
+	this->req_url = this->url+"?aco=6&email="+this->get_email();
 	if(this->req_web_api() == "1")
 		return true;
 	else
 		return false;
 }
 
-string ialoy_web_api::get_user_details()
+string ialoy_web_api::fetch_user_details()
 {
-	this->req_url = this->url+"?aco=7&email="+this->email;
+	this->req_url = this->url+"?aco=7&email="+this->get_email();
 	return this->req_web_api();
 }
 
 string ialoy_web_api::check_product_id()
 {
-	if(this->product_id != "")
+	if(this->get_product_id() != "")
 	{
-		this->req_url = this->url+"?aco=1&prod_id="+this->product_id;
+		this->req_url = this->url+"?aco=1&prod_id="+this->get_product_id();
 		return this->req_web_api();
 	}
 	else
 	{
-		string err_msg = "Product Id can't be blank.";
-		return err_msg;
+		return "Product Id can't be blank.";
 	}
 }
 
 int ialoy_web_api::login()
 {
-	if((this->email != "") && (this->password != ""))
+	if((this->get_email() != "") && (this->get_password() != ""))
 	{
-		this->req_url = this->url+"?aco=2&email="+this->email+"&pi_add="+this->pi_add+"&password="+this->password;
+		this->req_url = this->url+"?aco=2&email="+this->get_email()+"&pi_add="+this->get_pi_add()+"&password="+this->get_password();
 		string login_stat =  this->req_web_api();
 		cout << "Login Stat: " << login_stat << endl;
 		char* c = const_cast<char*>(login_stat.c_str());
@@ -189,7 +137,6 @@ int ialoy_web_api::login()
 			cout << "Login failed..." << endl;
 			return false;
 		}
-		//return login_stat;
 	}
 	else
 	{
@@ -200,35 +147,25 @@ int ialoy_web_api::login()
 
 int ialoy_web_api::send_otp()
 {
-	this->req_url = this->url+"?aco=3&su_mail="+this->email;
+	this->req_url = this->url+"?aco=3&su_mail="+this->get_email();
 	string send_otp_resp = this->req_web_api();
 	char* c = const_cast<char*>(send_otp_resp.c_str());
 	if(!strncmp(c, "1", 1))
 	{
-		this->otp = send_otp_resp.substr(1,send_otp_resp.length()-1);
+		this->set_otp(send_otp_resp.substr(1,send_otp_resp.length()-1));
 		return 1;
 	}
 	else
 		return 0;
 }
 
-void ialoy_web_api::set_user_type(int type)
-{
-	this->reg_user_type = type;
-}
-
-void ialoy_web_api::set_pi_name(string piName)
-{
-	this->pi_name = piName;
-}
-
 int ialoy_web_api::reg_new_pi()
 {
-	if(this->reg_user_type)
+	if(this->get_user_type())
 	{
-		this->req_url = this->url+"?aco=5&type="+to_string(this->reg_user_type)+"&prod_key="+this->product_id+"&pi_add="+this->pi_add+"&su_mail="+this->email+ \
-					"&pi_name="+this->pi_name+"&f_name="+this->f_name+"&l_name="+this->l_name+"&password="+this->password;
-		string reg_resp = this->req_web_api() ;	
+		this->req_url = this->url+"?aco=5&type="+to_string(this->get_user_type())+"&prod_key="+this->get_product_id()+"&pi_add="+this->get_pi_add()+"&su_mail="+this->get_email()+ \
+					"&pi_name="+this->get_pi_name()+"&f_name="+this->get_first_name()+"&l_name="+this->get_last_name()+"&password="+this->get_password();
+		string reg_resp = this->req_web_api() ;
 		if(reg_resp == "1")
 			return 1;
 		else
@@ -236,13 +173,12 @@ int ialoy_web_api::reg_new_pi()
 	}
 	else
 	{
-		this->req_url = this->url+"?aco=5&type="+to_string(this->reg_user_type)+"&prod_key="+this->product_id+"&pi_add="+this->pi_add+"&su_mail="+this->email+ \
-					"&pi_name="+this->pi_name;
-		string reg_resp = this->req_web_api() ;	
+		this->req_url = this->url+"?aco=5&type="+to_string(this->get_user_type())+"&prod_key="+this->get_product_id()+"&pi_add="+this->get_pi_add()+"&su_mail="+this->get_email()+ \
+					"&pi_name="+this->get_pi_name();
+		string reg_resp = this->req_web_api() ;
 		if(reg_resp == "1")
 			return 1;
 		else
 			return 0;
 	}
 }
-
