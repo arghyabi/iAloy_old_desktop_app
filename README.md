@@ -1,11 +1,6 @@
 # iAloy Desktop App
 
-## Setup first time
-
-Run dependency script 
-$ sudo ./dependency
-
-## Configure for the machin architecture
+## Configure and dependency solve
 Run Configure scpirt
 $ sudo ./configure
 
