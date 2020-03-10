@@ -1,3 +1,78 @@
+#!/bin/sh
+
 sudo ldconfig
 
-python3 conf.py
+if [ $(dpkg -s qt5-default | grep -c "ok installed") -ne 0 ]; then
+	echo "qt5-default is  already installed\n"
+else
+	echo "ERROR: qt5-default is not installed, Installing package ...\n"
+	sudo apt-get update
+	sudo apt-get install qt5-default
+	if [ $(dpkg -s qt5-default | grep -c "ok installed") -ne 0 ]; then
+		echo "qt5-default installation successful\n\n"
+	else
+		echo "qt5-default installtion failed... Do it manually.\n\n"
+	fi
+fi
+
+if [ $(dpkg -s openssl | grep -c "ok installed") -ne 0 ]; then
+		echo "openssl is  already installed\n"
+else
+		echo "ERROR: openssl is not installed, Installing package ...\n"
+		sudo apt-get update
+		sudo apt-get install openssl
+	if [ $(dpkg -s openssl | grep -c "ok installed") -ne 0 ]; then
+				echo "openssl installation successful\n\n"
+		else
+				echo "openssl installtion failed... Do it manually.\n\n"
+		fi
+fi
+
+if [ $(dpkg -s libssl-dev | grep -c "ok installed") -ne 0 ]; then
+		echo "libssl-dev is  already installed\n"
+else
+		echo "ERROR: libssl-dev is not installed, Installing package ...\n"
+		sudo apt-get update
+		sudo apt-get install libssl-dev
+	if [ $(dpkg -s libssl-dev | grep -c "ok installed") -ne 0 ]; then
+				echo "libssl-dev installation successful\n\n"
+		else
+				echo "libssl-dev installtion failed... Do it manually.\n\n"
+		fi
+fi
+
+if [ $(ldconfig -p | grep "Poco" | wc -l) -ge 50 ]; then
+	echo "Poco is already installed\n"
+else
+	echo "ERROR: Poco is nod installed, Cloning package...\n"
+	mkdir -p ~/Downloads/poco
+	git clone http://github.com/pocoproject/poco.git ~/Downloads/poco/
+	echo -e "Installing package...\n"
+	cd ~/Downloads/poco
+	sudo ./configure
+	sudo make && make install
+	cd -
+	if [ $(ldconfig -p | grep "Poco" | wc -l) -ge 50 ]; then
+				echo "poco installation successful\n\n"
+		else
+				echo "poco installtion failed... Do it manually.\n\n"
+		fi
+fi
+
+rm -rf 50
+echo "Processor Type:" $(cat /proc/cpuinfo | grep 'model name' | awk -F'[:,]' '{for(i=1;i<=NF;i=i+2) printf("%s%s", $(i+1), (i+2>NF)?ORS:OFS)}' | head -n1)
+
+if [ -f Makefile_h ]; then
+	rm -rf Makefile_h
+fi
+
+if [ $(cat /proc/cpuinfo | grep 'model name' | awk '{print tolower($4)}' | cut -c-5 | head -n1) = "intel" ]; then
+	echo "Configured for Intel Architecture\n"
+	echo "SYS_ARC = x86_64-linux-gnu" >> Makefile_h
+else
+	echo "Configured for ARM Architecture\n"
+	echo "SYS_ARC = arm-linux-gnueabihf" >> Makefile_h
+fi
+
+sudo ldconfig
+
