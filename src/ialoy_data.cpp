@@ -56,6 +56,16 @@ void ialoy_main_data::set_user_type(int u_type)
 	this->reg_user_type = u_type;
 }
 
+void ialoy_main_data::set_api_error_msg(string msg)
+{
+	this->api_error_msg = msg;
+}
+
+void ialoy_main_data::set_api_response(string response)
+{
+	this->api_response = response;
+}
+
 
 // all getter methods
 string ialoy_main_data::get_email()
@@ -106,4 +116,14 @@ string ialoy_main_data::get_otp()
 int ialoy_main_data::get_user_type()
 {
 	return this->reg_user_type;
+}
+
+string ialoy_main_data::get_api_error_msg()
+{
+	return this->api_error_msg;
+}
+
+string ialoy_main_data::get_api_response()
+{
+	return this->api_response;
 }

@@ -10,13 +10,14 @@ DEST_BIN_LOC 	= /usr/bin/
 QTLIB 	= 	-isystem /usr/include/$(SYS_ARC)/qt5 \
 			-isystem /usr/include/$(SYS_ARC)/qt5/QtWidgets \
 			-isystem /usr/include/$(SYS_ARC)/qt5/QtGui \
-			-isystem /usr/include/$(SYS_ARC)/qt5/QtCore
+			-isystem /usr/include/$(SYS_ARC)/qt5/QtCore \
+			-isystem /usr/include/$(SYS_ARC)/qt5/QtNetwork
+
 
 SHLIB	=	/usr/lib/$(SYS_ARC)/libQt5Widgets.so \
 			/usr/lib/$(SYS_ARC)/libQt5Gui.so \
 			/usr/lib/$(SYS_ARC)/libQt5Core.so \
-			/usr/local/lib/libPocoNet.so\
-			/usr/local/lib/libPocoFoundationd.so\
+			/usr/lib/$(SYS_ARC)/libQt5Network.so \
 			/usr/lib/$(SYS_ARC)/libGL.so -lpthread
 
 all: moc_predefs $(UIMOCCPP) $(UIMOCOBJ) $(CPPOBJFILE) $(UIOBJFILE) main_bin

@@ -1,6 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkReply>
 #include <QMainWindow>
 #include <iostream>
 
@@ -20,7 +23,7 @@ enum setUpLineEditStat
 	GET_INPUT_PROD_KEY_MODE,
 	GET_INPUT_PASSWORD_MODE,
 	GET_INPUT_OTP_MODE,
-	GET_INPUT_PI_NAME_MODE	
+	GET_INPUT_PI_NAME_MODE
 };
 
 enum prodKey_status
@@ -51,13 +54,17 @@ class MainWindow : public QMainWindow, public ialoy_web_api
 	Q_OBJECT
 
 public:
-
 	explicit MainWindow(QWidget *parent = nullptr);
 	void addBgImage();
 	void status_label_set_text(string text, string color);
 	void show_reg_form();
 	void hide_reg_form();
 	bool emailCheck(string email);
+
+	void update_mainwindow_gui();
+	bool api_response_parse();
+	void render_pi_name();
+
 	~MainWindow();
 
 //private slots:
@@ -70,6 +77,7 @@ private slots:
 	void on_passsword_toggle_stateChanged(int arg1);
 
 private:
+	QNetworkAccessManager *NetworkManager;
 	Ui::MainWindow *ui;
 };
 

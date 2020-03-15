@@ -1,27 +1,34 @@
 #ifndef CONNECT_INIT_H
 #define CONNECT_INIT_H
 
-#include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPRequest.h>
-#include <Poco/Net/HTTPResponse.h>
-#include <Poco/StreamCopier.h>
-#include <Poco/Path.h>
-#include <Poco/URI.h>
-#include <Poco/Exception.h>
+// #include <Poco/Net/HTTPClientSession.h>
+// #include <Poco/Net/HTTPRequest.h>
+// #include <Poco/Net/HTTPResponse.h>
+// #include <Poco/StreamCopier.h>
+// #include <Poco/Path.h>
+// #include <Poco/URI.h>
+// #include <Poco/Exception.h>
+
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkReply>
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <QObject>
 
 #include "ialoy_data.h"
 
-using namespace Poco::Net;
-using namespace Poco;
+// using namespace Poco::Net;
+// using namespace Poco;
 using namespace std;
 
 class ialoy_web_api : public ialoy_main_data
 {
 
 private:
+	//QNetworkAccessManager *manager;
+
 	string protocol = "http://";
 	string sub_domain = "ialoy";
 	string domain = "arghyabiswas.com";
@@ -31,17 +38,19 @@ private:
 	string req_url;
 
 public:
+	QNetworkRequest NetworkRequest;
 	// main operational functions.
-	string req_web_api();
-	string fetch_pi_name();
-	string check_email_pi_connection();
-	string check_product_id();
-	int login();
-	string pi_reg_status();
-	bool email_reg_status();
-	string fetch_user_details();
-	int send_otp();
-	int reg_new_pi();
+	void genarate_url(api_request_type genarate_url_flag);
+	void fetch_pi_name();
+	void check_email_pi_connection();
+	void check_product_id();
+	void login();
+	void pi_reg_status();
+	void email_reg_status();
+	void fetch_user_details();
+	void send_otp();
+	void reg_new_pi();
+	string get_req_url();
 
 };
 
