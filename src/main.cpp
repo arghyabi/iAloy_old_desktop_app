@@ -38,6 +38,8 @@ void dashboard_window_show(int mode)
 
 int main(int argc, char *argv[])
 {
+	system("/usr/share/iAloy/scripts/iAloy-interface-up.sh");
+
 	QApplication a(argc, argv);
 
 	MainWindow mainwindow;

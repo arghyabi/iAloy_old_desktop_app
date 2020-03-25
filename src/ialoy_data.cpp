@@ -46,14 +46,14 @@ void ialoy_main_data::set_product_id(string prod_id)
 	this->product_id = prod_id;
 }
 
+void ialoy_main_data::set_token(string token)
+{
+	this->token = token;
+}
+
 void ialoy_main_data::set_otp(string otp_data)
 {
 	this->otp = otp_data;
-}
-
-void ialoy_main_data::set_user_type(int u_type)
-{
-	this->reg_user_type = u_type;
 }
 
 void ialoy_main_data::set_api_error_msg(string msg)
@@ -108,14 +108,14 @@ string ialoy_main_data::get_product_id()
 	return this->product_id;
 }
 
+string ialoy_main_data::get_token()
+{
+	return this->token;
+}
+
 string ialoy_main_data::get_otp()
 {
 	return this->otp;
-}
-
-int ialoy_main_data::get_user_type()
-{
-	return this->reg_user_type;
 }
 
 string ialoy_main_data::get_api_error_msg()

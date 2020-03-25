@@ -1,14 +1,6 @@
 #ifndef CONNECT_INIT_H
 #define CONNECT_INIT_H
 
-// #include <Poco/Net/HTTPClientSession.h>
-// #include <Poco/Net/HTTPRequest.h>
-// #include <Poco/Net/HTTPResponse.h>
-// #include <Poco/StreamCopier.h>
-// #include <Poco/Path.h>
-// #include <Poco/URI.h>
-// #include <Poco/Exception.h>
-
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
@@ -19,16 +11,12 @@
 
 #include "ialoy_data.h"
 
-// using namespace Poco::Net;
-// using namespace Poco;
 using namespace std;
 
 class ialoy_web_api : public ialoy_main_data
 {
 
 private:
-	//QNetworkAccessManager *manager;
-
 	string protocol = "http://";
 	string sub_domain = "ialoy";
 	string domain = "arghyabiswas.com";
@@ -40,7 +28,7 @@ private:
 public:
 	QNetworkRequest NetworkRequest;
 	// main operational functions.
-	void genarate_url(api_request_type genarate_url_flag);
+	void set_api_request(api_request_type genarate_url_flag);
 	void fetch_pi_name();
 	void check_email_pi_connection();
 	void check_product_id();

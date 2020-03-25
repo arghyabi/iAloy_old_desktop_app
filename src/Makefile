@@ -18,7 +18,6 @@ SHLIB	=	/usr/lib/$(SYS_ARC)/libQt5Widgets.so \
 			/usr/lib/$(SYS_ARC)/libQt5Gui.so \
 			/usr/lib/$(SYS_ARC)/libQt5Core.so \
 			/usr/lib/$(SYS_ARC)/libQt5Network.so \
-			/usr/lib/$(SYS_ARC)/libGL.so -lpthread
 
 all: moc_predefs $(UIMOCCPP) $(UIMOCOBJ) $(CPPOBJFILE) $(UIOBJFILE) main_bin
 

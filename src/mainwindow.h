@@ -10,41 +10,6 @@
 #include "connect_init.h"
 #include "ialoy_data.h"
 
-enum email_status
-{
-	SUPER_USER_EMAIL = 11,
-	PERMANENT_USER_EMAIL = 10,
-	INVALID_USER_EMAIL = 0
-};
-
-enum setUpLineEditStat
-{
-	GET_INPUT_EMAIL_MODE = 0,
-	GET_INPUT_PROD_KEY_MODE,
-	GET_INPUT_PASSWORD_MODE,
-	GET_INPUT_OTP_MODE,
-	GET_INPUT_PI_NAME_MODE
-};
-
-enum prodKey_status
-{
-	PRODUCT_KEY_AVAILABLE = 0,
-	PRODUCT_KEY_NOT_AVAILABLE,
-	PRODUCT_KEY_INVALID
-};
-
-enum pi_reg_status
-{
-	PI_UNREGISTERED = 0,
-	PI_REGISTERED
-};
-
-enum user_type
-{
-	EXISTING_USER = 0,
-	NEW_USER
-};
-
 namespace Ui {
 class MainWindow;
 }
@@ -59,15 +24,22 @@ public:
 	void status_label_set_text(string text, string color);
 	void show_reg_form();
 	void hide_reg_form();
-	bool emailCheck(string email);
+	bool validateEmail(string email);
 
 	void update_mainwindow_gui();
 	bool api_response_parse();
+	void send_api_request();
+
 	void render_pi_name();
+	void render_password_or_user_details_form();
+	void render_after_login();
+	void render_otp_send_form();
+	void render_otp_verified_form();
+	void render_data_in_show_reg_form();
+	void render_product_key_validate_form();
+	void render_registered_new_pi();
 
 	~MainWindow();
-
-//private slots:
 
 private slots:
 	void on_submit_button_clicked();
