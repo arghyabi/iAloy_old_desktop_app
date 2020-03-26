@@ -18,6 +18,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
+	ui->settings_tool_button->setIcon(QIcon("/usr/share/iAloy/photos/setting.png"));
+	ui->wifi_tool_button->setIcon(QIcon("/usr/share/iAloy/photos/wifi.jpg"));
+	ui->keyboard_tool_button->setIcon(QIcon("/usr/share/iAloy/photos/keyboard.png"));
+
 	NetworkManager = new QNetworkAccessManager();
 	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
 			set_api_response("");
@@ -728,4 +732,19 @@ void MainWindow::on_passsword_toggle_stateChanged(int arg1)
 		ui->SetUpLineEdit->setEchoMode(QLineEdit::Normal);
 	else if (arg1 == 0)
 		ui->SetUpLineEdit->setEchoMode(QLineEdit::Password);
+}
+
+void MainWindow::on_keyboard_tool_button_clicked()
+{
+
+}
+
+void MainWindow::on_wifi_tool_button_clicked()
+{
+
+}
+
+void MainWindow::on_settings_tool_button_clicked()
+{
+	settings_window_show(true);
 }

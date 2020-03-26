@@ -250,6 +250,6 @@ void ialoy_web_api::reg_new_pi()
 			this->req_url = this->url+"?aco="+to_string(api_request)+"&type="+to_string(reg_user_type_flag)+"&prod_key="+this->get_product_id()+"&pi_add="+this->get_pi_add()+"&su_mail="+this->get_email()+"&pi_name="+this->get_pi_name();
 		}
 		else
-			this->set_api_error_msg("One or more data(s) are missing...");
+            this->set_api_error_msg("One or more data(s) are missing...");
 	}
 }

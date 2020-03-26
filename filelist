@@ -2,10 +2,10 @@ CPPFILE 	= ialoy_data.cpp main.cpp connect_init.cpp hardware.cpp
 UICPPFILE 	= mainwindow.cpp dashboard.cpp
 CPPOBJFILE	= ialoy_data.o main.o connect_init.o hardware.o
 
-UIFILE 		= mainwindow.ui dashboard.ui
-UIHFILE 	= mainwindow.h dashboard.h
-UIMHFILE 	= ui_mainwindow.h ui_dashboard.h
-UIMOCCPP 	= moc_mainwindow.cpp moc_dashboard.cpp
+UIFILE 		= mainwindow.ui dashboard.ui settings.ui
+UIHFILE 	= mainwindow.h dashboard.h settings.h
+UIMHFILE 	= ui_mainwindow.h ui_dashboard.h ui_settings.h
+UIMOCCPP 	= moc_mainwindow.cpp moc_dashboard.cpp moc_settings.cpp
 
-UIMOCOBJ 	= moc_mainwindow.o moc_dashboard.o
-UIOBJFILE 	= mainwindow.o dashboard.o
+UIMOCOBJ 	= moc_mainwindow.o moc_dashboard.o moc_settings.o
+UIOBJFILE 	= mainwindow.o dashboard.o settings.o

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,17 +29,20 @@ SOURCES += \
         src/mainwindow.cpp \
 	src/connect_init.cpp \
 	src/hardware.cpp \
-	src/dashboard.cpp \
+        src/dashboard.cpp \
+        src/settings.cpp
 
 HEADERS += \
         src/mainwindow.h \
 	src/connect_init.h \
 	src/hardware.h \
 	src/dashboard.h\
+        src/settings.h
 
 FORMS += \
 	resource/ui/mainwindow.ui \
-	resource/ui/dashboard.ui \
+        resource/ui/dashboard.ui \
+        resource/ui/settings.ui
 
 
 # Default rules for deployment.
