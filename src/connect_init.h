@@ -21,8 +21,8 @@ private:
 	string sub_domain = "ialoy";
 	string domain = "arghyabiswas.com";
 	string api = "desktop_api";
-	string req_manager = "req_mngr.php";
-	string url = protocol+sub_domain+"."+domain+"/"+api+"/"+req_manager;
+	string set_up_req_manager = "set_up_req_mngr.php";
+	string url = protocol+sub_domain+"."+domain+"/"+api+"/"+set_up_req_manager;
 	string req_url;
 
 public:

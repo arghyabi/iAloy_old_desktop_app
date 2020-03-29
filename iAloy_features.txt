@@ -1,0 +1,11 @@
+Features :
+
+1. WiFi interface,
+2. Power interface,
+3. Virtual keyboard,
+4. Sound,
+5. Setting,
+6. Screen brightness,
+7. Update,
+8. Notification,
+9. 
