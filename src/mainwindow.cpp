@@ -2,6 +2,11 @@
 #include<QMessageBox>
 #include<QString>
 #include<regex>
+#include <QCoreApplication>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include "main.h"
 #include "mainwindow.h"
@@ -18,9 +23,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	ui->settings_tool_button->setIcon(QIcon("/usr/share/iAloy/photos/setting.png"));
-	ui->wifi_tool_button->setIcon(QIcon("/usr/share/iAloy/photos/wifi.jpg"));
-	ui->keyboard_tool_button->setIcon(QIcon("/usr/share/iAloy/photos/keyboard.png"));
+	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_settings_icon_path())));
+	ui->wifi_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_wifi_icon_path())));
+	ui->keyboard_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_keyboad_icon_path())));
 
 	NetworkManager = new QNetworkAccessManager();
 	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
@@ -45,7 +50,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->pi_name_label->setText(QString::fromStdString("Connecting..."));
 	ui->status_label->setText("");
 
-	MainWindow::set_api_request(GET_PI_NAME);
+	status_label_set_text("Checking saved login...", "black");
+	if(!try_login_using_token())
+	{
+		MainWindow::set_api_request(GET_PI_NAME);
+	}
 	send_api_request();
 
 }
@@ -74,6 +83,40 @@ void MainWindow::send_api_request()
 		NetworkManager->get(NetworkRequest);
 	else
 		cout << MainWindow::get_api_error_msg() << endl;
+}
+
+bool MainWindow::try_login_using_token()
+{
+	QFile file;
+	file.setFileName(QString::fromStdString(MainWindow::get_user_credential_path()));
+	if(!file.exists())
+		return false;
+	file.open(QIODevice::ReadOnly | QIODevice::Text);
+	QString val = file.readAll();
+	file.close();
+	cout << "Raw file data : " << endl;
+
+	QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
+	QJsonObject sett2 = d.object();
+	QJsonValue value = sett2.value(QString("userCredential"));
+	QJsonObject item = value.toObject();
+
+	if(item["email"] != "" && item["token"] != "")
+	{
+		MainWindow::set_email(item["email"].toString().toStdString());
+		MainWindow::set_token(item["token"].toString().toStdString());
+
+		cout << "Email : " << item["email"].toString().toStdString() << endl;
+		cout << "Token : " << item["token"].toString().toStdString() << endl;
+
+		MainWindow::set_api_request(LOGIN_USING_TOKEN);
+	}
+	else
+	{
+		cout << "No saved user credential found..." << endl;
+		return false;
+	}
+	return true;
 }
 
 void MainWindow::update_mainwindow_gui()
@@ -118,11 +161,34 @@ void MainWindow::update_mainwindow_gui()
 			render_after_login();
 			break;
 
-		case VERIFY_TOKEN:
+		case LOGIN_USING_TOKEN:
+			render_login_using_token();
 			break;
 
 		default:
 			break;
+	}
+}
+
+void MainWindow::render_login_using_token()
+{
+	if(api_response_parse())
+	{
+		switch(user_login_status_flag)
+		{
+			case LOGIN_SUCCESS:
+				cout << "Login success... from render()" << endl;
+				dashboard_window_show(true);
+				main_window_show(false);
+				break;
+
+			case LOGIN_FAIL:
+				cout << "Login failed... from render()" << endl;
+				status_label_set_text("No proper saved credential found... Please login", "black");
+				MainWindow::set_api_request(GET_PI_NAME);
+				send_api_request();
+				break;
+		}
 	}
 }
 
@@ -266,6 +332,7 @@ bool MainWindow::api_response_parse()
 					{
 						cout << "Login success..." << endl;
 						MainWindow::set_token(token);
+						MainWindow::store_user_credential();
 						user_login_status_flag = LOGIN_SUCCESS;
 					}
 					else
@@ -281,10 +348,22 @@ bool MainWindow::api_response_parse()
 					MainWindow::set_token("");
 					user_login_status_flag = LOGIN_FAIL;
 				}
-				break;
 			}
+			break;
 
-		case VERIFY_TOKEN:
+		case LOGIN_USING_TOKEN:
+			{
+				if(stoi(api_res) == LOGIN_SUCCESS)
+				{
+					cout << "Login success... from api_response_parse()" << endl;
+					user_login_status_flag = LOGIN_SUCCESS;
+				}
+				else
+				{
+					cout << "Login failed... from api_response_parse()" << endl;
+					user_login_status_flag = LOGIN_FAIL;
+				}
+			}
 			break;
 
 		default:
@@ -410,12 +489,14 @@ void MainWindow::render_pi_name()
 		if(pi_reg_status_flag == PI_NOT_REGISTERED)
 		{
 			cout << this->get_pi_name() << endl;
+			status_label_set_text("", "black");
 			ui->pi_name_label->setText(QString::fromStdString("Pi not registered"));
 			ui->SetUpLineEdit->setPlaceholderText("Enter email to register");
 		}
 		else
 		{
 			cout << "Pi_name : " << this->get_pi_name() << endl;
+			status_label_set_text("No proper saved credential found... Please login", "black");
 			ui->pi_name_label->setText(QString::fromStdString("Welcome to "+this->get_pi_name()));
 		}
 		ui->SetUpLineEdit->setDisabled(0);
@@ -497,7 +578,7 @@ void MainWindow::render_after_login()
 void MainWindow::show_reg_form()
 {
 	MainWindow::set_email(ui->SetUpLineEdit->text().toStdString());
-	MainWindow::email_reg_status();
+	// MainWindow::email_reg_status();
 	if(reg_user_type_flag == EXISTING_USER)
 	{
 		status_label_set_text("<center>This Pi is not registered \
@@ -560,8 +641,7 @@ void MainWindow::hide_reg_form()
 
 void MainWindow::addBgImage()
 {
-	QString pic_add = "/usr/share/iAloy/photos/back.jpg";
-	QPixmap bkgnd(pic_add);
+	QPixmap bkgnd(QString::fromStdString(MainWindow::get_mainwindow_bg_file_path()));
 	bkgnd = bkgnd.scaled(this->width(),this->height());
 	QPalette palette;
 	palette.setBrush(QPalette::Background, bkgnd);

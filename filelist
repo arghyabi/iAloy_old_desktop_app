@@ -1,6 +1,6 @@
-CPPFILE 	= ialoy_data.cpp main.cpp connect_init.cpp hardware.cpp
+CPPFILE 	= ialoy_data.cpp main.cpp connect_init.cpp hardware.cpp dev_controller_api.cpp
 UICPPFILE 	= mainwindow.cpp dashboard.cpp
-CPPOBJFILE	= ialoy_data.o main.o connect_init.o hardware.o
+CPPOBJFILE	= ialoy_data.o main.o connect_init.o hardware.o dev_controller_api.o
 
 UIFILE 		= mainwindow.ui dashboard.ui settings.ui
 UIHFILE 	= mainwindow.h dashboard.h settings.h

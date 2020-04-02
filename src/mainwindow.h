@@ -6,6 +6,10 @@
 #include <QtNetwork/QNetworkReply>
 #include <QMainWindow>
 #include <iostream>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include "connect_init.h"
 #include "ialoy_data.h"
@@ -27,6 +31,7 @@ public:
 	bool validateEmail(string email);
 
 	void update_mainwindow_gui();
+	bool try_login_using_token();
 	bool api_response_parse();
 	void send_api_request();
 
@@ -38,6 +43,7 @@ public:
 	void render_data_in_show_reg_form();
 	void render_product_key_validate_form();
 	void render_registered_new_pi();
+	void render_login_using_token();
 
 	~MainWindow();
 

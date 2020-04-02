@@ -1,1 +1,1 @@
-SYS_ARC = x86_64-linux-gnu
+SYS_ARC = arm-linux-gnueabihf

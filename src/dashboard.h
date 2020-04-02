@@ -2,12 +2,20 @@
 #define DASHBOARD_H
 
 #include <QDialog>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkReply>
+#include <QMainWindow>
+#include <iostream>
+
+#include "dev_controller_api.h"
+#include "ialoy_data.h"
 
 namespace Ui {
 class dashboard;
 }
 
-class dashboard : public QDialog
+class dashboard : public QDialog, public ialoy_main_data
 {
 	Q_OBJECT
 

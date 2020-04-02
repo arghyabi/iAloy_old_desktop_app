@@ -22,7 +22,7 @@ dashboard::dashboard(QWidget *parent) :
 		frame_d->setObjectName(QString::fromUtf8("frame_d"));
 		frame_d->setFrameShape(QFrame::StyledPanel);
 		frame_d->setFrameShadow(QFrame::Raised);
-		
+
 		verticalLayout_d = new QVBoxLayout(frame_d);
 		pushButton_d = new QPushButton(frame_d);
 		slider_d = new QSlider(Qt::Orientation::Horizontal,frame_d);
@@ -48,8 +48,7 @@ dashboard::~dashboard()
 
 void dashboard::addBgImage()
 {
-	QString pic_add = "/usr/share/iAloy/photos/dashboard.jpg";
-	QPixmap bkgnd(pic_add);
+	QPixmap bkgnd(QString::fromStdString(dashboard::get_dashboard_bg_file_path()));
 	bkgnd = bkgnd.scaled(this->width(),this->height());
 	QPalette palette;
 	palette.setBrush(QPalette::Background, bkgnd);

@@ -108,7 +108,17 @@ void ialoy_web_api::set_api_request(api_request_type genarate_url_flag)
 				this->set_api_error_msg("Email and password can't be blank.");
 			break;
 
-		case VERIFY_TOKEN:
+		case LOGIN_USING_TOKEN:
+			{
+				if(this->get_email() != "" && this->get_token() != "")
+				{
+					this->req_url = url+"?aco="+aco+"&email="+this->get_email()+"&token="+this->get_token()+"&pi_add="+this->get_pi_add();
+				}
+				else
+				{
+					this->set_api_error_msg("Email & token can't be blank...");
+				}
+			}
 			break;
 		default:
 			break;
@@ -118,138 +128,29 @@ void ialoy_web_api::set_api_request(api_request_type genarate_url_flag)
 	NetworkRequest.setUrl(QString::fromStdString(this->req_url));
 }
 
-void ialoy_web_api::fetch_pi_name()
+void ialoy_web_api::store_user_credential()
 {
-	this->set_api_error_msg("");
-	if(this->get_pi_add() == "")
-		this->set_pi_add();
+	const char *email = strdup(get_email().data());
+	const char *token = strdup(get_token().data());
+	char data[1024];
 
-	api_request = GET_PI_NAME;
-	this->req_url = this->url+"?aco="+to_string(api_request)+"&pi_add="+this->get_pi_add();
-}
+	cout << "Email : " << email << "\nToken : " << token << endl;
 
-void ialoy_web_api::check_email_pi_connection()
-{
-	this->set_api_error_msg("");
-	if(this->get_pi_add() == "")
-		this->set_pi_add();
+	sprintf(data, "\
+{\n\
+	\"userCredential\" :\n\
+	{\n\
+		\"email\" : \"%s\",\n\
+		\"token\" : \"%s\"\n\
+	}\n\
+}", email, token);
 
-	if(this->get_email() != "")
-	{
-		api_request = CHECK_EMAIL_CONNECTED_PI;
-		this->req_url = this->url+"?aco="+to_string(api_request)+"&email="+this->get_email()+"&pi_add="+this->get_pi_add();
-	}
-	else
-	{
-		this->set_api_error_msg("Email can't be blank...");
-	}
-}
+	QFile file;
+	file.setFileName(QString::fromStdString(get_user_credential_path()));
+	file.open(QIODevice::WriteOnly | QIODevice::Text);
+	file.write(data);
+	file.close();
 
-void ialoy_web_api::pi_reg_status()
-{
-	this->set_api_error_msg("");
-	if(this->get_pi_add() == "")
-		this->set_pi_add();
-
-	api_request = CHECK_PI_STATUS;
-	this->req_url = this->url+"?aco="+to_string(api_request)+"&pi_add="+this->get_pi_add();
-}
-
-void ialoy_web_api::email_reg_status()
-{
-	this->set_api_error_msg("");
-
-	if(this->get_email() != "")
-	{
-		api_request = CHECK_EMAIL_STATUS;
-		this->req_url = this->url+"?aco="+to_string(api_request)+"&email="+this->get_email();
-	}
-	else
-	{
-		this->set_api_error_msg("Email can't be blank...");
-	}
-
-}
-
-void ialoy_web_api::fetch_user_details()
-{
-	this->set_api_error_msg("");
-
-	if(this->get_email() != "")
-	{
-		api_request = GET_USER_DETAILS;
-		this->req_url = this->url+"?aco="+to_string(api_request)+"&email="+this->get_email();
-	}
-	else
-	{
-		this->set_api_error_msg("Email can't be blank...");
-	}
-}
-
-void ialoy_web_api::check_product_id()
-{
-	this->set_api_error_msg("");
-
-	if(this->get_product_id() != "")
-	{
-		api_request = CHECK_PRODUCT_KEY_STATUS;
-		this->req_url = this->url+"?aco="+to_string(api_request)+"&prod_id="+this->get_product_id();
-	}
-	else
-	{
-		this->set_api_error_msg("Product Id can't be blank.");
-	}
-}
-
-void ialoy_web_api::login()
-{
-	this->set_api_error_msg("");
-
-	if((this->get_email() != "") && (this->get_password() != ""))
-	{
-		api_request = LOGIN;
-		this->req_url = this->url+"?aco="+to_string(api_request)+"&email="+this->get_email()+"&pi_add="+this->get_pi_add()+"&password="+this->get_password();
-	}
-	else
-		this->set_api_error_msg("Email and password can't be blank.");
-}
-
-void ialoy_web_api::send_otp()
-{
-	this->set_api_error_msg("");
-
-	if(this->get_email() != "")
-	{
-		api_request = SEND_OTP;
-		this->req_url = this->url+"?aco="+to_string(api_request)+"&su_mail="+this->get_email();
-	}
-	else
-		this->set_api_error_msg("Email can't be blank...");
-}
-
-void ialoy_web_api::reg_new_pi()
-{
-	this->set_api_error_msg("");
-
-	if(reg_user_type_flag ==  NEW_USER)
-	{
-		if((this->get_email() != "") && (this->get_first_name() !="") && (this->get_last_name() != "") && (this->get_password() != "") && (this->get_pi_add() != "") && (this->get_pi_name() != "") && (this->get_product_id() != "") )
-		{
-			api_request = REGISTER_NEW_PI;
-			this->req_url = this->url+"?aco="+to_string(api_request)+"&type="+to_string(reg_user_type_flag)+"&prod_key="+this->get_product_id()+"&pi_add="+this->get_pi_add()+"&su_mail="+this->get_email()+ \
-					"&pi_name="+this->get_pi_name()+"&f_name="+this->get_first_name()+"&l_name="+this->get_last_name()+"&password="+this->get_password();
-		}
-		else
-			this->set_api_error_msg("One or more data(s) are missing...");
-	}
-	else
-	{
-		if((this->get_email() != "") && (this->get_pi_add() != "") && (this->get_pi_name() != "") && (this->get_product_id() != "") )
-		{
-			api_request = REGISTER_NEW_PI;
-			this->req_url = this->url+"?aco="+to_string(api_request)+"&type="+to_string(reg_user_type_flag)+"&prod_key="+this->get_product_id()+"&pi_add="+this->get_pi_add()+"&su_mail="+this->get_email()+"&pi_name="+this->get_pi_name();
-		}
-		else
-            this->set_api_error_msg("One or more data(s) are missing...");
-	}
+	free((void*)email);
+	free((void*)token);
 }

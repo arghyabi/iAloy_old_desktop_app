@@ -13,7 +13,6 @@ enum email_connected_pi_status
 	SUPER_USER_REGISTERED_PI,
 	PERMANENT_USER_UNREGISTERED_PI,
 	INVALID_USER_UNREGISTERED_PI
-
 };
 
 enum setUpLineEditStat
@@ -63,7 +62,8 @@ enum otp_verification_status
 	OTP_VERIFIED
 };
 
-enum api_request_type{
+enum api_request_type
+{
 	CHECK_PI_STATUS = 0,
 	GET_PI_NAME,
 	CHECK_EMAIL_STATUS,
@@ -74,14 +74,53 @@ enum api_request_type{
 	VERIFY_OTP,
 	REGISTER_NEW_PI,
 	LOGIN,
-	VERIFY_TOKEN
+	LOGIN_USING_TOKEN
+};
+
+enum dev_controller_api_req_type
+{
+	GET_ALL_DEVICE_STATUS = 1,
+	GET_ROOM_DEVICE_LIST,
+	GET_ROOM_DEVICE_STATUS,
+	UPDATE_STATUS,
+	UPDATE_RANGE,
+	GET_CONNECTED_PI_LIST,
+	UPDATE_STATUS_FOR_PI
 };
 
 class ialoy_main_data{
 
 private:
+	// for setup class
 	string pi_add, pi_name, email, product_id, password, first_name, last_name, phone,\
 		 token, otp, api_error_msg, api_response;
+
+	string user = "/usr/";
+	string share = "share/";
+	string iAloy_folder = "iAloy/";
+
+	string conf_folder = ".conf/";
+	string photos_folder = "photos/";
+	string scripts_folder = "scripts/";
+
+	string ucp_file = "credential.json";
+	string mainwindow_bg_file = "mainwindow.jpg";
+	string dashboard_bg_file = "dashboard.jpg";
+	string keyboad_icon = "keyboard.png";
+	string settings_icon = "setting.png";
+	string wifi_icon = "wifi.jpg";
+	string interface_up_script = "iAloy-interface-up.sh";
+
+	string user_credential_path = user + share + iAloy_folder + conf_folder + ucp_file;
+	string mainwindow_bg_file_path = user + share + iAloy_folder + photos_folder + mainwindow_bg_file;
+	string dashboard_bg_file_path = user + share + iAloy_folder + photos_folder + dashboard_bg_file;
+	string keyboad_icon_path = user + share + iAloy_folder + photos_folder + keyboad_icon;
+	string settings_icon_path = user + share + iAloy_folder + photos_folder + settings_icon;
+	string wifi_icon_path = user + share + iAloy_folder + photos_folder + wifi_icon;
+	string interface_up_script_path = user + share + iAloy_folder + scripts_folder + interface_up_script;
+
+	// for dev_controller class
+	string d_id, status, range, mod_add, pin;
 
 public:
 	pi_reg_status pi_reg_status_flag;
@@ -92,8 +131,9 @@ public:
 	product_Key_status product_Key_status_flag;
 	otp_send_status otp_send_status_flag;
 	otp_verification_status otp_verification_status_flag;
+	dev_controller_api_req_type dev_controller_api_req_type_flag;
 
-	// setter methods for private variables.
+	// setter methods for setup class private variables.
 	void set_email(string email_id);
 	void set_password(string pass);
 	void set_first_name(string f_name);
@@ -107,7 +147,14 @@ public:
 	void set_api_error_msg(string msg);
 	void set_api_response(string response);
 
-	// getter methods for private variables.
+	// setter methods for dev_controller class private variables.
+	void set_d_id(string d_id);
+	void set_status(string status);
+	void set_range(string range);
+	void set_mod_add(string mod_add);
+	void set_pin(string pin);
+
+	// getter methods for setup class private variables.
 	string get_email();
 	string get_password();
 	string get_first_name();
@@ -120,6 +167,22 @@ public:
 	string get_otp();
 	string get_api_error_msg();
 	string get_api_response();
+
+	string get_user_credential_path();
+	string get_mainwindow_bg_file_path();
+	string get_dashboard_bg_file_path();
+	string get_keyboad_icon_path();
+	string get_settings_icon_path();
+	string get_wifi_icon_path();
+	string get_interface_up_script_path();
+
+	// getter methods for dev_controller class private variables.
+	string get_d_id();
+	string get_status();
+	string get_range();
+	string get_mod_add();
+	string get_pin();
+
 };
 
 #endif // IALOY_DATA_H

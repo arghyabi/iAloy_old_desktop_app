@@ -1,7 +1,7 @@
 ip_address="8.8.8.8"
 
 echo -e "checking internet connection..."
-ping -q -c5 "$ip_address" > /dev/null
+ping -q -c2 "$ip_address" > /dev/null
 
 if [ $? -ne 0 ]
 then

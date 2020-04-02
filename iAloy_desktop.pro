@@ -25,24 +25,26 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        src/main.cpp \
-        src/mainwindow.cpp \
+	src/main.cpp \
+	src/mainwindow.cpp \
 	src/connect_init.cpp \
 	src/hardware.cpp \
-        src/dashboard.cpp \
-        src/settings.cpp
+	src/dashboard.cpp \
+	src/settings.cpp \
+	src/dev_controller_api.cpp \
 
 HEADERS += \
-        src/mainwindow.h \
+	src/mainwindow.h \
 	src/connect_init.h \
 	src/hardware.h \
 	src/dashboard.h\
-        src/settings.h
+	src/settings.h \
+	src/dev_controller_api.h \
 
 FORMS += \
 	resource/ui/mainwindow.ui \
-        resource/ui/dashboard.ui \
-        resource/ui/settings.ui
+	resource/ui/dashboard.ui \
+	resource/ui/settings.ui \
 
 
 # Default rules for deployment.

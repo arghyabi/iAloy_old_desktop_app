@@ -7,5 +7,4 @@ Features :
 5. Setting,
 6. Screen brightness,
 7. Update,
-8. Notification,
-9. 
+8. Notification
