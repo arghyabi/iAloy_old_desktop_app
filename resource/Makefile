@@ -3,6 +3,7 @@ include ../filelist
 DEST_RESOURCE_LOC 	= /usr/share/iAloy/photos/
 DEST_SCRIPT_LOC 	= /usr/share/iAloy/scripts/
 DEST_FONT_LOC		= /usr/share/iAloy/fonts/
+DEST_CONF_LOC		= /usr/share/iAloy/.conf/
 
 SRC_DIR = ui/
 DEST_DIR = ../src/
@@ -16,6 +17,7 @@ install:
 	sudo mkdir -p $(DEST_RESOURCE_LOC)
 	sudo mkdir -p $(DEST_SCRIPT_LOC)
 	sudo mkdir -p $(DEST_FONT_LOC)
+	sudo mkdir -p $(DEST_CONF_LOC)
 	sudo cp photos/* $(DEST_RESOURCE_LOC)
 	sudo cp scripts/* $(DEST_SCRIPT_LOC)
 	sudo cp fonts/* $(DEST_FONT_LOC)

@@ -16,11 +16,13 @@ using namespace std;
 
 string ialoy_web_api::get_req_url()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	return this->req_url;
 }
 
 void ialoy_web_api::set_api_request(api_request_type genarate_url_flag)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	api_request = genarate_url_flag;
 	string aco = to_string(genarate_url_flag);
 	this->set_api_error_msg("");
@@ -130,6 +132,7 @@ void ialoy_web_api::set_api_request(api_request_type genarate_url_flag)
 
 void ialoy_web_api::store_user_credential()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	const char *email = strdup(get_email().data());
 	const char *token = strdup(get_token().data());
 	char data[1024];

@@ -7,6 +7,7 @@ using namespace std;
 
 string get_serial()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	string line;
 
 	system("cat /proc/cpuinfo | grep 'Serial' | awk '{print $3}' > tms.txt");

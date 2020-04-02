@@ -15,7 +15,7 @@
 
 device_controller_api::device_controller_api()
 {
-
+cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 // private:
 // 	// private methods
 

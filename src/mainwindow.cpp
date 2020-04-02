@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->setupUi(this);
 
 	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_settings_icon_path())));
@@ -55,30 +56,38 @@ MainWindow::MainWindow(QWidget *parent) :
 	{
 		MainWindow::set_api_request(GET_PI_NAME);
 	}
-	send_api_request();
+	else
+	{
+		MainWindow::set_api_request(LOGIN_USING_TOKEN);
+	}
 
+	send_api_request();
 }
 
 MainWindow::~MainWindow()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	delete ui;
 	delete NetworkManager;
 }
 
 void MainWindow::status_label_set_text(string text, string color)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->status_label->setText("<font color='"+QString::fromStdString(color)+"'>" \
 		+QString::fromStdString(text)+"</font>");
 }
 
 bool MainWindow::validateEmail(string email)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	const regex pattern("(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+");
 	return regex_match(email,pattern);
 }
 
 void MainWindow::send_api_request()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(MainWindow::get_api_error_msg() == "")
 		NetworkManager->get(NetworkRequest);
 	else
@@ -87,10 +96,13 @@ void MainWindow::send_api_request()
 
 bool MainWindow::try_login_using_token()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	QFile file;
 	file.setFileName(QString::fromStdString(MainWindow::get_user_credential_path()));
+
 	if(!file.exists())
 		return false;
+
 	file.open(QIODevice::ReadOnly | QIODevice::Text);
 	QString val = file.readAll();
 	file.close();
@@ -109,18 +121,18 @@ bool MainWindow::try_login_using_token()
 		cout << "Email : " << item["email"].toString().toStdString() << endl;
 		cout << "Token : " << item["token"].toString().toStdString() << endl;
 
-		MainWindow::set_api_request(LOGIN_USING_TOKEN);
+		return true;
 	}
 	else
 	{
 		cout << "No saved user credential found..." << endl;
 		return false;
 	}
-	return true;
 }
 
 void MainWindow::update_mainwindow_gui()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	cout << "flag:" << api_request << endl;
 	switch(api_request)
 	{
@@ -172,6 +184,7 @@ void MainWindow::update_mainwindow_gui()
 
 void MainWindow::render_login_using_token()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
 		switch(user_login_status_flag)
@@ -194,6 +207,7 @@ void MainWindow::render_login_using_token()
 
 bool MainWindow::api_response_parse()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	string api_res = get_api_response();
 	if(api_res.substr(0, 1) != "1")
 		return false;
@@ -374,6 +388,7 @@ bool MainWindow::api_response_parse()
 
 void MainWindow::render_registered_new_pi()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
 		switch(pi_reg_status_flag)
@@ -395,6 +410,7 @@ void MainWindow::render_registered_new_pi()
 
 void MainWindow::render_product_key_validate_form()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
 		// render_product_key_validate_form
@@ -424,6 +440,7 @@ void MainWindow::render_product_key_validate_form()
 
 void MainWindow::render_data_in_show_reg_form()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
 		ui->f_name_edit->setText(QString::fromStdString(this->get_first_name()));
@@ -439,6 +456,7 @@ void MainWindow::render_data_in_show_reg_form()
 void MainWindow::render_otp_send_form()
 {
 	// OTP send form render
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
 		switch (otp_send_status_flag)
@@ -463,6 +481,7 @@ void MainWindow::render_otp_send_form()
 
 void MainWindow::render_otp_verified_form()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
 		if(otp_verification_status_flag == OTP_VERIFIED)
@@ -484,6 +503,7 @@ void MainWindow::render_otp_verified_form()
 
 void MainWindow::render_pi_name()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
 		if(pi_reg_status_flag == PI_NOT_REGISTERED)
@@ -508,6 +528,7 @@ void MainWindow::render_pi_name()
 
 void MainWindow::render_password_or_user_details_form()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
 		if (email_connected_pi_status_flag == SUPER_USER_REGISTERED_PI)
@@ -550,6 +571,7 @@ void MainWindow::render_password_or_user_details_form()
 
 void MainWindow::render_after_login()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
 		if(user_login_status_flag == LOGIN_SUCCESS)
@@ -577,6 +599,7 @@ void MainWindow::render_after_login()
 
 void MainWindow::show_reg_form()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	MainWindow::set_email(ui->SetUpLineEdit->text().toStdString());
 	// MainWindow::email_reg_status();
 	if(reg_user_type_flag == EXISTING_USER)
@@ -625,6 +648,7 @@ void MainWindow::show_reg_form()
 
 void MainWindow::hide_reg_form()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->status_label->setText("");
 	ui->SetUpLineEdit->show();
 	ui->submit_button->show();
@@ -641,6 +665,7 @@ void MainWindow::hide_reg_form()
 
 void MainWindow::addBgImage()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	QPixmap bkgnd(QString::fromStdString(MainWindow::get_mainwindow_bg_file_path()));
 	bkgnd = bkgnd.scaled(this->width(),this->height());
 	QPalette palette;
@@ -650,6 +675,7 @@ void MainWindow::addBgImage()
 
 void MainWindow::on_submit_button_clicked()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if (SetUpLineEdit_stat == GET_INPUT_EMAIL_MODE)
 	{
 		// Email id proccessing section
@@ -753,6 +779,7 @@ void MainWindow::on_submit_button_clicked()
 
 void MainWindow::on_form_back_btn_clicked()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->SetUpLineEdit->setText(QString::fromStdString(MainWindow::get_email()));
 	ui->SetUpLineEdit->setPlaceholderText("Email");
 	ui->SetUpLineEdit->setEchoMode(QLineEdit::Normal);
@@ -762,6 +789,7 @@ void MainWindow::on_form_back_btn_clicked()
 
 void MainWindow::on_form_next_btn_clicked()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	// set_data in api
 	if(reg_user_type_flag == NEW_USER)
 	{
@@ -799,6 +827,7 @@ void MainWindow::on_form_next_btn_clicked()
 
 void MainWindow::on_form_reset_btn_clicked()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->f_name_edit->setText("");
 	ui->l_name_edit->setText("");
 	ui->password_edit->setText("");
@@ -808,6 +837,7 @@ void MainWindow::on_form_reset_btn_clicked()
 
 void MainWindow::on_passsword_toggle_stateChanged(int arg1)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(arg1 == 2)
 		ui->SetUpLineEdit->setEchoMode(QLineEdit::Normal);
 	else if (arg1 == 0)
@@ -816,15 +846,16 @@ void MainWindow::on_passsword_toggle_stateChanged(int arg1)
 
 void MainWindow::on_keyboard_tool_button_clicked()
 {
-
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 }
 
 void MainWindow::on_wifi_tool_button_clicked()
 {
-
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 }
 
 void MainWindow::on_settings_tool_button_clicked()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	settings_window_show(true);
 }

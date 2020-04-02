@@ -13,6 +13,7 @@ static settings *settings_pt;
 
 void main_window_show(int mode)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ <<"    mode :" << mode << endl;
 	if(mode)
 	{
 		QSize size = qApp->screens()[0]->size();
@@ -27,6 +28,7 @@ void main_window_show(int mode)
 
 void dashboard_window_show(int mode)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ <<"    mode :" << mode << endl;
 	if(mode)
 	{
 		QSize size = qApp->screens()[0]->size();
@@ -41,6 +43,7 @@ void dashboard_window_show(int mode)
 
 void settings_window_show(int mode)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(mode)
 	{
 		settings_pt->show();
@@ -51,6 +54,7 @@ void settings_window_show(int mode)
 
 int main(int argc, char *argv[])
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	system("/usr/share/iAloy/scripts/iAloy-interface-up.sh");
 
 	QApplication a(argc, argv);

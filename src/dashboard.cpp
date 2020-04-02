@@ -9,6 +9,7 @@ dashboard::dashboard(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::dashboard)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->setupUi(this);
 
 	for (int i = 0; i < 10; ++i){
@@ -43,11 +44,13 @@ dashboard::dashboard(QWidget *parent) :
 
 dashboard::~dashboard()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	delete ui;
 }
 
 void dashboard::addBgImage()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	QPixmap bkgnd(QString::fromStdString(dashboard::get_dashboard_bg_file_path()));
 	bkgnd = bkgnd.scaled(this->width(),this->height());
 	QPalette palette;

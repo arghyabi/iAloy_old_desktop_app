@@ -11,17 +11,20 @@ settings::settings(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::settings)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->setupUi(this);
 	settings::init();
 }
 
 settings::~settings()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	delete ui;
 }
 
 void settings::init()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	int font_size[] = {8,9,10,11,12,14,16,18,20};
 
 	system("basename -a -s .ttf /usr/share/iAloy/fonts/*.ttf > font.txt");
@@ -55,6 +58,7 @@ void settings::init()
 
 void settings::set_font_name_and_size()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	QString fname = ui->font_name_select_combobox->currentText();
 	QString fsize = ui->font_size_select_combobox->currentText();
 
@@ -64,10 +68,12 @@ void settings::set_font_name_and_size()
 
 void settings::on_buttonBox_accepted()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	set_font_name_and_size();
 }
 
 void settings::on_pushButton_clicked()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	set_font_name_and_size();
 }
