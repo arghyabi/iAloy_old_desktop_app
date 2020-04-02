@@ -8,7 +8,7 @@
 #include <QMainWindow>
 #include <iostream>
 
-#include "dev_controller_api.h"
+#include "device_controller_api.h"
 #include "ialoy_data.h"
 
 namespace Ui {

@@ -16,10 +16,10 @@
 device_controller_api::device_controller_api()
 {
 
-private:
-	// private methods
+// private:
+// 	// private methods
 
-public:
-	// public methods
+// public:
+// 	// public methods
 
 }
