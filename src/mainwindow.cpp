@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_settings_icon_path())));
 	ui->wifi_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_wifi_icon_path())));
 	ui->keyboard_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_keyboad_icon_path())));
+	ui->app_update_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_update_icon_path())));
 
 	NetworkManager = new QNetworkAccessManager();
 	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
@@ -858,4 +859,9 @@ void MainWindow::on_settings_tool_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	settings_window_show(true);
+}
+
+void MainWindow::on_app_update_button_clicked()
+{
+	system("iAloy_Desktop_App_Update_Manager");
 }

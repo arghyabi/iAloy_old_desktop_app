@@ -109,6 +109,7 @@ private:
 	string keyboad_icon = "keyboard.png";
 	string settings_icon = "setting.png";
 	string wifi_icon = "wifi.jpg";
+	string update_icon = "update.png";
 	string interface_up_script = "iAloy-interface-up.sh";
 
 	string user_credential_path = user + share + iAloy_folder + conf_folder + ucp_file;
@@ -117,6 +118,7 @@ private:
 	string keyboad_icon_path = user + share + iAloy_folder + photos_folder + keyboad_icon;
 	string settings_icon_path = user + share + iAloy_folder + photos_folder + settings_icon;
 	string wifi_icon_path = user + share + iAloy_folder + photos_folder + wifi_icon;
+	string update_icon_path = user + share + iAloy_folder + photos_folder + update_icon;
 	string interface_up_script_path = user + share + iAloy_folder + scripts_folder + interface_up_script;
 
 	// for dev_controller class
@@ -172,6 +174,7 @@ public:
 	string get_mainwindow_bg_file_path();
 	string get_dashboard_bg_file_path();
 	string get_keyboad_icon_path();
+	string get_update_icon_path();
 	string get_settings_icon_path();
 	string get_wifi_icon_path();
 	string get_interface_up_script_path();

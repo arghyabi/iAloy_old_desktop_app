@@ -211,6 +211,12 @@ string ialoy_main_data::get_keyboad_icon_path()
 	return this->keyboad_icon_path;
 }
 
+string ialoy_main_data::get_update_icon_path()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	return this->update_icon_path;
+}
+
 string ialoy_main_data::get_settings_icon_path()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;

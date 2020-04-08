@@ -57,6 +57,8 @@ private slots:
 	void on_wifi_tool_button_clicked();
 	void on_settings_tool_button_clicked();
 
+    void on_app_update_button_clicked();
+
 private:
 	QNetworkAccessManager *NetworkManager;
 	Ui::MainWindow *ui;
