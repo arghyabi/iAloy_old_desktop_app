@@ -6,10 +6,12 @@
 #include "mainwindow.h"
 #include "dashboard.h"
 #include "settings.h"
+#include "update_manager.h"
 
 static MainWindow *mainwindow_pt;
 static dashboard *dashboardwindow_pt;
 static settings *settings_pt;
+static update_manager *update_manager_pt;
 
 void main_window_show(int mode)
 {
@@ -52,6 +54,18 @@ void settings_window_show(int mode)
 		settings_pt->hide();
 }
 
+void update_manager_window_show(int mode)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ <<"    mode :" << mode << endl;
+	if(mode)
+	{
+		update_manager_pt->show();
+		update_manager_pt->init();
+	}
+	else
+		update_manager_pt->hide();
+}
+
 int main(int argc, char *argv[])
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -66,10 +80,12 @@ int main(int argc, char *argv[])
 	MainWindow mainwindow;
 	dashboard dashboardwindow;
 	settings settingswindow;
+	update_manager updateManager;
 
 	mainwindow_pt = &mainwindow;
 	dashboardwindow_pt = &dashboardwindow;
 	settings_pt = &settingswindow;
+	update_manager_pt = &updateManager;
 
 	main_window_show(true);
 

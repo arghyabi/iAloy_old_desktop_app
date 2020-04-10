@@ -863,5 +863,7 @@ void MainWindow::on_settings_tool_button_clicked()
 
 void MainWindow::on_app_update_button_clicked()
 {
-	system("iAloy_Desktop_App_Update_Manager");
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	update_manager_window_show(true);
+
 }

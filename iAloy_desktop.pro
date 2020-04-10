@@ -32,6 +32,9 @@ SOURCES += \
 	src/dashboard.cpp \
 	src/settings.cpp \
 	src/dev_controller_api.cpp \
+	src/update_manager.cpp \
+	src/update_manager_thread.cpp
+
 
 HEADERS += \
 	src/mainwindow.h \
@@ -40,12 +43,22 @@ HEADERS += \
 	src/dashboard.h\
 	src/settings.h \
 	src/dev_controller_api.h \
+	src/update_manager.h \
+	src/update_manager_thread.h
+
 
 FORMS += \
 	resource/ui/mainwindow.ui \
 	resource/ui/dashboard.ui \
 	resource/ui/settings.ui \
+	resource/ui/update_manager.ui
 
+
+OTHER_FILES += \
+	src/Makefile \
+	resource/Makefile \
+	resource/scripts/iAloy-interface-up.sh \
+	resource/scripts/update_check.sh
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
