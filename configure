@@ -34,6 +34,7 @@ if [ $(cat /proc/cpuinfo | grep 'model name' | awk '{print tolower($4)}' | cut -
 else
 	echo "${PURPLE}Configured for ARM Architecture${NC}\n"
 	echo "SYS_ARC = arm-linux-gnueabihf" >> Makefile_h
+	echo "ARC_TYPE=arm" >> Makefile_h
 fi
 
 sudo ldconfig

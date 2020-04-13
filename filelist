@@ -5,6 +5,7 @@ CPPFILE 	= \
 	hardware.cpp \
 	device_controller_api.cpp \
 	update_manager_thread.cpp \
+	i2c.cpp \
 
 
 UICPPFILE 	= \
@@ -20,6 +21,7 @@ CPPOBJFILE	= \
 	hardware.o \
 	device_controller_api.o \
 	update_manager_thread.o \
+	i2c.o \
 
 
 UIFILE 		= \

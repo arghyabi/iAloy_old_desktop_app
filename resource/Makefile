@@ -11,7 +11,8 @@ DEST_DIR = ../src/
 all: $(UIMHFILE)
 
 ui_%.h: $(SRC_DIR)%.ui
-	uic $< -o $(DEST_DIR)$@
+	@uic $< -o $(DEST_DIR)$@
+	@echo "	UIC	" $<
 
 install:
 	sudo mkdir -p $(DEST_RESOURCE_LOC)
@@ -25,7 +26,7 @@ install:
 
 clean: $(addprefix $(DEST_DIR), $(UIMHFILE))
 	rm -f $(addprefix $(DEST_DIR), $(UIMHFILE))
-	
+
 uninstall:
 	sudo rm -r $(DEST_RESOURCE_LOC)
 	sudo rm -r $(DEST_SCRIPT_LOC)
