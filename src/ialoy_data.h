@@ -2,6 +2,9 @@
 #define IALOY_DATA_H
 
 #include <iostream>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkRequest>
+
 #include "hardware.h"
 
 using namespace std;
@@ -77,23 +80,27 @@ enum api_request_type
 	LOGIN_USING_TOKEN
 };
 
-enum dev_controller_api_req_type
+enum device_controller_api_request_type
 {
-	GET_ALL_DEVICE_STATUS = 1,
+	DEVICE_CONTROLLER_LOGIN_USING_TOKEN = 0,
+	GET_DEVICE_DETAIL_STATUS,
 	GET_ROOM_DEVICE_LIST,
 	GET_ROOM_DEVICE_STATUS,
 	UPDATE_STATUS,
 	UPDATE_RANGE,
 	GET_CONNECTED_PI_LIST,
-	UPDATE_STATUS_FOR_PI
+	UPDATE_STATUS_FOR_PI,
+	UPDATE_RANGE_FOR_PI
 };
 
 class ialoy_main_data{
 
 private:
 	// for setup class
-	string pi_add, pi_name, email, product_id, password, first_name, last_name, phone,\
-		 token, otp, api_error_msg, api_response;
+	string pi_add, pi_name, product_id, password, first_name, last_name, phone,\
+		 otp, api_error_msg, api_response, device_controller_api_response, device_controller_api_error_msg;
+
+	string email, token;
 
 	string user = "/usr/";
 	string share = "share/";
@@ -133,7 +140,11 @@ public:
 	product_Key_status product_Key_status_flag;
 	otp_send_status otp_send_status_flag;
 	otp_verification_status otp_verification_status_flag;
-	dev_controller_api_req_type dev_controller_api_req_type_flag;
+	device_controller_api_request_type device_controller_api_request_type_flag;
+
+	// global network_manager variable
+	QNetworkAccessManager *NetworkManager, *DBNetworkManager;// = new QNetworkAccessManager();
+	QNetworkRequest NetworkRequest;
 
 	// setter methods for setup class private variables.
 	void set_email(string email_id);
@@ -155,6 +166,8 @@ public:
 	void set_range(string range);
 	void set_mod_add(string mod_add);
 	void set_pin(string pin);
+	void set_device_controller_api_response(string resp);
+	void set_device_controller_api_error_msg(string msg);
 
 	// getter methods for setup class private variables.
 	string get_email();
@@ -185,6 +198,8 @@ public:
 	string get_range();
 	string get_mod_add();
 	string get_pin();
+	string get_device_controller_api_response();
+	string get_device_controller_api_error_msg();
 
 };
 

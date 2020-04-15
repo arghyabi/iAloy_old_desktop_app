@@ -1,9 +1,11 @@
 #include <iostream>
 #include <string>
 
+#include <QtNetwork/QNetworkAccessManager>
 #include "ialoy_data.h"
 
 // define the class methods
+// this->NetworkManager = new QNetworkAccessManager();
 
 // all setter methods
 void ialoy_main_data::set_email(string email_id)
@@ -108,6 +110,19 @@ void ialoy_main_data::set_pin(string pin)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	this->pin = pin;
+}
+
+void ialoy_main_data::set_device_controller_api_response(string resp)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	cout << "Response data to store : " << resp << endl;
+	this->device_controller_api_response = resp;
+}
+
+void ialoy_main_data::set_device_controller_api_error_msg(string msg)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	this->device_controller_api_error_msg = msg;
 }
 
 // all getter methods
@@ -264,4 +279,16 @@ string ialoy_main_data::get_pin()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	return this->pin;
+}
+
+string ialoy_main_data::get_device_controller_api_response()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	return this->device_controller_api_response;
+}
+
+string ialoy_main_data::get_device_controller_api_error_msg()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	return this->device_controller_api_error_msg;
 }

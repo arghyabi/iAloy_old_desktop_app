@@ -27,7 +27,7 @@ private:
 	string req_url;
 
 public:
-	QNetworkRequest NetworkRequest;
+	// QNetworkRequest NetworkRequest;
 
 	// main operational functions.
 	void set_api_request(api_request_type genarate_url_flag);

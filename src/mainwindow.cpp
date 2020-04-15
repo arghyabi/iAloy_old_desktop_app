@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
 				return;
 			}
 			QString response = reply->readAll();
-			cout << response.toStdString() << endl;
+			cout << "MainWindow response : " << response.toStdString() << endl;
 			set_api_response(response.toStdString());
 			update_mainwindow_gui();
 		}
@@ -192,7 +192,7 @@ void MainWindow::render_login_using_token()
 		{
 			case LOGIN_SUCCESS:
 				cout << "Login success... from render()" << endl;
-				dashboard_window_show(true);
+				dashboard_window_show(true);//, NetworkManager, NetworkRequest);
 				main_window_show(false);
 				break;
 
@@ -397,7 +397,7 @@ void MainWindow::render_registered_new_pi()
 			case PI_REGISTERED:
 				cout << "Pi registered success..." << endl;
 				status_label_set_text("Pi register sucess...", "green");
-				dashboard_window_show(true);
+				dashboard_window_show(true);//, NetworkManager, NetworkRequest);
 				main_window_show(false);
 				break;
 
@@ -577,7 +577,7 @@ void MainWindow::render_after_login()
 	{
 		if(user_login_status_flag == LOGIN_SUCCESS)
 		{
-			dashboard_window_show(true);
+			dashboard_window_show(true);//, NetworkManager, NetworkRequest);
 			main_window_show(false);
 		}
 		else if(user_login_status_flag == LOGIN_TOKEN_ERROR)

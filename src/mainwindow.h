@@ -60,7 +60,7 @@ private slots:
     void on_app_update_button_clicked();
 
 private:
-	QNetworkAccessManager *NetworkManager;
+	// QNetworkAccessManager *NetworkManager;
 	Ui::MainWindow *ui;
 };
 
