@@ -26,7 +26,8 @@ void device_controller_api::set_device_controller_api_request(device_controller_
 		case DEVICE_CONTROLLER_LOGIN_USING_TOKEN:
 			{
 				string login_url = "http://ialoy.arghyabiswas.com/desktop_api/set_up_req_mngr.php";
-				this->req_url = login_url + "?aco=10&email=" + this->get_email() + "&token=" + this->get_token() + "&pi_add=" + this->get_pi_add();
+
+				this->req_url = login_url + "?aco=10&email=" + this->get_email() + "&token=" + QUrl::toPercentEncoding(this->get_token().c_str()).constData() + "&pi_add=" + this->get_pi_add();
 				break;
 			}
 
@@ -84,7 +85,7 @@ void device_controller_api::set_device_controller_api_request(device_controller_
 		default:
 			break;
 	}
-
+	//return QUrl::toPercentEncoding(this->token.c_str()).constData();
 	cout << this->req_url << endl;
 	NetworkRequest.setUrl(QString::fromStdString(this->req_url));
 

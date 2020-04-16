@@ -27,7 +27,7 @@ if [ $(cat /proc/cpuinfo | grep 'model name' | awk '{print tolower($4)}' | cut -
 	chmod 777 installer.sh
 
 
-	now="$(date +'%d-%m-%Y-%T')"
+	now="$(date +'%d-%m-%Y-%H-%M-%S')"
 
 	zip -r iAloy_update_package_$now.zip iAloy_update_package/
 

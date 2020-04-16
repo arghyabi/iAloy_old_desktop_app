@@ -32,54 +32,48 @@ void dashboard::init()
 		}
 	);
 
-	if(dashboard_login_using_token())
+	if(dashboard::saved_credential_manager())
 	{
 		set_device_controller_api_request(DEVICE_CONTROLLER_LOGIN_USING_TOKEN);
 		send_device_controller_api_request();
 	}
-
-	// set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
-	// send_device_controller_api_request();
-
-	//create dynamic btn
-	// render_dashboard_room_btn();
 }
 
-bool dashboard::dashboard_login_using_token()
-{
-	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	QFile file;
-	file.setFileName(QString::fromStdString(this->get_user_credential_path()));
+// bool dashboard::dashboard_login_using_token()
+// {
+// 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+// 	QFile file;
+// 	file.setFileName(QString::fromStdString(this->get_user_credential_path()));
 
-	if(!file.exists())
-		return false;
+// 	if(!file.exists())
+// 		return false;
 
-	file.open(QIODevice::ReadOnly | QIODevice::Text);
-	QString val = file.readAll();
-	file.close();
-	cout << "Raw file data : " << endl;
+// 	file.open(QIODevice::ReadOnly | QIODevice::Text);
+// 	QString val = file.readAll();
+// 	file.close();
+// 	cout << "Raw file data : " << endl;
 
-	QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
-	QJsonObject sett2 = d.object();
-	QJsonValue value = sett2.value(QString("userCredential"));
-	QJsonObject item = value.toObject();
+// 	QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
+// 	QJsonObject sett2 = d.object();
+// 	QJsonValue value = sett2.value(QString("userCredential"));
+// 	QJsonObject item = value.toObject();
 
-	if(item["email"] != "" && item["token"] != "")
-	{
-		this->set_email(item["email"].toString().toStdString());
-		this->set_token(item["token"].toString().toStdString());
+// 	if(item["email"] != "" && item["token"] != "")
+// 	{
+// 		this->set_email(item["email"].toString().toStdString());
+// 		this->set_token(item["token"].toString().toStdString());
 
-		cout << "DB-Email : " << item["email"].toString().toStdString() << endl;
-		cout << "DB-Token : " << item["token"].toString().toStdString() << endl;
+// 		cout << "DB-Email : " << item["email"].toString().toStdString() << endl;
+// 		cout << "DB-Token : " << item["token"].toString().toStdString() << endl;
 
-		return true;
-	}
-	else
-	{
-		cout << "No saved user credential found... from DashBoard" << endl;
-		return false;
-	}
-}
+// 		return true;
+// 	}
+// 	else
+// 	{
+// 		cout << "No saved user credential found... from DashBoard" << endl;
+// 		return false;
+// 	}
+// }
 
 // void dashboard::set_dashboard_network_interface(QNetworkAccessManager *QNAM, QNetworkRequest *QNR)
 // {

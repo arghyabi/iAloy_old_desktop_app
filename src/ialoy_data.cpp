@@ -7,6 +7,43 @@
 // define the class methods
 // this->NetworkManager = new QNetworkAccessManager();
 
+// saved_credential_manager
+bool ialoy_main_data::saved_credential_manager()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	QFile file;
+	file.setFileName(QString::fromStdString(ialoy_main_data::get_user_credential_path()));
+
+	if(!file.exists())
+		return false;
+
+	file.open(QIODevice::ReadOnly | QIODevice::Text);
+	QString val = file.readAll();
+	file.close();
+	cout << "Raw file data : " << endl;
+
+	QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
+	QJsonObject sett2 = d.object();
+	QJsonValue value = sett2.value(QString("userCredential"));
+	QJsonObject item = value.toObject();
+
+	if(item["email"] != "" && item["token"] != "")
+	{
+		ialoy_main_data::set_email(item["email"].toString().toStdString());
+		ialoy_main_data::set_token(item["token"].toString().toStdString());
+
+		cout << "Email : " << item["email"].toString().toStdString() << endl;
+		cout << "Token : " << item["token"].toString().toStdString() << endl;
+
+		return true;
+	}
+	else
+	{
+		cout << "No saved user credential found..." << endl;
+		return false;
+	}
+}
+
 // all setter methods
 void ialoy_main_data::set_email(string email_id)
 {

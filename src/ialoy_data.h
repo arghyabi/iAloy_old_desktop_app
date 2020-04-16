@@ -5,6 +5,11 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QFile>
+
 #include "hardware.h"
 
 using namespace std;
@@ -145,6 +150,9 @@ public:
 	// global network_manager variable
 	QNetworkAccessManager *NetworkManager, *DBNetworkManager;// = new QNetworkAccessManager();
 	QNetworkRequest NetworkRequest;
+
+	// saved credential manager
+	bool saved_credential_manager();
 
 	// setter methods for setup class private variables.
 	void set_email(string email_id);

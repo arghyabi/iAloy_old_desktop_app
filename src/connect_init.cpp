@@ -114,7 +114,7 @@ void ialoy_web_api::set_api_request(api_request_type genarate_url_flag)
 			{
 				if(this->get_email() != "" && this->get_token() != "")
 				{
-					this->req_url = url+"?aco="+aco+"&email="+this->get_email()+"&token="+this->get_token()+"&pi_add="+this->get_pi_add();
+					this->req_url = url+"?aco="+aco+"&email="+this->get_email()+"&token="+QUrl::toPercentEncoding(this->get_token().c_str()).constData()+"&pi_add="+this->get_pi_add();
 				}
 				else
 				{

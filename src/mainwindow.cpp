@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->status_label->setText("");
 
 	status_label_set_text("Checking saved login...", "black");
-	if(!try_login_using_token())
+	if(!MainWindow::saved_credential_manager())
 	{
 		MainWindow::set_api_request(GET_PI_NAME);
 	}
@@ -95,41 +95,41 @@ void MainWindow::send_api_request()
 		cout << MainWindow::get_api_error_msg() << endl;
 }
 
-bool MainWindow::try_login_using_token()
-{
-	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	QFile file;
-	file.setFileName(QString::fromStdString(MainWindow::get_user_credential_path()));
+// bool MainWindow::try_login_using_token()
+// {
+// 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+// 	QFile file;
+// 	file.setFileName(QString::fromStdString(MainWindow::get_user_credential_path()));
 
-	if(!file.exists())
-		return false;
+// 	if(!file.exists())
+// 		return false;
 
-	file.open(QIODevice::ReadOnly | QIODevice::Text);
-	QString val = file.readAll();
-	file.close();
-	cout << "Raw file data : " << endl;
+// 	file.open(QIODevice::ReadOnly | QIODevice::Text);
+// 	QString val = file.readAll();
+// 	file.close();
+// 	cout << "Raw file data : " << endl;
 
-	QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
-	QJsonObject sett2 = d.object();
-	QJsonValue value = sett2.value(QString("userCredential"));
-	QJsonObject item = value.toObject();
+// 	QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
+// 	QJsonObject sett2 = d.object();
+// 	QJsonValue value = sett2.value(QString("userCredential"));
+// 	QJsonObject item = value.toObject();
 
-	if(item["email"] != "" && item["token"] != "")
-	{
-		MainWindow::set_email(item["email"].toString().toStdString());
-		MainWindow::set_token(item["token"].toString().toStdString());
+// 	if(item["email"] != "" && item["token"] != "")
+// 	{
+// 		MainWindow::set_email(item["email"].toString().toStdString());
+// 		MainWindow::set_token(item["token"].toString().toStdString());
 
-		cout << "Email : " << item["email"].toString().toStdString() << endl;
-		cout << "Token : " << item["token"].toString().toStdString() << endl;
+// 		cout << "Email : " << item["email"].toString().toStdString() << endl;
+// 		cout << "Token : " << item["token"].toString().toStdString() << endl;
 
-		return true;
-	}
-	else
-	{
-		cout << "No saved user credential found..." << endl;
-		return false;
-	}
-}
+// 		return true;
+// 	}
+// 	else
+// 	{
+// 		cout << "No saved user credential found..." << endl;
+// 		return false;
+// 	}
+// }
 
 void MainWindow::update_mainwindow_gui()
 {
