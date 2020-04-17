@@ -106,7 +106,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_4"/>
+     <layout class="QVBoxLayout" name="v_layout_for_all_room"/>
     </item>
     <item>
      <spacer name="verticalSpacer">

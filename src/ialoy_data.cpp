@@ -4,9 +4,6 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include "ialoy_data.h"
 
-// define the class methods
-// this->NetworkManager = new QNetworkAccessManager();
-
 // saved_credential_manager
 bool ialoy_main_data::saved_credential_manager()
 {
@@ -287,10 +284,7 @@ string ialoy_main_data::get_interface_up_script_path()
 	return this->interface_up_script_path;
 }
 
-
-
 // getter methods for dev_controller class private variables.
-
 string ialoy_main_data::get_d_id()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;

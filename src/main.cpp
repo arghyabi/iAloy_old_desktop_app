@@ -28,18 +28,17 @@ void main_window_show(int mode)
 		mainwindow_pt->hide();
 }
 
-void dashboard_window_show(bool mode)//, QNetworkAccessManager *QNAM = NULL, QNetworkRequest *QNR = NULL)
+void dashboard_window_show(bool mode)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ <<"    mode :" << mode << endl;
 	if(mode)
 	{
 		QSize size = qApp->screens()[0]->size();
 		dashboardwindow_pt->resize(size);
-		// dashboardwindow_pt->addBgImage();
+		// dashboardwindow_pt->addBgImage(); // TODO: Solve the background image problem
 		dashboardwindow_pt->showFullScreen();
 		dashboardwindow_pt->show();
 		dashboardwindow_pt->init();
-		// dashboardwindow_pt->set_dashboard_network_interface(QNAM, QNR);
 	}
 	else
 		dashboardwindow_pt->hide();
@@ -88,9 +87,6 @@ int main(int argc, char *argv[])
 	dashboardwindow_pt = &dashboardwindow;
 	settings_pt = &settingswindow;
 	update_manager_pt = &updateManager;
-
-	// QNetworkAccessManager *NetworkManager;
-	// QNetworkRequest NetworkRequest;
 
 	main_window_show(true);
 

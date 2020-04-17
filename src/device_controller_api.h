@@ -9,7 +9,6 @@
 #include <fstream>
 #include <QObject>
 
-// #include "ialoy_data.h"
 #include "connect_init.h"
 
 using namespace std;
@@ -31,7 +30,6 @@ public:
 public:
 	void set_device_controller_api_request(device_controller_api_request_type device_controller_api_request);
 	string get_device_controller_req_url();
-
 };
 
 #endif // DEVICE_CONTROLLER_API_H

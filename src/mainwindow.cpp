@@ -95,42 +95,6 @@ void MainWindow::send_api_request()
 		cout << MainWindow::get_api_error_msg() << endl;
 }
 
-// bool MainWindow::try_login_using_token()
-// {
-// 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-// 	QFile file;
-// 	file.setFileName(QString::fromStdString(MainWindow::get_user_credential_path()));
-
-// 	if(!file.exists())
-// 		return false;
-
-// 	file.open(QIODevice::ReadOnly | QIODevice::Text);
-// 	QString val = file.readAll();
-// 	file.close();
-// 	cout << "Raw file data : " << endl;
-
-// 	QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
-// 	QJsonObject sett2 = d.object();
-// 	QJsonValue value = sett2.value(QString("userCredential"));
-// 	QJsonObject item = value.toObject();
-
-// 	if(item["email"] != "" && item["token"] != "")
-// 	{
-// 		MainWindow::set_email(item["email"].toString().toStdString());
-// 		MainWindow::set_token(item["token"].toString().toStdString());
-
-// 		cout << "Email : " << item["email"].toString().toStdString() << endl;
-// 		cout << "Token : " << item["token"].toString().toStdString() << endl;
-
-// 		return true;
-// 	}
-// 	else
-// 	{
-// 		cout << "No saved user credential found..." << endl;
-// 		return false;
-// 	}
-// }
-
 void MainWindow::update_mainwindow_gui()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -192,7 +156,7 @@ void MainWindow::render_login_using_token()
 		{
 			case LOGIN_SUCCESS:
 				cout << "Login success... from render()" << endl;
-				dashboard_window_show(true);//, NetworkManager, NetworkRequest);
+				dashboard_window_show(true);
 				main_window_show(false);
 				break;
 
@@ -397,7 +361,7 @@ void MainWindow::render_registered_new_pi()
 			case PI_REGISTERED:
 				cout << "Pi registered success..." << endl;
 				status_label_set_text("Pi register sucess...", "green");
-				dashboard_window_show(true);//, NetworkManager, NetworkRequest);
+				dashboard_window_show(true);
 				main_window_show(false);
 				break;
 
@@ -577,7 +541,7 @@ void MainWindow::render_after_login()
 	{
 		if(user_login_status_flag == LOGIN_SUCCESS)
 		{
-			dashboard_window_show(true);//, NetworkManager, NetworkRequest);
+			dashboard_window_show(true);
 			main_window_show(false);
 		}
 		else if(user_login_status_flag == LOGIN_TOKEN_ERROR)
@@ -602,7 +566,6 @@ void MainWindow::show_reg_form()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	MainWindow::set_email(ui->SetUpLineEdit->text().toStdString());
-	// MainWindow::email_reg_status();
 	if(reg_user_type_flag == EXISTING_USER)
 	{
 		status_label_set_text("<center>This Pi is not registered \

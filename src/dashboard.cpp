@@ -14,6 +14,7 @@ dashboard::dashboard(QWidget *parent) :
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 }
 
+// init method contain network->get()
 void dashboard::init()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -39,48 +40,7 @@ void dashboard::init()
 	}
 }
 
-// bool dashboard::dashboard_login_using_token()
-// {
-// 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-// 	QFile file;
-// 	file.setFileName(QString::fromStdString(this->get_user_credential_path()));
-
-// 	if(!file.exists())
-// 		return false;
-
-// 	file.open(QIODevice::ReadOnly | QIODevice::Text);
-// 	QString val = file.readAll();
-// 	file.close();
-// 	cout << "Raw file data : " << endl;
-
-// 	QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
-// 	QJsonObject sett2 = d.object();
-// 	QJsonValue value = sett2.value(QString("userCredential"));
-// 	QJsonObject item = value.toObject();
-
-// 	if(item["email"] != "" && item["token"] != "")
-// 	{
-// 		this->set_email(item["email"].toString().toStdString());
-// 		this->set_token(item["token"].toString().toStdString());
-
-// 		cout << "DB-Email : " << item["email"].toString().toStdString() << endl;
-// 		cout << "DB-Token : " << item["token"].toString().toStdString() << endl;
-
-// 		return true;
-// 	}
-// 	else
-// 	{
-// 		cout << "No saved user credential found... from DashBoard" << endl;
-// 		return false;
-// 	}
-// }
-
-// void dashboard::set_dashboard_network_interface(QNetworkAccessManager *QNAM, QNetworkRequest *QNR)
-// {
-// 	this->NetworkManager = QNAM;
-// 	this->NetworkRequest = *QNR;
-// }
-
+// contain calling statement of network->get()
 void dashboard::send_device_controller_api_request()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -90,6 +50,8 @@ void dashboard::send_device_controller_api_request()
 		cout << "Error massage : " << this->get_device_controller_api_error_msg() << endl;
 }
 
+// update_dashboard_gui method to call specific render method
+// wrt device_controller_api_request_type
 void dashboard::update_dashboard_gui()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -112,6 +74,8 @@ void dashboard::update_dashboard_gui()
 
 		case GET_ROOM_DEVICE_STATUS:
 			// render room_device_status
+			cout << "Entering render_dashboard_room_btn_status() " << endl;
+			render_dashboard_room_btn_state();
 			break;
 
 		case UPDATE_STATUS:
@@ -133,12 +97,17 @@ void dashboard::update_dashboard_gui()
 			// render update_range_for_pi
 			break;
 
+		case GET_I2C_DATA:
+			// render i2c data
+			render_i2c_data();
+			break;
+
 		default:
 			break;
 	}
 }
 
-
+// render after dashboard_saved_login response
 void dashboard::render_dashboard_login()
 {
 	if(device_controller_api_response_parse() && this->get_device_controller_api_response() == "1")
@@ -150,6 +119,7 @@ void dashboard::render_dashboard_login()
 	else
 		cout << "DB-LOGIN STATUS : Success" << endl;
 }
+
 
 bool dashboard::device_controller_api_response_parse()
 {
@@ -165,6 +135,28 @@ bool dashboard::device_controller_api_response_parse()
 	return true;
 }
 
+QJsonArray dashboard::get_json_array_from_response()
+{
+	string room_device_state_data = this->get_device_controller_api_response();
+	QString room_device_status_info = QString::fromStdString(room_device_state_data);
+	QJsonDocument jsonDocument = QJsonDocument::fromJson(room_device_status_info.toUtf8());
+	QJsonObject jsonObject = jsonDocument.object();
+	QJsonValue ArrayValue;
+	switch(this->device_controller_api_request_type_flag)
+	{
+		case GET_ROOM_DEVICE_LIST:
+			ArrayValue = jsonObject.value("room_device_details");
+			break;
+
+		case GET_ROOM_DEVICE_STATUS:
+			ArrayValue = jsonObject.value("room_device_status");
+			break;
+	}
+
+	QJsonArray result_Array = ArrayValue.toArray();
+	return result_Array;
+}
+
 
 void dashboard::render_dashboard_room_btn()
 {
@@ -172,146 +164,160 @@ void dashboard::render_dashboard_room_btn()
 
 	if(this->device_controller_api_response_parse())
 	{
+		// store response in structure_linked_list here
+		struct btn_node *tmp_btn_nd;
 
-		string room_device_data = this->get_device_controller_api_response();
-		cout << "\n\nRoom_device data : " << room_device_data << endl << endl;
-
-		QPushButton *btn1;
-		QVBoxLayout *verticalLayout_4, *verticalLayout01, *verticalLayout1;
-		QHBoxLayout *horizontalLayout01, *horizontalLayout1, *horizontalSpacer_3;
-		QLabel *room_name_label;
-		QSlider *slider1;
-		QSpacerItem *spacerItem;
+		QJsonArray roomArray = get_json_array_from_response();
 
 		// creating main_room_container
-		verticalLayout_4 = new QVBoxLayout();
-		verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
-
-
-		QString room_device_info = QString::fromStdString(room_device_data);
-
-		QJsonDocument jsonDocument = QJsonDocument::fromJson(room_device_info.toUtf8());
-		QJsonObject jsonObject = jsonDocument.object();
-
-		QJsonValue roomArrayValue = jsonObject.value("room_device_details");
-		QJsonArray roomArray = roomArrayValue.toArray();
+		v_layout_for_all_room = new QVBoxLayout();
 
 		foreach (const QJsonValue &room, roomArray)
 		{
-			horizontalLayout01 = new QHBoxLayout();
-			QString sub_room_container_object_name = "sub_room_container_"+room.toObject().value("room_id").toString();
-			horizontalLayout01->setObjectName(sub_room_container_object_name);
-
-			// creating room
-			verticalLayout01 = new QVBoxLayout();
-			QString room_object_name = "room_"+room.toObject().value("room_id").toString();
-			verticalLayout01->setObjectName(room_object_name);
-
-			// room_name
+			h_layout_for_room_and_spacer = new QHBoxLayout();
+			v_layout_for_all_btn_node_and_room_label = new QVBoxLayout();
+			h_layout_for_all_btn_node = new QHBoxLayout();
 			room_name_label = new QLabel();
+			spacerItem = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
 			QString room_name = room.toObject().value("room_name").toString();
-			room_name_label->setObjectName(room_name);
 			room_name_label->setText(room_name);
 
-			// adding room_name to room
-			verticalLayout01->addWidget(room_name_label);
-
-			// creating device_container
-			horizontalLayout1 = new QHBoxLayout();
-			QString device_container_name = "device_container_"+room.toObject().value("room_id").toString();
-			horizontalLayout1->setObjectName(device_container_name);
+			v_layout_for_all_btn_node_and_room_label->addWidget(room_name_label);
 
 			QJsonArray dev_array = room.toObject().value("dev_list").toArray();
 
 			foreach (const QJsonValue &device, dev_array)
 			{
+				tmp_btn_nd = new struct btn_node;
+				tmp_btn_nd->btn = new QPushButton();
+				tmp_btn_nd->slider = new QSlider();
+				v_layout_for_btn_node = new QVBoxLayout();
+
 				QString device_name = device.toObject().value("d_name").toString();
 				QString device_id = device.toObject().value("dev_id").toString();
 				QString device_is_var = device.toObject().value("is_var").toString();
 
-				// creating dynamic devices
+				tmp_btn_nd->device_id = device_id;
 
-				// creating device_layout
-				verticalLayout1 = new QVBoxLayout();
-				QString device_layout_obj_name = "device_layout_"+device_id;
-				verticalLayout1->setObjectName(device_layout_obj_name);
-
-				// creating device_btn
-				btn1 = new QPushButton();
-				QString device_button_name = "device_button_"+device_id;
-				btn1->setObjectName(device_button_name);
 				QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 				sizePolicy.setHorizontalStretch(0);
 				sizePolicy.setVerticalStretch(0);
-				sizePolicy.setHeightForWidth(btn1->sizePolicy().hasHeightForWidth());
-				btn1->setSizePolicy(sizePolicy);
-				btn1->setMinimumSize(QSize(0, 0));
-				btn1->setText(device_name);
+				sizePolicy.setHeightForWidth(tmp_btn_nd->btn->sizePolicy().hasHeightForWidth());
+				tmp_btn_nd->btn->setSizePolicy(sizePolicy);
+				tmp_btn_nd->btn->setMinimumSize(QSize(0, 0));
+				tmp_btn_nd->btn->setText(device_name);
 
-				// add device_btn to device_layout
-				verticalLayout1->addWidget(btn1);
+				sizePolicy.setHeightForWidth(tmp_btn_nd->slider->sizePolicy().hasHeightForWidth());
+				tmp_btn_nd->slider->setSizePolicy(sizePolicy);
+				tmp_btn_nd->slider->setOrientation(Qt::Horizontal);
 
-				// creating device_slider
-				slider1 = new QSlider();
-				QString device_slider_name = "device_slider_"+device_id;
-				slider1->setObjectName(device_slider_name);
-				sizePolicy.setHeightForWidth(slider1->sizePolicy().hasHeightForWidth());
-				slider1->setSizePolicy(sizePolicy);
-				slider1->setOrientation(Qt::Horizontal);
+				if(device_is_var == "1")
+				{
+					tmp_btn_nd->slider->setEnabled(true);
+					tmp_btn_nd->is_var = true;
+				}
+				else
+				{
+					tmp_btn_nd->slider->setEnabled(false);
+					tmp_btn_nd->is_var = false;
+				}
 
-				// add device_slider to device_layout
-				verticalLayout1->addWidget(slider1);
+				btn_list.append(tmp_btn_nd);
 
-				// add device_layout to device_container
-				horizontalLayout1->addLayout(verticalLayout1);
-
+				v_layout_for_btn_node->addWidget(tmp_btn_nd->btn);
+				v_layout_for_btn_node->addWidget(tmp_btn_nd->slider);
+				h_layout_for_all_btn_node->addLayout(v_layout_for_btn_node);
 			}
 
-			// adding device_container to room
-			verticalLayout01->addLayout(horizontalLayout1);
-
-			// adding room to sub_room_container
-			horizontalLayout01->addLayout(verticalLayout01);
-
-			// create spacer
-			spacerItem = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-			// add spacer to sub_room_container
-			horizontalLayout01->addItem(spacerItem);
-
-			// add sub_room_container to main_room_container
-			ui->verticalLayout_4->addLayout(horizontalLayout01);
-
-			cout << "------------- render success --------------------" << endl;
+			v_layout_for_all_btn_node_and_room_label->addLayout(h_layout_for_all_btn_node);
+			h_layout_for_room_and_spacer->addLayout(v_layout_for_all_btn_node_and_room_label);
+			h_layout_for_room_and_spacer->addItem(spacerItem);
+			ui->v_layout_for_all_room->addLayout(h_layout_for_room_and_spacer);
 		}
 
+		cout << "------------- Room device render success --------------------" << endl;
+		set_device_controller_api_request(GET_ROOM_DEVICE_STATUS);
+		send_device_controller_api_request();
+
 	}
-	// get api_response
-	// string room_device_data = "\
-{\
-	\"room\": [{ \
-	\"room_name\": \"room_no_1\",\"room_id\": \"120\", \
-	\"dev_list\": [ \
-	{\"dev_id\":\"405\",\"d_name\": \"led_5\", \"is_var\":\"0\"}, \
-	{\"dev_id\":\"404\",\"d_name\": \"led_4\", \"is_var\":\"0\"}, \
-	{\"dev_id\":\"403\",\"d_name\": \"led_3\", \"is_var\":\"0\"}, \
-	{\"dev_id\":\"402\",\"d_name\": \"led_2\", \"is_var\":\"0\"}, \
-	{\"dev_id\":\"401\",\"d_name\": \"led_1\", \"is_var\":\"0\"}, \
-	{\"dev_id\":\"417\",\"d_name\": \"led_8\", \"is_var\":\"1\"}] \
-},{\"room_name\":\"room_no_2\",\"room_id\":\"121\", \
-	\"dev_list\":[ \
-	{\"dev_id\":\"426\",\"d_name\": \"ND_8\", \"is_var\": \"0\"}, \
-	{\"dev_id\":\"425\",\"d_name\": \"ND_7\", \"is_var\": \"0\"}, \
-	{\"dev_id\":\"402\",\"d_name\": \"led_2\", \"is_var\":\"0\"}, \
-	{\"dev_id\":\"401\",\"d_name\": \"led_1\", \"is_var\":\"0\"}, \
-	{\"dev_id\":\"417\",\"d_name\": \"led_8\", \"is_var\":\"1\"} \
-]}] \
-}";
+}
 
-	// cout << "\n\nRoom_device_data : " << room_device_data << endl;
 
-	// qt variables
+void dashboard::render_dashboard_room_btn_state()
+{
+	// render using dco = 3 data
+	if(device_controller_api_response_parse())
+	{
+		cout << "\n\nRender dashboard_room_btn_state data : " << get_device_controller_api_response() << endl << endl;
+		QJsonArray roomArray = get_json_array_from_response();
+		foreach (const QJsonValue &room, roomArray)
+		{
+			QJsonArray dev_array = room.toObject().value("dev_list").toArray();
 
+			foreach (const QJsonValue &device, dev_array)
+			{
+				// setting up temp variables
+				QString device_id = device.toObject().value("dev_id").toString();
+				QString device_status_value = device.toObject().value("dev_status").toString();
+				QString device_var_value = device.toObject().value("var_value").toString();
+
+				struct btn_node *btn_nd;
+				foreach(btn_nd, btn_list)
+				{
+					if(btn_nd->device_id == device_id)
+					{
+
+						if(device_status_value == "1")
+						{
+							// turning btn on
+							btn_nd->btn->setStyleSheet("background-color: #74a6f3; color:  #ffffff;");
+						}
+						else if(device_status_value == "0")
+						{
+							// turning btn off
+							btn_nd->btn->setStyleSheet("background-color:  #525252; color:  #ffffff;");
+						}
+
+						// checking is_var enabled or not
+						if(btn_nd->is_var)
+						{
+							// setting var_value
+							btn_nd->slider->setValue(stoi(device_var_value.toStdString()));
+							btn_nd->slider_val = stoi(device_var_value.toStdString());
+						}
+
+					}
+				}
+			}
+		}
+		cout << "------------- state render success --------------------" << endl;
+
+		set_device_controller_api_request(GET_I2C_DATA);
+		send_device_controller_api_request();
+	}
+}
+
+
+void dashboard::render_i2c_data()
+{
+	if(device_controller_api_response_parse())
+	{
+		cout << "\n\\nI2C data : \n" << dashboard::get_device_controller_api_response() << endl << endl;
+		// checking if device state is updated or not
+		if(api_i2c_data == "" || api_i2c_data != dashboard::get_device_controller_api_response())
+		{
+			// set updated device state in temp variable
+			api_i2c_data = dashboard::get_device_controller_api_response();
+
+			// get_room_device_status api call
+			set_device_controller_api_request(GET_ROOM_DEVICE_STATUS);
+			send_device_controller_api_request();
+		}
+		// msleep(1000);
+		set_device_controller_api_request(GET_I2C_DATA);
+		send_device_controller_api_request();
+	}
 }
 
 

@@ -10,6 +10,10 @@
 #include <QJsonArray>
 #include <QFile>
 
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSlider>
+#include <QLinkedList>
+
 #include "hardware.h"
 
 using namespace std;
@@ -95,7 +99,8 @@ enum device_controller_api_request_type
 	UPDATE_RANGE,
 	GET_CONNECTED_PI_LIST,
 	UPDATE_STATUS_FOR_PI,
-	UPDATE_RANGE_FOR_PI
+	UPDATE_RANGE_FOR_PI,
+	GET_I2C_DATA
 };
 
 class ialoy_main_data{
@@ -147,9 +152,23 @@ public:
 	otp_verification_status otp_verification_status_flag;
 	device_controller_api_request_type device_controller_api_request_type_flag;
 
+	string api_i2c_data;
+
 	// global network_manager variable
 	QNetworkAccessManager *NetworkManager, *DBNetworkManager;// = new QNetworkAccessManager();
 	QNetworkRequest NetworkRequest;
+
+	struct btn_node
+	{
+		QPushButton *btn;
+		int btn_state;
+		QSlider *slider;
+		bool is_var;
+		int slider_val;
+		QString device_id;
+	};
+
+	QLinkedList<struct btn_node*> btn_list;
 
 	// saved credential manager
 	bool saved_credential_manager();

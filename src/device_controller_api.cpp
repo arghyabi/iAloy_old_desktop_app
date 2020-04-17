@@ -8,9 +8,6 @@
 #include <stdlib.h>
 #include <QObject>
 
-// #include "connect_init.h"
-// #include "main.h"
-// #include "hardware.h"
 #include "device_controller_api.h"
 
 
@@ -82,13 +79,15 @@ void device_controller_api::set_device_controller_api_request(device_controller_
 				break;
 			}
 
+		case GET_I2C_DATA:
+			this->req_url = this->url+"?dco="+dco;
+			break;
+
 		default:
 			break;
 	}
-	//return QUrl::toPercentEncoding(this->token.c_str()).constData();
 	cout << this->req_url << endl;
 	NetworkRequest.setUrl(QString::fromStdString(this->req_url));
-
 }
 
 
