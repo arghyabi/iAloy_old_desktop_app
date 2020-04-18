@@ -12,6 +12,24 @@ dashboard::dashboard(QWidget *parent) :
 	ui->setupUi(this);
 
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+
+	ui->pi_name_label->setText(QString::fromStdString(dashboard::get_pi_name()));
+	QTimer *timer_for_datatime = new QTimer(this);
+	connect( timer_for_datatime, SIGNAL(timeout()), this, SLOT(update_time()) );
+	timer_for_datatime->start(1000);
+
+	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_settings_icon_path())));
+	ui->wifi_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_wifi_icon_path())));
+	ui->keyboard_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_keyboad_icon_path())));
+	ui->app_update_button->setIcon(QIcon(QString::fromStdString(dashboard::get_update_icon_path())));
+	ui->power_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_power_icon_path())));
+}
+
+void dashboard::update_time()
+{
+	QDateTime dateTime = dateTime.currentDateTime();
+	QString dateTimeString = dateTime.toString("yyyy/MM/dd hh:mm:ss ap");
+	ui->time_label->setText(dateTimeString);
 }
 
 // init method contain network->get()
@@ -334,4 +352,44 @@ void dashboard::addBgImage()
 	QPalette palette;
 	palette.setBrush(QPalette::Background, bkgnd);
 	this->setPalette(palette);
+}
+
+void dashboard::on_power_tool_button_clicked()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+#ifdef ARC_TYPE
+	system("reboot");
+#else
+	this->close();
+#endif
+}
+
+void dashboard::on_settings_tool_button_clicked()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	settings_window_show(true);
+}
+
+void dashboard::on_wifi_tool_button_clicked()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+}
+
+void dashboard::on_keyboard_tool_button_clicked()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+}
+
+void dashboard::on_app_update_button_clicked()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	update_manager_window_show(true);
+}
+
+void dashboard::on_logout_button_clicked()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	system("mv /usr/share/iAloy/.conf/credential.json /usr/share/iAloy/.conf/credential_old.json");
+	main_window_show(true);
+	dashboard_window_show(false);
 }

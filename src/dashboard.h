@@ -22,6 +22,8 @@
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QFrame>
 #include <QThread>
+#include <QDateTime>
+#include <QTimer>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -29,6 +31,7 @@
 #include <iostream>
 
 #include "device_controller_api.h"
+#include "main.h"
 
 using namespace std;
 
@@ -77,6 +80,13 @@ public:
 	~dashboard();
 
 private slots:
+	void update_time();
+	void on_power_tool_button_clicked();
+	void on_settings_tool_button_clicked();
+	void on_wifi_tool_button_clicked();
+	void on_keyboard_tool_button_clicked();
+	void on_app_update_button_clicked();
+	void on_logout_button_clicked();
 
 private:
 	Ui::dashboard *ui;

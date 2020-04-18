@@ -48,6 +48,7 @@ public:
 	~MainWindow();
 
 private slots:
+	void update_time();
 	void on_submit_button_clicked();
 	void on_form_back_btn_clicked();
 	void on_form_next_btn_clicked();
@@ -56,8 +57,8 @@ private slots:
 	void on_keyboard_tool_button_clicked();
 	void on_wifi_tool_button_clicked();
 	void on_settings_tool_button_clicked();
-
 	void on_app_update_button_clicked();
+	void on_power_tool_button_clicked();
 
 private:
 	Ui::MainWindow *ui;

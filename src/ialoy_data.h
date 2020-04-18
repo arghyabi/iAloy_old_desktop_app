@@ -127,6 +127,7 @@ private:
 	string settings_icon = "setting.png";
 	string wifi_icon = "wifi.jpg";
 	string update_icon = "update.png";
+	string power_icon = "power.jpg";
 	string interface_up_script = "iAloy-interface-up.sh";
 
 	string user_credential_path = user + share + iAloy_folder + conf_folder + ucp_file;
@@ -136,6 +137,7 @@ private:
 	string settings_icon_path = user + share + iAloy_folder + photos_folder + settings_icon;
 	string wifi_icon_path = user + share + iAloy_folder + photos_folder + wifi_icon;
 	string update_icon_path = user + share + iAloy_folder + photos_folder + update_icon;
+	string power_icon_path = user + share + iAloy_folder + photos_folder + power_icon;
 	string interface_up_script_path = user + share + iAloy_folder + scripts_folder + interface_up_script;
 
 	// for dev_controller class
@@ -217,6 +219,7 @@ public:
 	string get_update_icon_path();
 	string get_settings_icon_path();
 	string get_wifi_icon_path();
+	string get_power_icon_path();
 	string get_interface_up_script_path();
 
 	// getter methods for dev_controller class private variables.

@@ -24,10 +24,16 @@ MainWindow::MainWindow(QWidget *parent) :
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->setupUi(this);
 
+	ui->pi_name_label->setText(QString::fromStdString(MainWindow::get_pi_name()));
+	QTimer *timer_for_datatime = new QTimer(this);
+	connect( timer_for_datatime, SIGNAL(timeout()), this, SLOT(update_time()) );
+	timer_for_datatime->start(1000);
+
 	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_settings_icon_path())));
 	ui->wifi_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_wifi_icon_path())));
 	ui->keyboard_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_keyboad_icon_path())));
 	ui->app_update_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_update_icon_path())));
+	ui->power_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_power_icon_path())));
 
 	NetworkManager = new QNetworkAccessManager();
 	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
@@ -70,6 +76,13 @@ MainWindow::~MainWindow()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	delete ui;
 	delete NetworkManager;
+}
+
+void MainWindow::update_time()
+{
+	QDateTime dateTime = dateTime.currentDateTime();
+	QString dateTimeString = dateTime.toString("yyyy/MM/dd hh:mm:ss ap");
+	ui->time_label->setText(dateTimeString);
 }
 
 void MainWindow::status_label_set_text(string text, string color)
@@ -808,6 +821,16 @@ void MainWindow::on_passsword_toggle_stateChanged(int arg1)
 		ui->SetUpLineEdit->setEchoMode(QLineEdit::Password);
 }
 
+void MainWindow::on_power_tool_button_clicked()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+#ifdef ARC_TYPE
+	system("reboot");
+#else
+	this->close();
+#endif
+}
+
 void MainWindow::on_keyboard_tool_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -828,5 +851,4 @@ void MainWindow::on_app_update_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	update_manager_window_show(true);
-
 }

@@ -17,6 +17,7 @@ update_manager::update_manager(QWidget *parent) :
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->setupUi(this);
 
+#ifdef ARC_TYPE
 	update_manager_thread *thread_obj = new update_manager_thread(this);
 	thread_obj->moveToThread(&workerThread);
 
@@ -30,9 +31,13 @@ update_manager::update_manager(QWidget *parent) :
 	connect(this, SIGNAL(untar_download_file()), thread_obj, SLOT(untar_dowload_tarball_slot()));
 	connect(thread_obj, SIGNAL(untar_dowload_tarball_complete()), this, SLOT(finished_render_slot()));
 
+	ui->version_status->setText("Connecting...");
+#else
+	ui->version_status->setText("Wrong CPU Architecture Found...");
+#endif
+
 	ui->update_btn->hide();
 	ui->console_area->hide();
-	ui->version_status->setText("Connecting...");
 	ui->download_progress->hide();
 	ui->progressBar->hide();
 	ui->restart_btn->hide();
