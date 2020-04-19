@@ -9,13 +9,15 @@ dashboard::dashboard(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::dashboard)
 {
+	isLoggedIn = false;
 	ui->setupUi(this);
 
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 
 	ui->pi_name_label->setText(QString::fromStdString(dashboard::get_pi_name()));
 	QTimer *timer_for_datatime = new QTimer(this);
-	connect( timer_for_datatime, SIGNAL(timeout()), this, SLOT(update_time()) );
+	connect(timer_for_datatime, SIGNAL(timeout()), this, SLOT(update_time()));
+	connect(timer_for_datatime, SIGNAL(timeout()), this, SLOT(get_i2c_web_status()));
 	timer_for_datatime->start(1000);
 
 	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_settings_icon_path())));
@@ -28,7 +30,7 @@ dashboard::dashboard(QWidget *parent) :
 void dashboard::update_time()
 {
 	QDateTime dateTime = dateTime.currentDateTime();
-	QString dateTimeString = dateTime.toString("yyyy/MM/dd hh:mm:ss ap");
+	QString dateTimeString = dateTime.toString("dd-MMMM-yyyy hh:mm:ss ap");
 	ui->time_label->setText(dateTimeString);
 }
 
@@ -55,6 +57,11 @@ void dashboard::init()
 	{
 		set_device_controller_api_request(DEVICE_CONTROLLER_LOGIN_USING_TOKEN);
 		send_device_controller_api_request();
+	}
+	else
+	{
+		main_window_show(true);
+		dashboard_window_show(false);
 	}
 }
 
@@ -128,16 +135,21 @@ void dashboard::update_dashboard_gui()
 // render after dashboard_saved_login response
 void dashboard::render_dashboard_login()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(device_controller_api_response_parse() && this->get_device_controller_api_response() == "1")
 	{
+		isLoggedIn = true;
 		cout << "DB-LOGIN STATUS : Success" << endl;
 		set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
 		send_device_controller_api_request();
 	}
 	else
-		cout << "DB-LOGIN STATUS : Success" << endl;
+	{
+		cout << "DB-LOGIN STATUS : Fail... Redirecting to MainWindow" << endl;
+		main_window_show(true);
+		dashboard_window_show(false);
+	}
 }
-
 
 bool dashboard::device_controller_api_response_parse()
 {
@@ -155,6 +167,7 @@ bool dashboard::device_controller_api_response_parse()
 
 QJsonArray dashboard::get_json_array_from_response()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	string room_device_state_data = this->get_device_controller_api_response();
 	QString room_device_status_info = QString::fromStdString(room_device_state_data);
 	QJsonDocument jsonDocument = QJsonDocument::fromJson(room_device_status_info.toUtf8());
@@ -169,21 +182,42 @@ QJsonArray dashboard::get_json_array_from_response()
 		case GET_ROOM_DEVICE_STATUS:
 			ArrayValue = jsonObject.value("room_device_status");
 			break;
+
+		case GET_I2C_DATA:
+			ArrayValue = jsonObject.value("i2c_data");
+			break;
 	}
 
 	QJsonArray result_Array = ArrayValue.toArray();
 	return result_Array;
 }
 
+void dashboard::clearLayout(QLayout* layout)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+
+	while (QLayoutItem* item = layout->takeAt(0))
+	{
+		if (QWidget* widget = item->widget())
+			widget->deleteLater();
+		if (QLayout* childLayout = item->layout())
+			clearLayout(childLayout);
+		delete item;
+	}
+}
 
 void dashboard::render_dashboard_room_btn()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-
 	if(this->device_controller_api_response_parse())
 	{
 		// store response in structure_linked_list here
 		struct btn_node *tmp_btn_nd;
+		if(!btn_list.isEmpty())
+		{
+			clearLayout(ui->v_layout_for_all_room);
+			btn_list.clear();
+		}
 
 		QJsonArray roomArray = get_json_array_from_response();
 
@@ -257,13 +291,13 @@ void dashboard::render_dashboard_room_btn()
 		cout << "------------- Room device render success --------------------" << endl;
 		set_device_controller_api_request(GET_ROOM_DEVICE_STATUS);
 		send_device_controller_api_request();
-
 	}
 }
 
 
 void dashboard::render_dashboard_room_btn_state()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	// render using dco = 3 data
 	if(device_controller_api_response_parse())
 	{
@@ -311,33 +345,70 @@ void dashboard::render_dashboard_room_btn_state()
 		}
 		cout << "------------- state render success --------------------" << endl;
 
+		isLoggedIn = true;
 		set_device_controller_api_request(GET_I2C_DATA);
 		send_device_controller_api_request();
 	}
 }
 
+void dashboard::get_i2c_web_status()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	if(isLoggedIn)
+	{
+		set_device_controller_api_request(GET_I2C_DATA);
+		send_device_controller_api_request();
+	}
+}
 
 void dashboard::render_i2c_data()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(device_controller_api_response_parse())
 	{
-		cout << "\n\\nI2C data : \n" << dashboard::get_device_controller_api_response() << endl << endl;
+		string tmp_api_resp = dashboard::get_device_controller_api_response();
+		cout << "\n\nI2C data : \n" << tmp_api_resp << endl << endl;
 		// checking if device state is updated or not
-		if(api_i2c_data == "" || api_i2c_data != dashboard::get_device_controller_api_response())
+		if(api_i2c_data == "" || api_i2c_data != tmp_api_resp)
 		{
 			// set updated device state in temp variable
-			api_i2c_data = dashboard::get_device_controller_api_response();
+			api_i2c_data = tmp_api_resp;
+			QJsonArray i2c_array = get_json_array_from_response();
+
+			int data_to_send = 0;
+			string mod_Add;
+
+			//assign value
+			foreach(const QJsonValue mod_info, i2c_array)
+			{
+				mod_Add = mod_info.toObject().value("mod_add").toString().toStdString();
+
+				QJsonArray status_array = mod_info.toObject().value("pin_status").toArray();
+				int array_len = status_array.count();
+				for(int i = (array_len - 1); i > -1; i--)
+				{
+					// cout << "Status : " << status_array[i] << "For Pin : " << i << endl;
+					if(status_array[i] == 1)
+					{
+						// add value
+						data_to_send += 1 * pow(2,(array_len - 1 - i));
+					}
+					else
+					{
+						data_to_send += 0 * pow(2,(array_len - 1 - i));
+					}
+
+				}
+				cout << "\n\nMod address : " << mod_Add << "\nStatus Code : " << data_to_send << endl;
+				data_to_send = 0;
+			}
 
 			// get_room_device_status api call
 			set_device_controller_api_request(GET_ROOM_DEVICE_STATUS);
 			send_device_controller_api_request();
 		}
-		// msleep(1000);
-		set_device_controller_api_request(GET_I2C_DATA);
-		send_device_controller_api_request();
 	}
 }
-
 
 dashboard::~dashboard()
 {

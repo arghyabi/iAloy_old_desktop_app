@@ -5,7 +5,7 @@
 #include "i2c.h"
 
 using namespace std;
-#define DEVICE_ID 0x04
+#define MOD_ADD 0x04
 
 void dec_to_bin(int data, int *bin_arr)
 {
@@ -31,7 +31,7 @@ int random_genaration()
 int write_data(int *data_to_send)
 {
 #ifdef ARC_TYPE
-	int fd = wiringPiI2CSetup(DEVICE_ID);
+	int fd = wiringPiI2CSetup(MOD_ADD);
 	if (fd == -1) {
 		cout << "Failed to init I2C communication." << endl;
 		return -1;
@@ -56,7 +56,7 @@ int write_data(int *data_to_send)
 int read_i2c_data(int *data_to_recv)
 {
 #ifdef ARC_TYPE
-	int fd = wiringPiI2CSetup(DEVICE_ID);
+	int fd = wiringPiI2CSetup(MOD_ADD);
 	for(int t=0;t<1000000;t++);
 	int received_data = wiringPiI2CRead(fd);
 	dec_to_bin(received_data, data_to_recv);

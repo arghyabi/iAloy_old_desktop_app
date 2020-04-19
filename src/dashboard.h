@@ -2,7 +2,8 @@
 #define DASHBOARD_H
 
 #include <QMainWindow>
-#include<QString>
+#include <QString>
+#include <math.h>
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>
@@ -61,6 +62,8 @@ public:
 	QSpacerItem *spacerItem;
 	QFrame *frame_d;
 
+	bool isLoggedIn;
+
 	explicit dashboard(QWidget *parent = 0);
 	void addBgImage();
 	void init();
@@ -76,7 +79,7 @@ public:
 	void render_dashboard_room_btn();
 	void render_dashboard_room_btn_state();
 	void render_i2c_data();
-
+	void clearLayout(QLayout* layout);
 	~dashboard();
 
 private slots:
@@ -87,6 +90,7 @@ private slots:
 	void on_keyboard_tool_button_clicked();
 	void on_app_update_button_clicked();
 	void on_logout_button_clicked();
+	void get_i2c_web_status();
 
 private:
 	Ui::dashboard *ui;

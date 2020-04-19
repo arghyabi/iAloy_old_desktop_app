@@ -20,7 +20,7 @@ void main_window_show(int mode)
 	{
 		QSize size = qApp->screens()[0]->size();
 		mainwindow_pt->resize(size);
-		mainwindow_pt->addBgImage();
+		//mainwindow_pt->addBgImage();
 		mainwindow_pt->showFullScreen();
 		mainwindow_pt->show();
 	}
