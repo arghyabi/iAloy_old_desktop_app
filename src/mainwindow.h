@@ -44,6 +44,7 @@ public:
 	void render_product_key_validate_form();
 	void render_registered_new_pi();
 	void render_login_using_token();
+	void mainwindow_reset_on_logout();
 
 	~MainWindow();
 

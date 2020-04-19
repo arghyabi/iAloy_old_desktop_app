@@ -12,4 +12,6 @@ void dashboard_window_show(bool mode);
 void settings_window_show(int mode);
 void update_manager_window_show(int mode);
 
+void mainwindow_reset_on_logout();
+
 #endif // MAIN_H

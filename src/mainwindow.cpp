@@ -81,8 +81,20 @@ MainWindow::~MainWindow()
 void MainWindow::update_time()
 {
 	QDateTime dateTime = dateTime.currentDateTime();
-	QString dateTimeString = dateTime.toString("yyyy/MM/dd hh:mm:ss ap");
+	QString dateTimeString = dateTime.toString("dd-MMMM-yyyy hh:mm:ss ap");
 	ui->time_label->setText(dateTimeString);
+}
+
+void MainWindow::mainwindow_reset_on_logout()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	SetUpLineEdit_stat = GET_INPUT_EMAIL_MODE;
+	MainWindow::set_api_request(GET_PI_NAME);
+	ui->SetUpLineEdit->setText("");
+	ui->submit_button->setText("Go");
+	ui->SetUpLineEdit->setPlaceholderText("Email");
+	ui->SetUpLineEdit->setEchoMode(QLineEdit::Normal);
+	send_api_request();
 }
 
 void MainWindow::status_label_set_text(string text, string color)

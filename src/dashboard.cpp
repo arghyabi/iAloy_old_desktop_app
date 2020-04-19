@@ -9,15 +9,15 @@ dashboard::dashboard(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::dashboard)
 {
-	isLoggedIn = false;
 	ui->setupUi(this);
 
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 
 	ui->pi_name_label->setText(QString::fromStdString(dashboard::get_pi_name()));
-	QTimer *timer_for_datatime = new QTimer(this);
+	timer_for_datatime = new QTimer(this);
+	timer_for_i2c = new QTimer(this);
 	connect(timer_for_datatime, SIGNAL(timeout()), this, SLOT(update_time()));
-	connect(timer_for_datatime, SIGNAL(timeout()), this, SLOT(get_i2c_web_status()));
+	connect(timer_for_i2c, SIGNAL(timeout()), this, SLOT(get_i2c_web_status()));
 	timer_for_datatime->start(1000);
 
 	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_settings_icon_path())));
@@ -84,6 +84,7 @@ void dashboard::update_dashboard_gui()
 	switch(device_controller_api_request_type_flag)
 	{
 		case DEVICE_CONTROLLER_LOGIN_USING_TOKEN:
+			timer_for_i2c->start(1000);
 			render_dashboard_login();
 			break;
 
@@ -138,7 +139,6 @@ void dashboard::render_dashboard_login()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(device_controller_api_response_parse() && this->get_device_controller_api_response() == "1")
 	{
-		isLoggedIn = true;
 		cout << "DB-LOGIN STATUS : Success" << endl;
 		set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
 		send_device_controller_api_request();
@@ -159,7 +159,12 @@ bool dashboard::device_controller_api_response_parse()
 		return false;
 
 	device_controller_api_res = device_controller_api_res.substr(1, device_controller_api_res.length()-1);
-
+	if(device_controller_api_res == "0Please Login first.")
+	{
+		cout << ">>>> " << __PRETTY_FUNCTION__ << "logout function called due to session failure" << endl;
+		on_logout_button_clicked();
+		return false;
+	}
 	this->set_device_controller_api_response(device_controller_api_res);
 
 	return true;
@@ -345,7 +350,6 @@ void dashboard::render_dashboard_room_btn_state()
 		}
 		cout << "------------- state render success --------------------" << endl;
 
-		isLoggedIn = true;
 		set_device_controller_api_request(GET_I2C_DATA);
 		send_device_controller_api_request();
 	}
@@ -354,11 +358,8 @@ void dashboard::render_dashboard_room_btn_state()
 void dashboard::get_i2c_web_status()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(isLoggedIn)
-	{
-		set_device_controller_api_request(GET_I2C_DATA);
-		send_device_controller_api_request();
-	}
+	set_device_controller_api_request(GET_I2C_DATA);
+	send_device_controller_api_request();
 }
 
 void dashboard::render_i2c_data()
@@ -384,21 +385,15 @@ void dashboard::render_i2c_data()
 				mod_Add = mod_info.toObject().value("mod_add").toString().toStdString();
 
 				QJsonArray status_array = mod_info.toObject().value("pin_status").toArray();
-				int array_len = status_array.count();
-				for(int i = (array_len - 1); i > -1; i--)
-				{
-					// cout << "Status : " << status_array[i] << "For Pin : " << i << endl;
-					if(status_array[i] == 1)
-					{
-						// add value
-						data_to_send += 1 * pow(2,(array_len - 1 - i));
-					}
-					else
-					{
-						data_to_send += 0 * pow(2,(array_len - 1 - i));
-					}
 
+				int tmp = 1;
+				for(int i = 0; i < 8; i++)
+				{
+					if(status_array[i] == 1)
+						data_to_send += tmp;
+					tmp = tmp*2;
 				}
+
 				cout << "\n\nMod address : " << mod_Add << "\nStatus Code : " << data_to_send << endl;
 				data_to_send = 0;
 			}
@@ -461,6 +456,8 @@ void dashboard::on_logout_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	system("mv /usr/share/iAloy/.conf/credential.json /usr/share/iAloy/.conf/credential_old.json");
+	timer_for_i2c->stop();
 	main_window_show(true);
 	dashboard_window_show(false);
+	mainwindow_reset_on_logout();
 }

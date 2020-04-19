@@ -28,6 +28,12 @@ void main_window_show(int mode)
 		mainwindow_pt->hide();
 }
 
+void mainwindow_reset_on_logout()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	mainwindow_pt->mainwindow_reset_on_logout();
+}
+
 void dashboard_window_show(bool mode)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ <<"    mode :" << mode << endl;

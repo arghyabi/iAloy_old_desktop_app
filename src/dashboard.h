@@ -60,9 +60,9 @@ public:
 	QLabel *room_name_label;
 	QSlider *slider1;
 	QSpacerItem *spacerItem;
-	QFrame *frame_d;
 
-	bool isLoggedIn;
+	QTimer *timer_for_datatime;
+	QTimer *timer_for_i2c;
 
 	explicit dashboard(QWidget *parent = 0);
 	void addBgImage();
