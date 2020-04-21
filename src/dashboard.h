@@ -25,6 +25,7 @@
 #include <QThread>
 #include <QDateTime>
 #include <QTimer>
+#include <QSignalMapper>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -33,6 +34,7 @@
 
 #include "device_controller_api.h"
 #include "main.h"
+#include "i2c_data.h"
 
 using namespace std;
 
@@ -44,6 +46,7 @@ class dashboard : public QMainWindow, public device_controller_api
 {
 
 	Q_OBJECT
+	QThread i2cWorkerThread;
 
 public:
 	/*
@@ -61,8 +64,11 @@ public:
 	QSlider *slider1;
 	QSpacerItem *spacerItem;
 
-	QTimer *timer_for_datatime;
-	QTimer *timer_for_i2c;
+	QTimer *timer_for_datetime;
+	QTimer *timer_for_i2c_data_read_from_web;
+	QTimer *timer_for_i2c_data_read_from_mod;
+
+	QSignalMapper *signalMapper;
 
 	explicit dashboard(QWidget *parent = 0);
 	void addBgImage();
@@ -82,6 +88,10 @@ public:
 	void clearLayout(QLayout* layout);
 	~dashboard();
 
+signals:
+	void send_i2c_data_to_module_signal(int, int);
+	void read_request_i2c_data_from_module_signal(int);
+
 private slots:
 	void update_time();
 	void on_power_tool_button_clicked();
@@ -91,11 +101,15 @@ private slots:
 	void on_app_update_button_clicked();
 	void on_logout_button_clicked();
 	void get_i2c_web_status();
+	void read_request_i2c_data_from_module();
+	void read_i2c_data_from_module(int, int);
+	void button_clicked_slot(QString);
 
 private:
 	Ui::dashboard *ui;
 
 	QJsonArray get_json_array_from_response();
+	int hex_to_int(string hex);
 };
 
 #endif // DASHBOARD_H

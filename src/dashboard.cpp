@@ -14,17 +14,26 @@ dashboard::dashboard(QWidget *parent) :
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 
 	ui->pi_name_label->setText(QString::fromStdString(dashboard::get_pi_name()));
-	timer_for_datatime = new QTimer(this);
-	timer_for_i2c = new QTimer(this);
-	connect(timer_for_datatime, SIGNAL(timeout()), this, SLOT(update_time()));
-	connect(timer_for_i2c, SIGNAL(timeout()), this, SLOT(get_i2c_web_status()));
-	timer_for_datatime->start(1000);
+	timer_for_datetime = new QTimer(this);
+	timer_for_i2c_data_read_from_web = new QTimer(this);
+	connect(timer_for_datetime, SIGNAL(timeout()), this, SLOT(update_time()));
+	connect(timer_for_i2c_data_read_from_web, SIGNAL(timeout()), this, SLOT(get_i2c_web_status()));
+	timer_for_datetime->start(1000);
 
 	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_settings_icon_path())));
 	ui->wifi_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_wifi_icon_path())));
 	ui->keyboard_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_keyboad_icon_path())));
 	ui->app_update_button->setIcon(QIcon(QString::fromStdString(dashboard::get_update_icon_path())));
 	ui->power_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_power_icon_path())));
+
+	i2c_data *i2c_thread_obj = new i2c_data(this);
+	i2c_thread_obj->moveToThread(&i2cWorkerThread);
+	connect(this, SIGNAL(send_i2c_data_to_module_signal(int, int)), i2c_thread_obj, SLOT(write_i2c_data(int, int)));
+	connect(this, SIGNAL(read_request_i2c_data_from_module_signal(int)), i2c_thread_obj, SLOT(read_i2c_data(int)));
+	connect(i2c_thread_obj, SIGNAL(receive_i2c_data_from_module(int, int)), this, SLOT(read_i2c_data_from_module(int, int)));
+
+	timer_for_i2c_data_read_from_mod = new QTimer(this);
+	connect(timer_for_i2c_data_read_from_mod, SIGNAL(timeout()), this, SLOT(read_request_i2c_data_from_module()));
 }
 
 void dashboard::update_time()
@@ -84,7 +93,7 @@ void dashboard::update_dashboard_gui()
 	switch(device_controller_api_request_type_flag)
 	{
 		case DEVICE_CONTROLLER_LOGIN_USING_TOKEN:
-			timer_for_i2c->start(1000);
+			timer_for_i2c_data_read_from_web->start(1000);
 			render_dashboard_login();
 			break;
 
@@ -247,13 +256,19 @@ void dashboard::render_dashboard_room_btn()
 			foreach (const QJsonValue &device, dev_array)
 			{
 				tmp_btn_nd = new struct btn_node;
-				tmp_btn_nd->btn = new QPushButton();
-				tmp_btn_nd->slider = new QSlider();
-				v_layout_for_btn_node = new QVBoxLayout();
 
 				QString device_name = device.toObject().value("d_name").toString();
 				QString device_id = device.toObject().value("dev_id").toString();
 				QString device_is_var = device.toObject().value("is_var").toString();
+
+				tmp_btn_nd->pin_num = device.toObject().value("pin").toInt();
+				tmp_btn_nd->mod_add = hex_to_int(device.toObject().value("mod_add").toString().toStdString());
+
+				tmp_btn_nd->btn = new QPushButton(device_id);
+				tmp_btn_nd->slider = new QSlider();
+				v_layout_for_btn_node = new QVBoxLayout();
+				signalMapper = new QSignalMapper(this);
+				signalMapper->setMapping(tmp_btn_nd->btn, device_id);
 
 				tmp_btn_nd->device_id = device_id;
 
@@ -264,6 +279,9 @@ void dashboard::render_dashboard_room_btn()
 				tmp_btn_nd->btn->setSizePolicy(sizePolicy);
 				tmp_btn_nd->btn->setMinimumSize(QSize(0, 0));
 				tmp_btn_nd->btn->setText(device_name);
+
+				connect(tmp_btn_nd->btn, SIGNAL(clicked()), signalMapper, SLOT(map()));
+				connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(button_clicked_slot(QString)));
 
 				sizePolicy.setHeightForWidth(tmp_btn_nd->slider->sizePolicy().hasHeightForWidth());
 				tmp_btn_nd->slider->setSizePolicy(sizePolicy);
@@ -299,7 +317,6 @@ void dashboard::render_dashboard_room_btn()
 	}
 }
 
-
 void dashboard::render_dashboard_room_btn_state()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -324,13 +341,17 @@ void dashboard::render_dashboard_room_btn_state()
 				{
 					if(btn_nd->device_id == device_id)
 					{
-
 						if(device_status_value == "1")
+							btn_nd->btn_state = 1;
+						else
+							btn_nd->btn_state = 0;
+
+						if(btn_nd->btn_state)
 						{
 							// turning btn on
 							btn_nd->btn->setStyleSheet("background-color: #74a6f3; color:  #ffffff;");
 						}
-						else if(device_status_value == "0")
+						else
 						{
 							// turning btn off
 							btn_nd->btn->setStyleSheet("background-color:  #525252; color:  #ffffff;");
@@ -343,7 +364,8 @@ void dashboard::render_dashboard_room_btn_state()
 							btn_nd->slider->setValue(stoi(device_var_value.toStdString()));
 							btn_nd->slider_val = stoi(device_var_value.toStdString());
 						}
-
+						else
+							btn_nd->slider->setDisabled(1);
 					}
 				}
 			}
@@ -353,6 +375,52 @@ void dashboard::render_dashboard_room_btn_state()
 		set_device_controller_api_request(GET_I2C_DATA);
 		send_device_controller_api_request();
 	}
+}
+
+void dashboard::button_clicked_slot(QString device_id)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	cout << " button id: " << device_id.toStdString() << " is clicked." << endl;
+	struct btn_node *btn_nd;
+	int data_to_send = 0;
+	int tmp = 1;
+	int mod_add;
+	foreach(btn_nd, btn_list)
+	{
+		if(btn_nd->device_id == device_id)
+		{
+			mod_add = btn_nd->mod_add;
+			if(btn_nd->btn_state == 1)
+			{
+				cout << "found the " << device_id.toStdString() << " button; current is 1, will be 0" << endl;
+				btn_nd->btn_state = 0;
+				btn_nd->btn->setStyleSheet("background-color: #FF0000; color:  #ffffff;");
+			}
+			else
+			{
+				cout << "found the " << device_id.toStdString() << " button; current is 0, will be 1" << endl;
+				btn_nd->btn_state = 1;
+				btn_nd->btn->setStyleSheet("background-color:  #00FF00; color:  #ffffff;");
+			}
+			this->set_d_id(device_id.toStdString());
+			this->set_status(to_string(btn_nd->btn_state));
+		}
+	}
+
+	foreach(btn_nd, btn_list)
+	{
+		if(btn_nd->mod_add == mod_add)
+		{
+			if(btn_nd->btn_state == 1)
+				data_to_send += tmp;
+			tmp *= 2;
+		}
+	}
+
+	emit send_i2c_data_to_module_signal(mod_add, data_to_send);
+
+	set_device_controller_api_request(UPDATE_STATUS);
+	send_device_controller_api_request();
 }
 
 void dashboard::get_i2c_web_status()
@@ -367,6 +435,7 @@ void dashboard::render_i2c_data()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(device_controller_api_response_parse())
 	{
+		timer_for_i2c_data_read_from_mod->start(1000);
 		string tmp_api_resp = dashboard::get_device_controller_api_response();
 		cout << "\n\nI2C data : \n" << tmp_api_resp << endl << endl;
 		// checking if device state is updated or not
@@ -377,12 +446,12 @@ void dashboard::render_i2c_data()
 			QJsonArray i2c_array = get_json_array_from_response();
 
 			int data_to_send = 0;
-			string mod_Add;
+			int mod_Add;
 
 			//assign value
 			foreach(const QJsonValue mod_info, i2c_array)
 			{
-				mod_Add = mod_info.toObject().value("mod_add").toString().toStdString();
+				mod_Add = hex_to_int(mod_info.toObject().value("mod_add").toString().toStdString());
 
 				QJsonArray status_array = mod_info.toObject().value("pin_status").toArray();
 
@@ -391,10 +460,11 @@ void dashboard::render_i2c_data()
 				{
 					if(status_array[i] == 1)
 						data_to_send += tmp;
-					tmp = tmp*2;
+					tmp *= 2;
 				}
 
 				cout << "\n\nMod address : " << mod_Add << "\nStatus Code : " << data_to_send << endl;
+				emit send_i2c_data_to_module_signal(mod_Add, data_to_send);
 				data_to_send = 0;
 			}
 
@@ -410,6 +480,20 @@ dashboard::~dashboard()
 	delete ui;
 }
 
+void dashboard::read_request_i2c_data_from_module()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	// TODO : Dynamic mod_add
+	int mod_address=4;
+	emit read_request_i2c_data_from_module_signal(mod_address);
+}
+
+void dashboard::read_i2c_data_from_module(int mod_address, int received_data)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	cout << "\n\n*****Mod_Add : " << mod_address << "\trecieved data : " << received_data << endl;
+}
+
 void dashboard::addBgImage()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -418,6 +502,76 @@ void dashboard::addBgImage()
 	QPalette palette;
 	palette.setBrush(QPalette::Background, bkgnd);
 	this->setPalette(palette);
+}
+
+int dashboard::hex_to_int(string hex)
+{
+	int int_data = 0;
+	int tmp = 1;
+
+	for(int i = 2; i < 4; i++)
+	{
+		switch(hex[i])
+		{
+			case '0':
+				int_data = tmp * int_data;
+				break;
+			case '1':
+				int_data = tmp * int_data + 1;
+				break;
+			case '2':
+				int_data = tmp * int_data + 2;
+				break;
+			case '3':
+				int_data = tmp * int_data + 3;
+				break;
+			case '4':
+				int_data = tmp * int_data + 4;
+				break;
+			case '5':
+				int_data = tmp * int_data + 5;
+				break;
+			case '6':
+				int_data = tmp * int_data + 6;
+				break;
+			case '7':
+				int_data = tmp * int_data + 7;
+				break;
+			case '8':
+				int_data = tmp * int_data + 8;
+				break;
+			case '9':
+				int_data = tmp * int_data + 9;
+				break;
+			case 'a':
+			case 'A':
+				int_data = tmp * int_data + 10;
+				break;
+			case 'b':
+			case 'B':
+				int_data = tmp * int_data + 11;
+				break;
+			case 'c':
+			case 'C':
+				int_data = tmp * int_data + 12;
+				break;
+			case 'd':
+			case 'D':
+				int_data = tmp * int_data + 13;
+				break;
+			case 'e':
+			case 'E':
+				int_data = tmp * int_data + 14;
+				break;
+			case 'f':
+			case 'F':
+				int_data = tmp * int_data + 15;
+				break;
+		}
+		tmp *= 10;
+	}
+
+	return int_data;
 }
 
 void dashboard::on_power_tool_button_clicked()
@@ -456,7 +610,8 @@ void dashboard::on_logout_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	system("mv /usr/share/iAloy/.conf/credential.json /usr/share/iAloy/.conf/credential_old.json");
-	timer_for_i2c->stop();
+	timer_for_i2c_data_read_from_web->stop();
+	timer_for_i2c_data_read_from_mod->stop();
 	main_window_show(true);
 	dashboard_window_show(false);
 	mainwindow_reset_on_logout();

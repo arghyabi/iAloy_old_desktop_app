@@ -34,6 +34,7 @@ SOURCES += \
 	src/dev_controller_api.cpp \
 	src/update_manager.cpp \
 	src/update_manager_thread.cpp \
+	src/i2c_data.cpp
 
 
 HEADERS += \
@@ -45,6 +46,7 @@ HEADERS += \
 	src/dev_controller_api.h \
 	src/update_manager.h \
 	src/update_manager_thread.h \
+	src/i2c_data.h
 
 
 FORMS += \

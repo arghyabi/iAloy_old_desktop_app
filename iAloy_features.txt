@@ -8,3 +8,51 @@ Features :
 6. Screen brightness,
 7. Update,
 8. Notification
+
+
+2.
+
+
+current_web, prev_web
+
+current_mod, prev_mod
+
+struct mod_data_node
+{
+    int mod_add; // got from i2c data api call
+    int current_web; // got from i2c data api call
+    int prev_web; // got from current_web
+    int current_mod; // got from => read_i2c_data_from_module(int mod_address, int received_data)
+    int prev_mod; // got from current_mod
+};
+
+{"i2c_dta":[{"mod_add":"0x04, "pin_status":[1,0,0,0,1,0,1,-1]}]}
+{"i2c_dta":[{"mod_add":"0x04, "pin_status":[1,0,1,0,1,0,1,-1]}]}
+
+QLinkedList mod_data_list;
+
+case 1: current_web == prev_web => no change in web
+case 2: current_mod == prev_mod => no change in mod
+case 3: current_web == current_mod => no change needed
+
+
+algo:
+foreach(int mod_Add, all_mod_Add)
+    if(current_web != current_mod)
+        if(current_mod != prev_mod)
+            prev_mod = current_mod
+            send_data_to_web_with_switch_chagne_status // api call
+        else if(current_web != prev_web)
+            prev_web = current_web
+            send_i2c_data_to_module_signal(mod_Add, data_to_send);
+
+
+
+          -- -- -- -- -- -- -- -- -- -- -- -- --
+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+ -- -- -- -- -- -- -- --

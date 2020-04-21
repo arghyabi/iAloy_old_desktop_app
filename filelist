@@ -5,7 +5,7 @@ CPPFILE 	= \
 	hardware.cpp \
 	device_controller_api.cpp \
 	update_manager_thread.cpp \
-	i2c.cpp \
+	i2c_data.cpp \
 
 
 UICPPFILE 	= \
@@ -21,7 +21,7 @@ CPPOBJFILE	= \
 	hardware.o \
 	device_controller_api.o \
 	update_manager_thread.o \
-	i2c.o \
+	i2c_data.o \
 
 
 UIFILE 		= \
@@ -51,6 +51,7 @@ UIMOCCPP 	= \
 	moc_settings.cpp \
 	moc_update_manager.cpp \
 	moc_update_manager_thread.cpp \
+	moc_i2c_data.cpp \
 
 
 UIMOCOBJ 	= \
@@ -59,6 +60,7 @@ UIMOCOBJ 	= \
 	moc_settings.o \
 	moc_update_manager.o \
 	moc_update_manager_thread.o \
+	moc_i2c_data.o \
 
 UIOBJFILE 	= \
 	mainwindow.o \

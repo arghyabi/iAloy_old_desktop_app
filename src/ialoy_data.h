@@ -157,7 +157,7 @@ public:
 	string api_i2c_data;
 
 	// global network_manager variable
-	QNetworkAccessManager *NetworkManager, *DBNetworkManager;// = new QNetworkAccessManager();
+	QNetworkAccessManager *NetworkManager, *DBNetworkManager;
 	QNetworkRequest NetworkRequest;
 
 	struct btn_node
@@ -168,9 +168,21 @@ public:
 		bool is_var;
 		int slider_val;
 		QString device_id;
+		int pin_num;
+		int mod_add;
+	};
+
+	struct mod_data_node
+	{
+		int mod_add;
+		int current_web;
+		int prev_web;
+		int current_mod;
+		int prev_mod;
 	};
 
 	QLinkedList<struct btn_node*> btn_list;
+	QLinkedList<struct mod_data_node*> mod_data_list;
 
 	// saved credential manager
 	bool saved_credential_manager();
