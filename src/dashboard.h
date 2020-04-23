@@ -90,7 +90,7 @@ public:
 
 signals:
 	void send_i2c_data_to_module_signal(int, int);
-	void read_request_i2c_data_from_module_signal(int);
+	void read_request_i2c_data_from_module_signal(int, int);
 
 private slots:
 	void update_time();

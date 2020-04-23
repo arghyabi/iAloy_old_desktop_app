@@ -38,21 +38,10 @@ case 3: current_web == current_mod => no change needed
 
 algo:
 foreach(int mod_Add, all_mod_Add)
-    if(current_web != current_mod)
-        if(current_mod != prev_mod)
+    if(current_web != current_mod) //<=TODO
+        if(current_mod != prev_mod) // Done [i2c_data::read_i2c_data()]
             prev_mod = current_mod
             send_data_to_web_with_switch_chagne_status // api call
-        else if(current_web != prev_web)
+        else if(current_web != prev_web) // Done [dashboard::render_i2c_data()]
             prev_web = current_web
             send_i2c_data_to_module_signal(mod_Add, data_to_send);
-
-
-
-          -- -- -- -- -- -- -- -- -- -- -- -- --
- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
- -- -- -- -- -- -- -- --

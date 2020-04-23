@@ -125,9 +125,9 @@ private:
 	string dashboard_bg_file = "dashboard.jpg";
 	string keyboad_icon = "keyboard.png";
 	string settings_icon = "setting.png";
-	string wifi_icon = "wifi.jpg";
+	string wifi_icon = "wifi.png";
 	string update_icon = "update.png";
-	string power_icon = "power.jpg";
+	string power_icon = "power.png";
 	string interface_up_script = "iAloy-interface-up.sh";
 
 	string user_credential_path = user + share + iAloy_folder + conf_folder + ucp_file;
@@ -243,6 +243,8 @@ public:
 	string get_device_controller_api_response();
 	string get_device_controller_api_error_msg();
 
+	int hex_to_int(string);
+	string int_to_hex(int);
 };
 
 #endif // IALOY_DATA_H

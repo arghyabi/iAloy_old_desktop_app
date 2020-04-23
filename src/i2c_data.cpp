@@ -40,7 +40,7 @@ void i2c_data::write_i2c_data(int mod_address, int data)
 #endif
 }
 
-void i2c_data::read_i2c_data(int mod_address)
+void i2c_data::read_i2c_data(int mod_address, int curerent_data)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 #ifdef ARC_TYPE
@@ -49,13 +49,16 @@ void i2c_data::read_i2c_data(int mod_address)
 	int tmp_data = wiringPiI2CRead(fd);
 	int received_data = 0;
 
-	while(tmp_data > 0){
+	for(int i = 0; i < 8; i++)
+	{
 		received_data = received_data << 1; 		
 		received_data = received_data | (tmp_data & 1); 			
 		tmp_data = tmp_data >> 1;
 	}
-	received_data = received_data << 1;
+	//received_data = received_data << 1;
 
-	emit receive_i2c_data_from_module(mod_address, received_data);
+	cout << "\n\n*****Mod_Add : " << mod_address <<"\tcurrent data : " << curerent_data << "\trecieved data : " << received_data << endl;
+	if(curerent_data != received_data)
+		emit receive_i2c_data_from_module(mod_address, received_data);
 #endif
 }

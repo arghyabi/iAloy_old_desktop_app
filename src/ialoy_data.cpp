@@ -329,3 +329,141 @@ string ialoy_main_data::get_device_controller_api_error_msg()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	return this->device_controller_api_error_msg;
 }
+
+string ialoy_main_data::int_to_hex(int int_data)
+{
+	string hex_data = "0x";
+
+	while(int_data > 0)
+	{
+		int rem = int_data % 16;
+		int_data = int_data / 16;
+
+		switch(rem)
+		{
+			case 0:
+				hex_data += "0";
+				break;
+			case 1:
+				hex_data += "1";
+				break;
+			case 2:
+				hex_data += "2";
+				break;
+			case 3:
+				hex_data += "3";
+				break;
+			case 4:
+				hex_data += "4";
+				break;
+			case 5:
+				hex_data += "5";
+				break;
+			case 6:
+				hex_data += "6";
+				break;
+			case 7:
+				hex_data += "7";
+				break;
+			case 8:
+				hex_data += "8";
+				break;
+			case 9:
+				hex_data += "9";
+				break;
+			case 10:
+				hex_data += "A";
+				break;
+			case 11:
+				hex_data += "B";
+				break;
+			case 12:
+				hex_data += "C";
+				break;
+			case 13:
+				hex_data += "D";
+				break;
+			case 14:
+				hex_data += "E";
+				break;
+			case 15:
+				hex_data += "F";
+				break;
+			default:
+				break;
+		}
+	}
+	return hex_data;
+}
+
+int ialoy_main_data::hex_to_int(string hex_data)
+{
+	int int_data = 0;
+	int tmp = 1;
+
+	for(int i = 2; i < 4; i++)
+	{
+		switch(hex_data[i])
+		{
+			case '0':
+				int_data = tmp * int_data;
+				break;
+			case '1':
+				int_data = tmp * int_data + 1;
+				break;
+			case '2':
+				int_data = tmp * int_data + 2;
+				break;
+			case '3':
+				int_data = tmp * int_data + 3;
+				break;
+			case '4':
+				int_data = tmp * int_data + 4;
+				break;
+			case '5':
+				int_data = tmp * int_data + 5;
+				break;
+			case '6':
+				int_data = tmp * int_data + 6;
+				break;
+			case '7':
+				int_data = tmp * int_data + 7;
+				break;
+			case '8':
+				int_data = tmp * int_data + 8;
+				break;
+			case '9':
+				int_data = tmp * int_data + 9;
+				break;
+			case 'a':
+			case 'A':
+				int_data = tmp * int_data + 10;
+				break;
+			case 'b':
+			case 'B':
+				int_data = tmp * int_data + 11;
+				break;
+			case 'c':
+			case 'C':
+				int_data = tmp * int_data + 12;
+				break;
+			case 'd':
+			case 'D':
+				int_data = tmp * int_data + 13;
+				break;
+			case 'e':
+			case 'E':
+				int_data = tmp * int_data + 14;
+				break;
+			case 'f':
+			case 'F':
+				int_data = tmp * int_data + 15;
+				break;
+			default:
+				break;
+		}
+		tmp *= 10;
+	}
+
+	return int_data;
+}

@@ -24,7 +24,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->setupUi(this);
 
-	ui->pi_name_label->setText(QString::fromStdString(MainWindow::get_pi_name()));
+	ui->ialoy_logo_label->setText("<b><font size=8 color='#1e93b6'>i</font><font size=8 color='#555'>Aloy</font></b>");
+	ui->ialoy_tag_line_label->setText("<font size=4 color='#415c76'><b>Smart Home for Smart Future</b></font>");
+	ui->pi_name_label->setText(QString::fromStdString("<center><font size=3>Welcome to</font><b><br/><font size=5>"+this->get_pi_name()+"</font></b></center>"));
+	// ui->pi_name_label->setText(QString::fromStdString(MainWindow::get_pi_name()));
 	QTimer *timer_for_datatime = new QTimer(this);
 	connect( timer_for_datatime, SIGNAL(timeout()), this, SLOT(update_time()) );
 	timer_for_datatime->start(1000);
@@ -80,9 +83,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::update_time()
 {
+	// QDateTime dateTime = dateTime.currentDateTime();
+	// QString dateTimeString = dateTime.toString("dd-MMMM-yyyy hh:mm:ss ap");
+	// ui->time_label->setText(dateTimeString);
 	QDateTime dateTime = dateTime.currentDateTime();
-	QString dateTimeString = dateTime.toString("dd-MMMM-yyyy hh:mm:ss ap");
-	ui->time_label->setText(dateTimeString);
+	QString timeString = dateTime.toString("hh:mm:ss ap");
+	QString dateString = dateTime.toString("dd-MMMM-yyyy");
+	ui->time_label->setText("<font size=4><b>"+timeString+"</b></font><br/>  "+dateString);
 }
 
 void MainWindow::mainwindow_reset_on_logout()
@@ -117,7 +124,9 @@ void MainWindow::send_api_request()
 	if(MainWindow::get_api_error_msg() == "")
 		NetworkManager->get(NetworkRequest);
 	else
+	{
 		cout << MainWindow::get_api_error_msg() << endl;
+	}
 }
 
 void MainWindow::update_mainwindow_gui()
@@ -488,7 +497,9 @@ void MainWindow::render_otp_verified_form()
 		}
 	}
 	else
+	{
 		cout << "API response error." << endl;
+	}
 }
 
 void MainWindow::render_pi_name()
@@ -507,13 +518,15 @@ void MainWindow::render_pi_name()
 		{
 			cout << "Pi_name : " << this->get_pi_name() << endl;
 			status_label_set_text("No proper saved credential found... Please login", "black");
-			ui->pi_name_label->setText(QString::fromStdString("Welcome to "+this->get_pi_name()));
+			ui->pi_name_label->setText(QString::fromStdString("<center><font size=3>Welcome to</font><b><br/><font size=5>"+this->get_pi_name()+"</font></b></center>"));
 		}
 		ui->SetUpLineEdit->setDisabled(0);
 		ui->submit_button->setDisabled(0);
 	}
 	else
+	{
 		cout << "API response error." << endl;
+	}
 }
 
 void MainWindow::render_password_or_user_details_form()
@@ -556,7 +569,9 @@ void MainWindow::render_password_or_user_details_form()
 		}
 	}
 	else
+	{
 		cout << "API response error." << endl;
+	}
 }
 
 void MainWindow::render_after_login()
@@ -795,13 +810,11 @@ void MainWindow::on_form_next_btn_clicked()
 								"Password and confirm password not matched ", QMessageBox::Ok);
 			return;
 		}
-		cout << "Email : " << MainWindow::get_email() << "\nFirst name : " << MainWindow::get_first_name()
-			<< "\nLast name : " << MainWindow::get_last_name() << "\nPassword : " << MainWindow::get_password() << endl;
+		cout << "Email : " << MainWindow::get_email() << "\nFirst name : " << MainWindow::get_first_name() << "\nLast name : " << MainWindow::get_last_name() << "\nPassword : " << MainWindow::get_password() << endl;
 	}
 	else
 	{
-		cout << "Email : " << MainWindow::get_email() << "\nFirst name : " << MainWindow::get_first_name()
-			<< "\nLast name : " << MainWindow::get_last_name() << endl;
+		cout << "Email : " << MainWindow::get_email() << "\nFirst name : " << MainWindow::get_first_name() << "\nLast name : " << MainWindow::get_last_name() << endl;
 	}
 
 

@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(186, 189, 182);</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
@@ -36,6 +39,9 @@
           </item>
           <item>
            <widget class="QLabel" name="ialoy_logo_label">
+            <property name="styleSheet">
+             <string notr="true">font-size: &quot;10px&quot;;</string>
+            </property>
             <property name="text">
              <string>iAloy</string>
             </property>
@@ -112,7 +118,7 @@
             </property>
            </spacer>
           </item>
-          <item>
+          <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
            <widget class="QLabel" name="time_label">
             <property name="text">
              <string/>
@@ -150,12 +156,42 @@
            </spacer>
           </item>
           <item>
+           <widget class="QToolButton" name="wifi_tool_button">
+            <property name="toolTip">
+             <string>WiFi</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(52, 101, 164);
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>26</width>
+              <height>26</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="app_update_button">
             <property name="toolTip">
              <string>Update</string>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(52, 101, 164);
+color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>...</string>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>26</width>
+              <height>26</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -164,18 +200,18 @@
             <property name="toolTip">
              <string>Virtual Keyboard</string>
             </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="wifi_tool_button">
-            <property name="toolTip">
-             <string>WiFi</string>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(52, 101, 164);
+color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>...</string>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>42</width>
+              <height>26</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -184,8 +220,18 @@
             <property name="toolTip">
              <string>Settings</string>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(52, 101, 164);
+color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>...</string>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>26</width>
+              <height>26</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -194,8 +240,21 @@
             <property name="toolTip">
              <string>Power</string>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(52, 101, 164);
+color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>...</string>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>26</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+S</string>
             </property>
            </widget>
           </item>
@@ -233,7 +292,7 @@
             </property>
            </spacer>
           </item>
-          <item>
+          <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
            <widget class="QLabel" name="pi_name_label">
             <property name="text">
              <string>TextLabel</string>
@@ -272,6 +331,10 @@
           </item>
           <item>
            <widget class="QPushButton" name="logout_button">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(52, 101, 164);
+color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Logout</string>
             </property>
@@ -298,6 +361,13 @@
     </item>
     <item>
      <widget class="Line" name="line">
+      <property name="styleSheet">
+       <string notr="true">border-color: rgb(0, 0, 0);
+background-color: rgb(0, 0, 0);</string>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>

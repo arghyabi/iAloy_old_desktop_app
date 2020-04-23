@@ -13,7 +13,8 @@ dashboard::dashboard(QWidget *parent) :
 
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 
-	ui->pi_name_label->setText(QString::fromStdString(dashboard::get_pi_name()));
+	ui->ialoy_logo_label->setText("<b><font size=8 color='#1e93b6'>i</font><font size=8 color='#555'>Aloy</font></b>");
+	ui->ialoy_tag_line_label->setText("<font size=4 color='#415c76'><b>Smart Home for Smart Future</b></font>");
 	timer_for_datetime = new QTimer(this);
 	timer_for_i2c_data_read_from_web = new QTimer(this);
 	connect(timer_for_datetime, SIGNAL(timeout()), this, SLOT(update_time()));
@@ -29,7 +30,7 @@ dashboard::dashboard(QWidget *parent) :
 	i2c_data *i2c_thread_obj = new i2c_data(this);
 	i2c_thread_obj->moveToThread(&i2cWorkerThread);
 	connect(this, SIGNAL(send_i2c_data_to_module_signal(int, int)), i2c_thread_obj, SLOT(write_i2c_data(int, int)));
-	connect(this, SIGNAL(read_request_i2c_data_from_module_signal(int)), i2c_thread_obj, SLOT(read_i2c_data(int)));
+	connect(this, SIGNAL(read_request_i2c_data_from_module_signal(int, int)), i2c_thread_obj, SLOT(read_i2c_data(int, int)));
 	connect(i2c_thread_obj, SIGNAL(receive_i2c_data_from_module(int, int)), this, SLOT(read_i2c_data_from_module(int, int)));
 
 	timer_for_i2c_data_read_from_mod = new QTimer(this);
@@ -39,8 +40,9 @@ dashboard::dashboard(QWidget *parent) :
 void dashboard::update_time()
 {
 	QDateTime dateTime = dateTime.currentDateTime();
-	QString dateTimeString = dateTime.toString("dd-MMMM-yyyy hh:mm:ss ap");
-	ui->time_label->setText(dateTimeString);
+	QString timeString = dateTime.toString("hh:mm:ss ap");
+	QString dateString = dateTime.toString("dd-MMMM-yyyy");
+	ui->time_label->setText("<font size=4><b>"+timeString+"</b></font><br/>  "+dateString);
 }
 
 // init method contain network->get()
@@ -81,7 +83,9 @@ void dashboard::send_device_controller_api_request()
 	if(this->get_device_controller_api_error_msg() == "")
 		DBNetworkManager->get(NetworkRequest);
 	else
+	{
 		cout << "Error massage : " << this->get_device_controller_api_error_msg() << endl;
+	}
 }
 
 // update_dashboard_gui method to call specific render method
@@ -146,14 +150,16 @@ void dashboard::update_dashboard_gui()
 void dashboard::render_dashboard_login()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(device_controller_api_response_parse() && this->get_device_controller_api_response() == "1")
+	if(device_controller_api_response_parse() && this->get_device_controller_api_response().substr(0,1) == "1")
 	{
 		cout << "DB-LOGIN STATUS : Success" << endl;
+		ui->pi_name_label->setText(QString::fromStdString("<center><b><font size=5>"+this->get_pi_name()+"</font></b><br/>"+this->get_email()+"</center>"));
 		set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
 		send_device_controller_api_request();
 	}
 	else
 	{
+		cout << "Response : " << this->get_device_controller_api_response() << endl;
 		cout << "DB-LOGIN STATUS : Fail... Redirecting to MainWindow" << endl;
 		main_window_show(true);
 		dashboard_window_show(false);
@@ -174,6 +180,9 @@ bool dashboard::device_controller_api_response_parse()
 		on_logout_button_clicked();
 		return false;
 	}
+	this->set_pi_name(device_controller_api_res.substr(1, device_controller_api_res.length()-1));
+	cout << "Pi_name from dashboard : " << this->get_pi_name() << endl;
+
 	this->set_device_controller_api_response(device_controller_api_res);
 
 	return true;
@@ -272,7 +281,7 @@ void dashboard::render_dashboard_room_btn()
 
 				tmp_btn_nd->device_id = device_id;
 
-				QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+				QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 				sizePolicy.setHorizontalStretch(0);
 				sizePolicy.setVerticalStretch(0);
 				sizePolicy.setHeightForWidth(tmp_btn_nd->btn->sizePolicy().hasHeightForWidth());
@@ -296,6 +305,7 @@ void dashboard::render_dashboard_room_btn()
 				{
 					tmp_btn_nd->slider->setEnabled(false);
 					tmp_btn_nd->is_var = false;
+					// tmp_btn_nd->slider->setVisible(false);
 				}
 
 				btn_list.append(tmp_btn_nd);
@@ -349,12 +359,12 @@ void dashboard::render_dashboard_room_btn_state()
 						if(btn_nd->btn_state)
 						{
 							// turning btn on
-							btn_nd->btn->setStyleSheet("background-color: #74a6f3; color:  #ffffff;");
+							btn_nd->btn->setStyleSheet("background-color: #74a6f3; color: #000;");
 						}
 						else
 						{
 							// turning btn off
-							btn_nd->btn->setStyleSheet("background-color:  #525252; color:  #ffffff;");
+							btn_nd->btn->setStyleSheet("background-color:  #525252; color: #fff;");
 						}
 
 						// checking is_var enabled or not
@@ -394,13 +404,13 @@ void dashboard::button_clicked_slot(QString device_id)
 			{
 				cout << "found the " << device_id.toStdString() << " button; current is 1, will be 0" << endl;
 				btn_nd->btn_state = 0;
-				btn_nd->btn->setStyleSheet("background-color: #FF0000; color:  #ffffff;");
+				btn_nd->btn->setStyleSheet("background-color: #FF33E9; color:  #000;");
 			}
 			else
 			{
 				cout << "found the " << device_id.toStdString() << " button; current is 0, will be 1" << endl;
 				btn_nd->btn_state = 1;
-				btn_nd->btn->setStyleSheet("background-color:  #00FF00; color:  #ffffff;");
+				btn_nd->btn->setStyleSheet("background-color:  #0DD8B3; color:  #fff;");
 			}
 			this->set_d_id(device_id.toStdString());
 			this->set_status(to_string(btn_nd->btn_state));
@@ -448,6 +458,17 @@ void dashboard::render_i2c_data()
 			int data_to_send = 0;
 			int mod_Add;
 
+			struct mod_data_node *mod_data_nd;
+			mod_data_nd = new struct mod_data_node;
+			mod_data_nd->mod_add = 0;
+			mod_data_nd->current_web = 0;
+			mod_data_nd->prev_web = 0;
+			mod_data_nd->current_mod = 0;
+			mod_data_nd->prev_mod = 0;
+
+			if(!mod_data_list.isEmpty())
+				mod_data_list.clear();
+
 			//assign value
 			foreach(const QJsonValue mod_info, i2c_array)
 			{
@@ -464,13 +485,31 @@ void dashboard::render_i2c_data()
 				}
 
 				cout << "\n\nMod address : " << mod_Add << "\nStatus Code : " << data_to_send << endl;
-				emit send_i2c_data_to_module_signal(mod_Add, data_to_send);
+				mod_data_nd->mod_add = mod_Add;
+				mod_data_nd->prev_web = mod_data_nd->current_web;
+				mod_data_nd->current_web = data_to_send;
+
+				mod_data_list.append(mod_data_nd);
+
+				// if(mod_data_nd->current_mod != mod_data_nd->current_web)
+				// {	//ERROR: ervdery time the current_mod is 0 due to fresh initilization
+					cout << "current mod: " << mod_data_nd->current_mod << "\t current_web: " << mod_data_nd->current_web << endl;
+					emit send_i2c_data_to_module_signal(mod_Add, data_to_send);
+				//}
 				data_to_send = 0;
 			}
 
 			// get_room_device_status api call
-			set_device_controller_api_request(GET_ROOM_DEVICE_STATUS);
-			send_device_controller_api_request();
+			if(api_i2c_data.length() == tmp_api_resp.length())
+			{
+				set_device_controller_api_request(GET_ROOM_DEVICE_STATUS);
+				send_device_controller_api_request();
+			}
+			else
+			{
+				set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
+				send_device_controller_api_request();
+			}
 		}
 	}
 }
@@ -482,16 +521,69 @@ dashboard::~dashboard()
 
 void dashboard::read_request_i2c_data_from_module()
 {
+	//This function is getting called by timer in every 1 second
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	// TODO : Dynamic mod_add
-	int mod_address=4;
-	emit read_request_i2c_data_from_module_signal(mod_address);
+	struct mod_data_node *mod_data_nd;
+	foreach(mod_data_nd, mod_data_list)
+		emit read_request_i2c_data_from_module_signal(mod_data_nd->mod_add, mod_data_nd->current_mod);
 }
 
 void dashboard::read_i2c_data_from_module(int mod_address, int received_data)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	cout << "\n\n*****Mod_Add : " << mod_address << "\trecieved data : " << received_data << endl;
+	struct mod_data_node *mod_data_nd;
+	struct btn_node *btn_nd;
+	foreach(mod_data_nd, mod_data_list)
+	{
+		if(mod_data_nd->mod_add == mod_address)
+		{
+			mod_data_nd->prev_mod = mod_data_nd->current_mod;
+			mod_data_nd->current_mod = received_data;
+			if(mod_data_nd->current_mod != mod_data_nd->current_web)
+			{
+				int xor_res = mod_data_nd->current_mod ^ mod_data_nd->prev_mod;
+				int pin = 0;
+				int tmp;
+				//TODO:need 8 times loop
+				do
+				{
+					tmp = xor_res & 1;
+					xor_res = xor_res >> 1;
+					pin++;
+				}
+				while(!tmp);
+
+				int pin_state = (received_data >> (pin - 1)) & 1;
+
+				cout << "Switch state changed... \tPin : " << pin << " state: " << pin_state << endl;
+
+				foreach(btn_nd, btn_list)
+				{
+					if(btn_nd->mod_add == mod_address && btn_nd->pin_num == pin)
+					{
+						if(pin_state == 1)
+						{
+							btn_nd->btn_state = 1;
+							btn_nd->btn->setStyleSheet("background-color: #00FF00; color:  #000;");
+						}
+						else
+						{
+							btn_nd->btn_state = 0;
+							btn_nd->btn->setStyleSheet("background-color:  #FF0000; color:  #fff;");
+						}
+						break;
+					}
+				}
+				// TODO : int to hex
+				this->set_mod_add("0x04");
+				this->set_pin(to_string(pin));
+				this->set_status(to_string(pin_state));
+				set_device_controller_api_request(UPDATE_STATUS_FOR_PI);
+				send_device_controller_api_request();
+				break;
+			}
+		}
+	}
 }
 
 void dashboard::addBgImage()
