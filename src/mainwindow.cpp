@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->setupUi(this);
 
+	ui->online_offline_label->setText("<b><font color='#000000'>Connecting...</font></b>");
 	ui->ialoy_logo_label->setText("<b><font size=8 color='#1e93b6'>i</font><font size=8 color='#555'>Aloy</font></b>");
 	ui->ialoy_tag_line_label->setText("<font size=4 color='#415c76'><b>Smart Home for Smart Future</b></font>");
 	ui->pi_name_label->setText(QString::fromStdString("<center><font size=3>Welcome to</font><b><br/><font size=5>"+this->get_pi_name()+"</font></b></center>"));
@@ -43,11 +44,13 @@ MainWindow::MainWindow(QWidget *parent) :
 			set_api_response("");
 			if (reply->error()) {
 				cout << "Error : " << reply->errorString().toStdString() << endl;
+				ui->online_offline_label->setText("<b><font color='#FF4500'>Offline</font></b>");
 				return;
 			}
 			QString response = reply->readAll();
 			cout << "MainWindow response : " << response.toStdString() << endl;
 			set_api_response(response.toStdString());
+			ui->online_offline_label->setText("<b><font color='#228B22'>Online</font></b>");
 			update_mainwindow_gui();
 		}
 	);
@@ -83,9 +86,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::update_time()
 {
-	// QDateTime dateTime = dateTime.currentDateTime();
-	// QString dateTimeString = dateTime.toString("dd-MMMM-yyyy hh:mm:ss ap");
-	// ui->time_label->setText(dateTimeString);
 	QDateTime dateTime = dateTime.currentDateTime();
 	QString timeString = dateTime.toString("hh:mm:ss ap");
 	QString dateString = dateTime.toString("dd-MMMM-yyyy");

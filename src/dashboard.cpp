@@ -13,6 +13,7 @@ dashboard::dashboard(QWidget *parent) :
 
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 
+	ui->online_offline_label->setText("<b><font color='#000000'>Connecting...</font></b>");
 	ui->ialoy_logo_label->setText("<b><font size=8 color='#1e93b6'>i</font><font size=8 color='#555'>Aloy</font></b>");
 	ui->ialoy_tag_line_label->setText("<font size=4 color='#415c76'><b>Smart Home for Smart Future</b></font>");
 	timer_for_datetime = new QTimer(this);
@@ -55,6 +56,7 @@ void dashboard::init()
 			if (reply->error())
 			{
 				cout << "Error : " << reply->errorString().toStdString() << endl;
+				ui->online_offline_label->setText("<b><font color='#FF4500'>Offline</font></b>");
 				return;
 			}
 			QString response = reply->readAll();
@@ -445,6 +447,7 @@ void dashboard::render_i2c_data()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(device_controller_api_response_parse())
 	{
+		ui->online_offline_label->setText("<b><font color='#228B22'>Online</font></b>");
 		timer_for_i2c_data_read_from_mod->start(1000);
 		string tmp_api_resp = dashboard::get_device_controller_api_response();
 		cout << "\n\nI2C data : \n" << tmp_api_resp << endl << endl;
