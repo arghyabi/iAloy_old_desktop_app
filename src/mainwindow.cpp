@@ -24,14 +24,17 @@ MainWindow::MainWindow(QWidget *parent) :
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->setupUi(this);
 
+	get_pi_name_timer_flag = true;
+
 	ui->online_offline_label->setText("<b><font color='#000000'>Connecting...</font></b>");
 	ui->ialoy_logo_label->setText("<b><font size=8 color='#1e93b6'>i</font><font size=8 color='#555'>Aloy</font></b>");
 	ui->ialoy_tag_line_label->setText("<font size=4 color='#415c76'><b>Smart Home for Smart Future</b></font>");
 	ui->pi_name_label->setText(QString::fromStdString("<center><font size=3>Welcome to</font><b><br/><font size=5>"+this->get_pi_name()+"</font></b></center>"));
-	// ui->pi_name_label->setText(QString::fromStdString(MainWindow::get_pi_name()));
-	QTimer *timer_for_datatime = new QTimer(this);
-	connect( timer_for_datatime, SIGNAL(timeout()), this, SLOT(update_time()) );
-	timer_for_datatime->start(1000);
+	QTimer *timer_for_datatime_mm = new QTimer(this);
+	QTimer *timer_for_get_pi_name = new QTimer(this);
+	connect(timer_for_datatime_mm, SIGNAL(timeout()), this, SLOT(update_time()));
+	connect(timer_for_get_pi_name, SIGNAL(timeout()), this, SLOT(get_pi_name_with_timer_slot()));
+	timer_for_datatime_mm->start(1000);
 
 	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_settings_icon_path())));
 	ui->wifi_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_wifi_icon_path())));
@@ -65,16 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->status_label->setText("");
 
 	status_label_set_text("Checking saved login...", "black");
-	if(!MainWindow::saved_credential_manager())
-	{
-		MainWindow::set_api_request(GET_PI_NAME);
-	}
-	else
-	{
-		MainWindow::set_api_request(LOGIN_USING_TOKEN);
-	}
-
-	send_api_request();
+	timer_for_get_pi_name->start(3000);
 }
 
 MainWindow::~MainWindow()
@@ -82,6 +76,18 @@ MainWindow::~MainWindow()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	delete ui;
 	delete NetworkManager;
+}
+
+void MainWindow::get_pi_name_with_timer_slot()
+{
+	if(get_pi_name_timer_flag)
+	{
+		if(!MainWindow::saved_credential_manager())
+			MainWindow::set_api_request(GET_PI_NAME);
+		else
+			MainWindow::set_api_request(LOGIN_USING_TOKEN);
+		send_api_request();
+	}
 }
 
 void MainWindow::update_time()
@@ -507,6 +513,8 @@ void MainWindow::render_pi_name()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
+		get_pi_name_timer_flag = false;
+
 		if(pi_reg_status_flag == PI_NOT_REGISTERED)
 		{
 			cout << this->get_pi_name() << endl;

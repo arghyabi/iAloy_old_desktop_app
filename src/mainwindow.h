@@ -23,6 +23,9 @@ class MainWindow : public QMainWindow, public ialoy_web_api
 	Q_OBJECT
 
 public:
+	QTimer *timer_for_datetime_mm;
+	QTimer *timer_for_get_pi_name;
+
 	explicit MainWindow(QWidget *parent = nullptr);
 	void addBgImage();
 	void status_label_set_text(string text, string color);
@@ -50,6 +53,7 @@ public:
 
 private slots:
 	void update_time();
+	void get_pi_name_with_timer_slot();
 	void on_submit_button_clicked();
 	void on_form_back_btn_clicked();
 	void on_form_next_btn_clicked();
@@ -63,6 +67,7 @@ private slots:
 
 private:
 	Ui::MainWindow *ui;
+	bool get_pi_name_timer_flag;
 };
 
 #endif // MAINWINDOW_H
