@@ -192,6 +192,8 @@ void MainWindow::render_login_using_token()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	if(api_response_parse())
 	{
+		get_pi_name_timer_flag = false;
+
 		switch(user_login_status_flag)
 		{
 			case LOGIN_SUCCESS:
