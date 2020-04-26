@@ -18,14 +18,15 @@ update_manager::update_manager(QWidget *parent) :
 	ui->setupUi(this);
 
 #ifdef ARC_TYPE
+	is_retry = false;
 	update_manager_thread *thread_obj = new update_manager_thread(this);
 	thread_obj->moveToThread(&workerThread);
 
 	connect(this, SIGNAL(fetch_update_status()), thread_obj, SLOT(fetch_update_status_slot()));
-	connect(thread_obj, SIGNAL(fetch_update_status_need_update()), this, SLOT(fetch_update_status_need_update_render_slot()));
+	connect(thread_obj, SIGNAL(fetch_update_status_need_update(QLinkedList<struct version_details_node*>)), this, SLOT(fetch_update_status_need_update_render_slot(QLinkedList<struct version_details_node*>)));
 	connect(thread_obj, SIGNAL(fetch_update_status_already_uptodate()), this, SLOT(fetch_update_status_already_uptodate_render_slot()));
 	connect(thread_obj, SIGNAL(fetch_update_status_failed()), this, SLOT(fetch_update_status_failed_render_slot()));
-	connect(this, SIGNAL(download_update_tarball()), thread_obj, SLOT(download_update_tarball_slot()));
+	connect(this, SIGNAL(download_update_tarball(QString, int, QString)), thread_obj, SLOT(download_update_tarball_slot(QString, int, QString)));
 	connect(thread_obj, SIGNAL(download_progressbar_update_signal(int, int)), this, SLOT(download_progressbar_render_slot(int, int)));
 	connect(thread_obj, SIGNAL(download_update_tarball_complete()), this, SLOT(untar_download_file_render_slot()));
 	connect(this, SIGNAL(untar_download_file()), thread_obj, SLOT(untar_dowload_tarball_slot()));
@@ -41,6 +42,8 @@ update_manager::update_manager(QWidget *parent) :
 	ui->download_progress->hide();
 	ui->progressBar->hide();
 	ui->restart_btn->hide();
+	ui->version_list_combo_box->hide();
+	ui->version_details->hide();
 }
 
 void update_manager::init()
@@ -115,15 +118,56 @@ void update_manager::console_print(QString data)
 		ui->console_area->setText(data);
 }
 
-
-void update_manager::fetch_update_status_need_update_render_slot()
+void update_manager::render_version_details()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	struct version_details_node* version_details_nd;
+	foreach (version_details_nd, version_list_details)
+	{
+		if(ui->version_list_combo_box->currentText() == version_details_nd->version)
+		{
+			ui->version_details->setText("Details : "+version_details_nd->details);
+			download_size = version_details_nd->size;
+			download_url = version_details_nd->url;
+			latest_version = version_details_nd->version;
+			break;
+		}
+	}
+	ui->version_details->show();
+}
+
+void update_manager::fetch_update_status_need_update_render_slot(QLinkedList<struct version_details_node*> version_list)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+
+	is_retry = false;
+	ui->update_btn->setText("Download");
+	ui->restart_btn->hide();
 	ui->update_btn->show();
 	ui->console_area->show();
-	ui->version_status->setText(read_current_version()+" > "+read_latest_version());
+	ui->version_status->setText(read_current_version()+" > ");
+
+	ui->version_list_combo_box->clear();
+	struct version_details_node* version_details_nd;
+	version_list_details = version_list;
+	bool start_flag = true;
+	foreach (version_details_nd, version_list)
+	{
+		ui->version_list_combo_box->addItem(version_details_nd->version);
+		if(start_flag)
+		{
+			download_size = version_details_nd->size;
+			download_url = version_details_nd->url;
+			latest_version = version_details_nd->version;
+			start_flag = false;
+		}
+	}
+	ui->version_list_combo_box->show();
+
+	render_version_details();
+
 	console_print("Current Version: " + read_current_version());
-	console_print("Latest Version: " + read_latest_version());
+	console_print("Latest Version: " + latest_version);
 	ui->progressBar->setTextVisible(true);
 	ui->progressBar->setFormat("Overall: 0%");
 	ui->progressBar->setAlignment(Qt::AlignCenter);
@@ -148,6 +192,7 @@ void update_manager::fetch_update_status_failed_render_slot()
 	ui->version_status->setText("Can't fetch update, please try again.");
 	ui->update_btn->setText("Retry");
 	ui->update_btn->show();
+	is_retry = true;
 }
 
 void update_manager::download_progressbar_render_slot(int read, int total)
@@ -182,14 +227,22 @@ void update_manager::finished_render_slot()
 void update_manager::on_update_btn_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	ui->update_btn->hide();
-	console_print("Downloading...");
-	emit download_update_tarball();
+
+	if(!is_retry)
+	{
+		ui->update_btn->hide();
+		console_print("\nSelected version: " + latest_version);
+		console_print("Downloading...");
+		emit download_update_tarball(download_url, download_size, latest_version);
+	}
+	else
+		emit fetch_update_status();
 }
 
 
 void update_manager::on_cancel_btn_clicked()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->update_btn->hide();
 	ui->console_area->setText("");
 	ui->console_area->hide();
@@ -197,11 +250,21 @@ void update_manager::on_cancel_btn_clicked()
 	ui->download_progress->hide();
 	ui->progressBar->hide();
 	ui->restart_btn->hide();
+	ui->version_list_combo_box->hide();
+	ui->version_list_combo_box->clear();
+	ui->version_details->hide();
 	this->close();
 }
 
 void update_manager::on_restart_btn_clicked()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	system("reboot now");
 	console_print("Restarting...");
+}
+
+void update_manager::on_version_list_combo_box_currentIndexChanged(int index)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	render_version_details();
 }

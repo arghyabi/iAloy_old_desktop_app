@@ -181,8 +181,18 @@ public:
 		int prev_mod;
 	};
 
+	struct version_details_node
+	{
+		QString version;
+		QString date;
+		QString details;
+		int size;
+		QString url;
+	};
+
 	QLinkedList<struct btn_node*> btn_list;
 	QLinkedList<struct mod_data_node*> mod_data_list;
+	QLinkedList<struct version_details_node*> version_details_list;
 
 	// saved credential manager
 	bool saved_credential_manager();

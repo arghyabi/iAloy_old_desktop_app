@@ -4,37 +4,47 @@ Features :
 2. Power interface,
 3. Virtual keyboard,
 4. Sound,
-5. Setting,
+5. Settings,
 6. Screen brightness,
 7. Update,
-8. Notification
+8. Notification [Guest user, Module not working]
+
+TODO: Update manager should be updated.
+
+5. Settings
+    a. fonts
+    b. display
+        i. resulation
+        ii. brightness
+    c. date & time
+    d. Network
+        i. Wifi,
+        ii. Proxy,
+    e. about
+
+** Module flash button in head menu
+
+Status bar:
+    a. Online status
+    b. Available updates
+    c. IP address
+    d. New module info
+    e. Module current status
+    f. Virtual keyboard
+
+Room device UI update:
+    a. Scroll bar area,
+    b. Group box area as room,
+    c. Overall scrollableonly.
 
 
-2.
 
 
-current_web, prev_web
-
-current_mod, prev_mod
-
-struct mod_data_node
-{
-    int mod_add; // got from i2c data api call
-    int current_web; // got from i2c data api call
-    int prev_web; // got from current_web
-    int current_mod; // got from => read_i2c_data_from_module(int mod_address, int received_data)
-    int prev_mod; // got from current_mod
-};
-
-{"i2c_dta":[{"mod_add":"0x04, "pin_status":[1,0,0,0,1,0,1,-1]}]}
-{"i2c_dta":[{"mod_add":"0x04, "pin_status":[1,0,1,0,1,0,1,-1]}]}
-
-QLinkedList mod_data_list;
+/////////////////////////////////////////////////////////////////////////
 
 case 1: current_web == prev_web => no change in web
 case 2: current_mod == prev_mod => no change in mod
 case 3: current_web == current_mod => no change needed
-
 
 algo:
 foreach(int mod_Add, all_mod_Add)

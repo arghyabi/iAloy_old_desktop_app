@@ -14,10 +14,11 @@ cp /usr/share/iAloy/.temp/iAloy_update_package/resource/scripts/* /usr/share/iAl
 chmod 777 /usr/share/iAloy/scripts/*
 
 latestvar=`cat /usr/share/iAloy/.conf/version_info.json | grep "latest_version" | awk '{print $3}'`
+currentvar=`cat /usr/share/iAloy/.temp/done`
 
 json_data="\
 {\
-	\"current_version\" : $latestvar,\
+	\"current_version\" : \"$currentvar\",\
 	\"latest_version\" : $latestvar\
 }"
 

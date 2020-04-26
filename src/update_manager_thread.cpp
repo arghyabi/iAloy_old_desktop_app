@@ -24,7 +24,8 @@ update_manager_thread::update_manager_thread(QObject *parent) : QObject(parent)
 
 		QString val = reply->readAll();
 
-		purse_fetched_data(val);
+		parse_fetched_data(val);
+
 		QString current_version = read_current_version();
 		cout << "current version:" << current_version.toStdString() << endl;
 		cout << "latest version:" << latest_version.toStdString() << endl;
@@ -34,25 +35,48 @@ update_manager_thread::update_manager_thread(QObject *parent) : QObject(parent)
 		if(current_version == latest_version)
 			emit fetch_update_status_already_uptodate();
 		else
-			emit fetch_update_status_need_update();
+			emit fetch_update_status_need_update(version_details_list);
 	}
 	);
 }
 
-void update_manager_thread::purse_fetched_data(QString val)
+void update_manager_thread::parse_fetched_data(QString version_info)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(val.left(1) == '1')
+	if(version_info.left(1) == '1')
 	{
-		val = val.mid(1,-1);
-		cout << "resp : " << val.toStdString() << endl;
+		version_info = version_info.mid(1,-1);
+		cout << "resp : " << version_info.toStdString() << endl;
 	}
-	QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
-	QJsonObject sett2 = d.object();
 
-	this->latest_version = QString::fromStdString(sett2["version"].toString().toStdString());
-	this->size = QString::fromStdString(sett2["size"].toString().toStdString());
-	this->url = QString::fromStdString(sett2["url"].toString().toStdString());
+	// parsing data
+	QJsonDocument jsonDocument = QJsonDocument::fromJson(version_info.toUtf8());
+	QJsonObject jsonObject = jsonDocument.object();
+	QJsonValue ArrayValue = jsonObject.value("version_list");
+	QJsonArray version_Array = ArrayValue.toArray();
+
+	if(!version_details_list.isEmpty())
+		version_details_list.clear();
+
+	bool latest_check_flag = true;
+	foreach(const QJsonValue &version_data, version_Array)
+	{
+		struct version_details_node* version_details_nd = new struct version_details_node;
+
+		version_details_nd->version = version_data.toObject().value("version").toString();
+		version_details_nd->date = version_data.toObject().value("date").toString();
+		version_details_nd->details = version_data.toObject().value("details").toString();
+		version_details_nd->size = version_data.toObject().value("size").toString().toInt();
+		version_details_nd->url = version_data.toObject().value("url").toString();
+
+		version_details_list.append(version_details_nd);
+
+		if(latest_check_flag)
+		{
+			this->latest_version = version_details_nd->version;
+			latest_check_flag = false;
+		}
+	}
 }
 
 QString update_manager_thread::read_current_version()
@@ -78,11 +102,11 @@ void update_manager_thread::write_latest_version(QString current_ver, QString la
 	file.setFileName(QString::fromStdString("/usr/share/iAloy/.conf/version_info.json"));
 
 	QString data = "\
-{\n\
-	\"current_version\" : \"" + current_ver + "\",\n\
-	\"latest_version\" : \"" + latest_ver + "\"\n\
-}\
-";
+	{\n\
+		\"current_version\" : \"" + current_ver + "\",\n\
+		\"latest_version\" : \"" + latest_ver + "\"\n\
+	}\
+	";
 
 	file.open(QIODevice::WriteOnly | QIODevice::Text);
 	file.write(data.toUtf8());
@@ -92,15 +116,21 @@ void update_manager_thread::write_latest_version(QString current_ver, QString la
 void update_manager_thread::fetch_update_status_slot()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	NetworkRequest.setUrl(QString::fromStdString("http://ialoy.arghyabiswas.com/desktop_api/update_package_req_manager.php?upmc=0"));
+	NetworkRequest.setUrl(QString::fromStdString("http://ialoy.arghyabiswas.com/desktop_api/update_package_req_manager.php?upmc=1"));
 	NetworkManager->get(NetworkRequest);
 }
 
-void update_manager_thread::download_update_tarball_slot()
+void update_manager_thread::download_update_tarball_slot(QString download_url, int download_size, QString selected_ver)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	cout << "url :" << download_url.toStdString() << endl;
+	cout << "total_size:" << download_size << endl;
+
+	total_size = download_size;
+	selected_version = selected_ver;
+
 	system("rm -rf /usr/share/iAloy/.temp/*");
-	NetworkDownloadRequest.setUrl(this->url);
+	NetworkDownloadRequest.setUrl(download_url);
 	NetworkDownloadManager = new QNetworkAccessManager();
 	webResponse = NetworkDownloadManager->get(NetworkDownloadRequest);
 	connect(webResponse, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
@@ -119,8 +149,7 @@ void update_manager_thread::error(QNetworkReply::NetworkError err)
 void update_manager_thread::updateProgress(qint64 read, qint64 total)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	cout << "Downloaded : " << read << " of " << total << endl;
-	int total_size = this->size.toInt();
+	cout << "Downloaded : " << read << " of " << total_size << endl;
 	emit download_progressbar_update_signal((int)read, total_size);
 }
 
@@ -143,6 +172,6 @@ void update_manager_thread::untar_dowload_tarball_slot()
 	cout << "unzip command:" << unzip_command.toStdString() << endl ;
 	system(unzip_command.toUtf8());
 	system("rm -rf " + this->des.toUtf8());
-	system("touch /usr/share/iAloy/.temp/done");
+	system("echo " + selected_version.toUtf8() + " > /usr/share/iAloy/.temp/done");
 	emit untar_dowload_tarball_complete();
 }
