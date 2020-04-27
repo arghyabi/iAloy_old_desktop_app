@@ -97,7 +97,21 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="version_list_combo_box"/>
+      <widget class="QComboBox" name="version_list_combo_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(52, 101, 164);
+
+selection-background-color: rgb(52, 101, 164);
+selection-color: rgb(255, 255, 255);</string>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_7">
@@ -173,6 +187,10 @@
      </item>
      <item>
       <widget class="QPushButton" name="update_btn">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(52, 101, 164);
+color: rgb(255, 255, 255);</string>
+       </property>
        <property name="text">
         <string>Update</string>
        </property>
@@ -234,6 +252,13 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
+        <widget class="QLabel" name="update_status">
+         <property name="text">
+          <string>Already updated</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="horizontalSpacer_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -254,6 +279,10 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(52, 101, 164);
+color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Close</string>
          </property>
@@ -261,6 +290,10 @@
        </item>
        <item>
         <widget class="QPushButton" name="restart_btn">
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(52, 101, 164);
+color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Restart</string>
          </property>

@@ -22,9 +22,8 @@ update_manager::update_manager(QWidget *parent) :
 	update_manager_thread *thread_obj = new update_manager_thread(this);
 	thread_obj->moveToThread(&workerThread);
 
-	connect(this, SIGNAL(fetch_update_status()), thread_obj, SLOT(fetch_update_status_slot()));
-	connect(thread_obj, SIGNAL(fetch_update_status_need_update(QLinkedList<struct version_details_node*>)), this, SLOT(fetch_update_status_need_update_render_slot(QLinkedList<struct version_details_node*>)));
-	connect(thread_obj, SIGNAL(fetch_update_status_already_uptodate()), this, SLOT(fetch_update_status_already_uptodate_render_slot()));
+	connect(this, SIGNAL(fetch_update_status(bool)), thread_obj, SLOT(fetch_update_status_slot(bool)));
+	connect(thread_obj, SIGNAL(fetch_update_status_need_update(QLinkedList<struct version_details_node*>, bool, bool)), this, SLOT(fetch_update_status_need_update_render_slot(QLinkedList<struct version_details_node*>, bool, bool)));
 	connect(thread_obj, SIGNAL(fetch_update_status_failed()), this, SLOT(fetch_update_status_failed_render_slot()));
 	connect(this, SIGNAL(download_update_tarball(QString, int, QString)), thread_obj, SLOT(download_update_tarball_slot(QString, int, QString)));
 	connect(thread_obj, SIGNAL(download_progressbar_update_signal(int, int)), this, SLOT(download_progressbar_render_slot(int, int)));
@@ -54,13 +53,14 @@ void update_manager::init()
 	if(file.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
 		file.close();
-		cout << "downlaod already complete" << endl;
+		cout << "Download already complete" << endl;
 		dowload_already_complete_render();
+		emit fetch_update_status(true);
 	}
 	else
 	{
-		cout << "need to downlaod" << endl;
-		emit fetch_update_status();
+		cout << "Need to download" << endl;
+		emit fetch_update_status(false);
 	}
 }
 
@@ -126,7 +126,7 @@ void update_manager::render_version_details()
 	{
 		if(ui->version_list_combo_box->currentText() == version_details_nd->version)
 		{
-			ui->version_details->setText("Details : "+version_details_nd->details);
+			ui->version_details->setText("<b>Details : </b>"+version_details_nd->details);
 			download_size = version_details_nd->size;
 			download_url = version_details_nd->url;
 			latest_version = version_details_nd->version;
@@ -136,7 +136,7 @@ void update_manager::render_version_details()
 	ui->version_details->show();
 }
 
-void update_manager::fetch_update_status_need_update_render_slot(QLinkedList<struct version_details_node*> version_list)
+void update_manager::fetch_update_status_need_update_render_slot(QLinkedList<struct version_details_node*> version_list, bool is_updated, bool is_downloaded)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 
@@ -151,9 +151,23 @@ void update_manager::fetch_update_status_need_update_render_slot(QLinkedList<str
 	struct version_details_node* version_details_nd;
 	version_list_details = version_list;
 	bool start_flag = true;
+
+	if(is_downloaded)
+	{
+		// downloaded_version should be initialised from done file with proper format
+		QFile done_file;
+		done_file.setFileName(QString::fromStdString("/usr/share/iAloy/.temp/done"));
+
+		done_file.open(QIODevice::ReadOnly | QIODevice::Text);
+		downloaded_version = done_file.readAll();
+		//need to remove the line end char that is autometically added by the system
+		downloaded_version = downloaded_version.mid(0, downloaded_version.length()-1);
+		done_file.close();
+		cout << "Done version : \"" << downloaded_version.toStdString() << "\"" << endl;
+	}
+
 	foreach (version_details_nd, version_list)
 	{
-		ui->version_list_combo_box->addItem(version_details_nd->version);
 		if(start_flag)
 		{
 			download_size = version_details_nd->size;
@@ -161,6 +175,14 @@ void update_manager::fetch_update_status_need_update_render_slot(QLinkedList<str
 			latest_version = version_details_nd->version;
 			start_flag = false;
 		}
+		if(is_downloaded && downloaded_version == version_details_nd->version)
+		{
+			cout << "Done version in render : " << downloaded_version.toStdString() << endl;
+			continue;
+		}
+		if(version_details_nd->version == read_current_version())
+			continue;
+		ui->version_list_combo_box->addItem(version_details_nd->version);
 	}
 	ui->version_list_combo_box->show();
 
@@ -178,20 +200,30 @@ void update_manager::fetch_update_status_need_update_render_slot(QLinkedList<str
 	ui->download_progress->setValue(0);
 	ui->download_progress->show();
 	ui->progressBar->show();
-}
 
-void update_manager::fetch_update_status_already_uptodate_render_slot()
-{
-	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	ui->version_status->setText("Already upto date.");
+	if(is_downloaded)
+	{
+		ui->update_status->setText("<font size=4 color='#1963dd'>Version <b>"+downloaded_version+"</b> already downloaded. Please restart to apply changes.</font>");
+		ui->restart_btn->show();
+	}
+	else
+	{
+		if(is_updated)
+			ui->update_status->setText("<font size=4 color='#128d2e'>Already upto date.</font>");
+		else
+			ui->update_status->setText("<font size=4 color='#f94400'>Update available</font>");
+	}
+	ui->update_status->show();
 }
 
 void update_manager::fetch_update_status_failed_render_slot()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	ui->version_status->setText("Can't fetch update, please try again.");
+	ui->version_status->setText("<font size=4 color='#f94400'>Can't fetch update, please try again.</font>");
 	ui->update_btn->setText("Retry");
 	ui->update_btn->show();
+	ui->update_status->hide();
+	ui->restart_btn->hide();
 	is_retry = true;
 }
 
@@ -200,10 +232,10 @@ void update_manager::download_progressbar_render_slot(int read, int total)
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	float percent = (read*100)/total;
 	ui->download_progress->setValue(percent);
-	ui->download_progress->setFormat("Download: " + QString::number(percent) + "%");
+	ui->download_progress->setFormat("Downloading: " + QString::number(percent) + "%");
 	percent = percent/2;
 	ui->progressBar->setValue(percent);
-	ui->progressBar->setFormat("Overall: "+QString::number(percent)+"%");
+	ui->progressBar->setFormat("Overall: " + QString::number(percent)+"%");
 }
 
 void update_manager::untar_download_file_render_slot()
@@ -219,8 +251,11 @@ void update_manager::finished_render_slot()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->progressBar->setValue(100);
 	ui->progressBar->setFormat("Overall: 100%");
+	ui->download_progress->setFormat("Download completed");
+	ui->update_btn->show();
 	console_print("Extracting is complete.");
 	console_print("Please restart the system to complete the installation process.");
+	ui->update_status->setText("<font size=4 color='#1963dd'>Download completed. Please restart to apply changes.</font>");
 	ui->restart_btn->show();
 }
 
@@ -236,7 +271,7 @@ void update_manager::on_update_btn_clicked()
 		emit download_update_tarball(download_url, download_size, latest_version);
 	}
 	else
-		emit fetch_update_status();
+		this->init();
 }
 
 

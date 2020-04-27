@@ -33,9 +33,9 @@ update_manager_thread::update_manager_thread(QObject *parent) : QObject(parent)
 		write_latest_version(current_version, latest_version);
 
 		if(current_version == latest_version)
-			emit fetch_update_status_already_uptodate();
+			emit fetch_update_status_need_update(version_details_list, true, is_downloaded);
 		else
-			emit fetch_update_status_need_update(version_details_list);
+			emit fetch_update_status_need_update(version_details_list, false, is_downloaded);
 	}
 	);
 }
@@ -113,9 +113,10 @@ void update_manager_thread::write_latest_version(QString current_ver, QString la
 	file.close();
 }
 
-void update_manager_thread::fetch_update_status_slot()
+void update_manager_thread::fetch_update_status_slot(bool is_downloaded)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	this->is_downloaded = is_downloaded;
 	NetworkRequest.setUrl(QString::fromStdString("http://ialoy.arghyabiswas.com/desktop_api/update_package_req_manager.php?upmc=1"));
 	NetworkManager->get(NetworkRequest);
 }

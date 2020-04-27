@@ -34,17 +34,17 @@ private:
 
 public:
 	explicit update_manager_thread(QObject *parent = nullptr);
+	bool is_downloaded;
 
 signals:
-	void fetch_update_status_need_update(QLinkedList<struct version_details_node*> version_details_list);
-	void fetch_update_status_already_uptodate();
+	void fetch_update_status_need_update(QLinkedList<struct version_details_node*> version_details_list, bool is_updated, bool is_downloaded);
 	void fetch_update_status_failed();
 	void download_progressbar_update_signal(int, int);
 	void download_update_tarball_complete();
 	void untar_dowload_tarball_complete();
 
 public slots:
-	void fetch_update_status_slot();
+	void fetch_update_status_slot(bool);
 	void download_update_tarball_slot(QString, int, QString);
 
 	void error(QNetworkReply::NetworkError err);

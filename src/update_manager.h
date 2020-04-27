@@ -19,6 +19,7 @@ public:
 	QString download_url;
 	int download_size;
 	QString latest_version;
+	QString downloaded_version;
 
 	explicit update_manager(QWidget *parent = 0);
 	void init();
@@ -32,15 +33,14 @@ public:
 	~update_manager();
 
 signals:
-	void fetch_update_status();
+	void fetch_update_status(bool);
 	void download_update_tarball(QString, int, QString);
 	void untar_download_file();
 
 
 public slots:
 	void dowload_already_complete_render();
-	void fetch_update_status_need_update_render_slot(QLinkedList<struct version_details_node*>);
-	void fetch_update_status_already_uptodate_render_slot();
+	void fetch_update_status_need_update_render_slot(QLinkedList<struct version_details_node*>, bool, bool);
 	void fetch_update_status_failed_render_slot();
 	void download_progressbar_render_slot(int, int);
 	void untar_download_file_render_slot();
