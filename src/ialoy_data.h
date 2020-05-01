@@ -12,6 +12,7 @@
 
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
+#include <QLabel>
 #include <QLinkedList>
 
 #include "hardware.h"
@@ -165,6 +166,7 @@ public:
 		QPushButton *btn;
 		int btn_state;
 		QSlider *slider;
+		QLabel *label;
 		bool is_var;
 		int slider_val;
 		QString device_id;

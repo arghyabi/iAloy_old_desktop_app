@@ -22,6 +22,8 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QFrame>
+#include <QtWidgets/QScrollArea>
+#include <QtWidgets/QGroupBox>
 #include <QThread>
 #include <QDateTime>
 #include <QTimer>
@@ -49,20 +51,17 @@ class dashboard : public QMainWindow, public device_controller_api
 	QThread i2cWorkerThread;
 
 public:
-	/*
-	v_layout_for_all_room => outer most layout for all room
-	h_layout_for_room_and_spacer => contains the room laoyout and spacer
-	v_layout_for_all_btn_node_and_room_label => contains room_label and multiple btn_node layout
-	h_layout_for_all_btn_node =>contains multiple btn_node
-	v_layout_for_btn_node => innermost layout for the btn and slider
-	*/
 
-	QVBoxLayout *v_layout_for_all_room, *v_layout_for_all_btn_node_and_room_label, *v_layout_for_btn_node;
-	QHBoxLayout *h_layout_for_room_and_spacer, *h_layout_for_all_btn_node, *horizontalSpacer_3;
-	QPushButton *btn1;
-	QLabel *room_name_label;
-	QSlider *slider1;
-	QSpacerItem *spacerItem;
+	QScrollArea *scrollArea;
+	QWidget *scrollAreaWidgetContents;
+	QGridLayout *gridLayoutForRoom, *gridLayout;
+	QGroupBox *room;
+	QVBoxLayout *verticalLayout;
+	QSpacerItem *horizontalSpacer;
+	QLabel *label;
+	QSlider *slider;
+	QSpacerItem *verticalSpacer;
+	QPushButton *btn;
 
 	QTimer *timer_for_datetime;
 	QTimer *timer_for_i2c_data_read_from_web;

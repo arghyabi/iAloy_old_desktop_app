@@ -237,7 +237,7 @@ bool MainWindow::api_response_parse()
 				else if(stoi(api_res.substr(0,1)) == PI_NOT_REGISTERED)
 				{
 					pi_reg_status_flag = PI_NOT_REGISTERED;
-					set_pi_name("Pi not registered");
+					set_pi_name("<font size=6><b>Pi not registered</b></font>");
 				}
 				break;
 			}
@@ -521,7 +521,7 @@ void MainWindow::render_pi_name()
 		{
 			cout << this->get_pi_name() << endl;
 			status_label_set_text("", "black");
-			ui->pi_name_label->setText(QString::fromStdString("Pi not registered"));
+			ui->pi_name_label->setText(QString::fromStdString("<font size=4><b>Pi not registered</b></font>"));
 			ui->SetUpLineEdit->setPlaceholderText("Enter email to register");
 		}
 		else

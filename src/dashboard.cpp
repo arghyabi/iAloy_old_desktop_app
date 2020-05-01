@@ -240,29 +240,86 @@ void dashboard::render_dashboard_room_btn()
 		struct btn_node *tmp_btn_nd;
 		if(!btn_list.isEmpty())
 		{
-			clearLayout(ui->v_layout_for_all_room);
 			btn_list.clear();
 		}
+		clearLayout(ui->verticalLayoutForRooms);
 
 		QJsonArray roomArray = get_json_array_from_response();
 
 		// creating main_room_container
-		v_layout_for_all_room = new QVBoxLayout();
+		scrollArea = new QScrollArea();
+		QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+		sizePolicy.setHorizontalStretch(0);
+		sizePolicy.setVerticalStretch(0);
+		sizePolicy.setHeightForWidth(scrollArea->sizePolicy().hasHeightForWidth());
+		scrollArea->setSizePolicy(sizePolicy);
+		scrollArea->setLayoutDirection(Qt::LeftToRight);
+		scrollArea->setWidgetResizable(true);
 
-		foreach (const QJsonValue &room, roomArray)
+		scrollAreaWidgetContents = new QWidget();
+		gridLayout = new QGridLayout(scrollAreaWidgetContents);
+		int rm = 0;
+
+		foreach (const QJsonValue &room_item, roomArray)
 		{
-			h_layout_for_room_and_spacer = new QHBoxLayout();
-			v_layout_for_all_btn_node_and_room_label = new QVBoxLayout();
-			h_layout_for_all_btn_node = new QHBoxLayout();
-			room_name_label = new QLabel();
-			spacerItem = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+			QString room_name = room_item.toObject().value("room_name").toString();
 
-			QString room_name = room.toObject().value("room_name").toString();
-			room_name_label->setText(room_name);
+			room = new QGroupBox(scrollAreaWidgetContents);
+			QSizePolicy sizePolicy2(QSizePolicy::Expanding, QSizePolicy::Fixed);
+			sizePolicy2.setHeightForWidth(room->sizePolicy().hasHeightForWidth());
+			room->setSizePolicy(sizePolicy2);
+			room->setTitle(room_name);
 
-			v_layout_for_all_btn_node_and_room_label->addWidget(room_name_label);
+			if(rm%2 == 0)
+			{
+				room->setStyleSheet(QString::fromUtf8(" \
+						QGroupBox::title \
+						{ \
+							background-color: #FFFFFF; \
+							color: #0A75E1; \
+							subcontrol-origin: margin; \
+							margin-left: 10px; \
+							margin-top: 8px; \
+							border-radius: 5px; \
+							padding: 6px; \
+							border: 1px solid #000000; \
+						} \
+						QGroupBox \
+						{ \
+							background-color: rgb(240, 240, 240); \
+							font-size: 16px; \
+						}" \
+				));
+			}
+			else
+			{
+				room->setStyleSheet(QString::fromUtf8(" \
+						QGroupBox::title \
+						{ \
+							background-color: #FFFFFF; \
+							color: #2D84DB; \
+							subcontrol-origin: margin; \
+							margin-left: 10px; \
+							margin-top: 8px; \
+							border-radius: 5px; \
+							padding: 6px; \
+							border: 1px solid #000000; \
+						} \
+						QGroupBox \
+						{ \
+							background-color: rgb(208, 223, 232); \
+							font-size: 16px; \
+						}" \
+				));
+			}
 
-			QJsonArray dev_array = room.toObject().value("dev_list").toArray();
+			room->setAlignment(Qt::AlignLeading|Qt::AlignVCenter|Qt::AlignVCenter);
+			gridLayoutForRoom = new QGridLayout(room);
+
+			QJsonArray dev_array = room_item.toObject().value("dev_list").toArray();
+
+			int row = 0;
+			int col = 0;
 
 			foreach (const QJsonValue &device, dev_array)
 			{
@@ -270,62 +327,100 @@ void dashboard::render_dashboard_room_btn()
 
 				QString device_name = device.toObject().value("d_name").toString();
 				QString device_id = device.toObject().value("dev_id").toString();
+				QString status = device.toObject().value("status").toString();
 				QString device_is_var = device.toObject().value("is_var").toString();
+				QString slider_value = device.toObject().value("slider_value").toString();
 
 				tmp_btn_nd->pin_num = device.toObject().value("pin").toInt();
 				tmp_btn_nd->mod_add = hex_to_int(device.toObject().value("mod_add").toString().toStdString());
 
+				tmp_btn_nd->device_id = device_id;
+
+				verticalLayout = new QVBoxLayout();
+				verticalLayout->setSpacing(6);
+				verticalLayout->setContentsMargins(5, 20, 5, -1);
 				tmp_btn_nd->btn = new QPushButton(device_id);
-				tmp_btn_nd->slider = new QSlider();
-				v_layout_for_btn_node = new QVBoxLayout();
+
 				signalMapper = new QSignalMapper(this);
 				signalMapper->setMapping(tmp_btn_nd->btn, device_id);
 
-				tmp_btn_nd->device_id = device_id;
+				if(status == "1")
+				{
+					tmp_btn_nd->btn->setStyleSheet(QString::fromUtf8("padding: 10%;background-color: #317AD7;color: #FFF;"));
+					tmp_btn_nd->btn_state = 1;
+				}
+				else
+				{
+					tmp_btn_nd->btn->setStyleSheet(QString::fromUtf8("padding: 10%;background-color: #525252;color: #FFF;"));
+					tmp_btn_nd->btn_state = 0;
+				}
 
-				QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-				sizePolicy.setHorizontalStretch(0);
-				sizePolicy.setVerticalStretch(0);
-				sizePolicy.setHeightForWidth(tmp_btn_nd->btn->sizePolicy().hasHeightForWidth());
-				tmp_btn_nd->btn->setSizePolicy(sizePolicy);
-				tmp_btn_nd->btn->setMinimumSize(QSize(0, 0));
 				tmp_btn_nd->btn->setText(device_name);
 
-				connect(tmp_btn_nd->btn, SIGNAL(clicked()), signalMapper, SLOT(map()));
-				connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(button_clicked_slot(QString)));
-
-				sizePolicy.setHeightForWidth(tmp_btn_nd->slider->sizePolicy().hasHeightForWidth());
-				tmp_btn_nd->slider->setSizePolicy(sizePolicy);
-				tmp_btn_nd->slider->setOrientation(Qt::Horizontal);
-
+				verticalLayout->addWidget(tmp_btn_nd->btn);
+				verticalLayout->setStretch(0, 3);
 				if(device_is_var == "1")
 				{
-					tmp_btn_nd->slider->setEnabled(true);
+					tmp_btn_nd->slider = new QSlider(room);
+					tmp_btn_nd->slider->setOrientation(Qt::Horizontal);
+					if(rm%2 == 0)
+						tmp_btn_nd->slider->setStyleSheet(QString::fromUtf8("background-color: rgb(240, 240, 240);"));
+					else
+						tmp_btn_nd->slider->setStyleSheet(QString::fromUtf8("background-color: rgb(208, 223, 232);"));
+
+					tmp_btn_nd->slider->setValue(stoi(slider_value.toStdString()));
+					tmp_btn_nd->slider_val = stoi(slider_value.toStdString());
+					verticalLayout->addWidget(tmp_btn_nd->slider);
+					tmp_btn_nd->label = NULL;
 					tmp_btn_nd->is_var = true;
 				}
 				else
 				{
-					tmp_btn_nd->slider->setEnabled(false);
+					tmp_btn_nd->label = new QLabel();
+					if(rm%2 == 0)
+						tmp_btn_nd->label->setStyleSheet(QString::fromUtf8("font-size: 0px;background-color: rgb(240, 240, 240);"));
+					else
+						tmp_btn_nd->label->setStyleSheet(QString::fromUtf8("font-size: 0px;background-color: rgb(208, 223, 232);"));
+					verticalLayout->addWidget(tmp_btn_nd->label);
+					tmp_btn_nd->slider = NULL;
+					tmp_btn_nd->slider_val = 0;
 					tmp_btn_nd->is_var = false;
-					// tmp_btn_nd->slider->setVisible(false);
 				}
+				gridLayoutForRoom->addLayout(verticalLayout, row, col, 1, 1);
+
+				if(col == 7)
+				{
+					col = 0;
+					row++;
+				}
+				else
+					col++;
+
+				connect(tmp_btn_nd->btn, SIGNAL(clicked()), signalMapper, SLOT(map()));
+				connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(button_clicked_slot(QString)));
 
 				btn_list.append(tmp_btn_nd);
-
-				v_layout_for_btn_node->addWidget(tmp_btn_nd->btn);
-				v_layout_for_btn_node->addWidget(tmp_btn_nd->slider);
-				h_layout_for_all_btn_node->addLayout(v_layout_for_btn_node);
 			}
+			for(int sp = 0; sp < 8; sp++)
+			{
+				horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+				gridLayoutForRoom->addItem(horizontalSpacer, row+1, sp, 1, 1);
+			}
+			gridLayout->addWidget(room, rm, 0, 1, 1);
 
-			v_layout_for_all_btn_node_and_room_label->addLayout(h_layout_for_all_btn_node);
-			h_layout_for_room_and_spacer->addLayout(v_layout_for_all_btn_node_and_room_label);
-			h_layout_for_room_and_spacer->addItem(spacerItem);
-			ui->v_layout_for_all_room->addLayout(h_layout_for_room_and_spacer);
+			rm++;
+		}
+		if(rm)
+		{
+			verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Expanding);
+			gridLayout->addItem(verticalSpacer, rm+1, 0, 1, 1);
 		}
 
+		scrollArea->setWidget(scrollAreaWidgetContents);
+		ui->verticalLayoutForRooms->addWidget(scrollArea);
+
 		cout << "------------- Room device render success --------------------" << endl;
-		set_device_controller_api_request(GET_ROOM_DEVICE_STATUS);
-		send_device_controller_api_request();
+		get_i2c_web_status();
 	}
 }
 
@@ -340,7 +435,6 @@ void dashboard::render_dashboard_room_btn_state()
 		foreach (const QJsonValue &room, roomArray)
 		{
 			QJsonArray dev_array = room.toObject().value("dev_list").toArray();
-
 			foreach (const QJsonValue &device, dev_array)
 			{
 				// setting up temp variables
@@ -354,38 +448,30 @@ void dashboard::render_dashboard_room_btn_state()
 					if(btn_nd->device_id == device_id)
 					{
 						if(device_status_value == "1")
+						{
 							btn_nd->btn_state = 1;
-						else
-							btn_nd->btn_state = 0;
-
-						if(btn_nd->btn_state)
-						{
 							// turning btn on
-							btn_nd->btn->setStyleSheet("background-color: #74a6f3; color: #000;");
+							btn_nd->btn->setStyleSheet("padding: 10%;background-color: #317AD7;color: #FFF;");
 						}
 						else
 						{
+							btn_nd->btn_state = 0;
 							// turning btn off
-							btn_nd->btn->setStyleSheet("background-color:  #525252; color: #fff;");
+							btn_nd->btn->setStyleSheet("padding: 10%;background-color: #525252;color: #FFF;");
 						}
-
 						// checking is_var enabled or not
 						if(btn_nd->is_var)
 						{
-							// setting var_value
 							btn_nd->slider->setValue(stoi(device_var_value.toStdString()));
 							btn_nd->slider_val = stoi(device_var_value.toStdString());
 						}
-						else
-							btn_nd->slider->setDisabled(1);
 					}
 				}
 			}
 		}
 		cout << "------------- state render success --------------------" << endl;
 
-		set_device_controller_api_request(GET_I2C_DATA);
-		send_device_controller_api_request();
+		get_i2c_web_status();
 	}
 }
 
@@ -406,13 +492,13 @@ void dashboard::button_clicked_slot(QString device_id)
 			{
 				cout << "found the " << device_id.toStdString() << " button; current is 1, will be 0" << endl;
 				btn_nd->btn_state = 0;
-				btn_nd->btn->setStyleSheet("background-color: #FF33E9; color:  #000;");
+				btn_nd->btn->setStyleSheet("padding: 10%;background-color: #525252;color: #FFF;");
 			}
 			else
 			{
 				cout << "found the " << device_id.toStdString() << " button; current is 0, will be 1" << endl;
 				btn_nd->btn_state = 1;
-				btn_nd->btn->setStyleSheet("background-color:  #0DD8B3; color:  #fff;");
+				btn_nd->btn->setStyleSheet("padding: 10%;background-color: #317AD7;color: #FFF;");
 			}
 			this->set_d_id(device_id.toStdString());
 			this->set_status(to_string(btn_nd->btn_state));
@@ -599,6 +685,7 @@ void dashboard::addBgImage()
 	this->setPalette(palette);
 }
 
+// TODO : Duplicate function from iAloy_main_data
 int dashboard::hex_to_int(string hex)
 {
 	int int_data = 0;
