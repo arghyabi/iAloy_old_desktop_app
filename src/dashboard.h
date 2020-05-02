@@ -93,6 +93,7 @@ signals:
 
 private slots:
 	void update_time();
+	void ip_address_update();
 	void on_power_tool_button_clicked();
 	void on_settings_tool_button_clicked();
 	void on_wifi_tool_button_clicked();
@@ -104,8 +105,11 @@ private slots:
 	void read_i2c_data_from_module(int, int);
 	void button_clicked_slot(QString);
 
+    void on_module_current_status_btn_clicked();
+
 private:
 	Ui::dashboard *ui;
+	int counter_for_ip_check;
 
 	QJsonArray get_json_array_from_response();
 	int hex_to_int(string hex);

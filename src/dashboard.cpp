@@ -11,6 +11,8 @@ dashboard::dashboard(QWidget *parent) :
 {
 	ui->setupUi(this);
 
+	counter_for_ip_check = 3600;
+
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 
 	ui->online_offline_label->setText("<b><font color='#000000'>Connecting...</font></b>");
@@ -20,6 +22,7 @@ dashboard::dashboard(QWidget *parent) :
 	timer_for_i2c_data_read_from_web = new QTimer(this);
 	connect(timer_for_datetime, SIGNAL(timeout()), this, SLOT(update_time()));
 	connect(timer_for_i2c_data_read_from_web, SIGNAL(timeout()), this, SLOT(get_i2c_web_status()));
+	connect(timer_for_datetime, SIGNAL(timeout()), this, SLOT(ip_address_update()));
 	timer_for_datetime->start(1000);
 
 	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_settings_icon_path())));
@@ -28,7 +31,13 @@ dashboard::dashboard(QWidget *parent) :
 	ui->app_update_button->setIcon(QIcon(QString::fromStdString(dashboard::get_update_icon_path())));
 	ui->power_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_power_icon_path())));
 
+	ui->module_current_status_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_normal_icon_path())));
+	ui->new_module_info_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_plus_brown_icon_path())));
+	ui->available_update_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_warning_icon_path())));
+	ui->module_current_status_btn->setEnabled(false);
+
 	i2c_data *i2c_thread_obj = new i2c_data(this);
+	// TODO: Warining comes from thread. but working on main thread.
 	i2c_thread_obj->moveToThread(&i2cWorkerThread);
 	connect(this, SIGNAL(send_i2c_data_to_module_signal(int, int)), i2c_thread_obj, SLOT(write_i2c_data(int, int)));
 	connect(this, SIGNAL(read_request_i2c_data_from_module_signal(int, int)), i2c_thread_obj, SLOT(read_i2c_data(int, int)));
@@ -44,6 +53,28 @@ void dashboard::update_time()
 	QString timeString = dateTime.toString("hh:mm:ss ap");
 	QString dateString = dateTime.toString("dd-MMMM-yyyy");
 	ui->time_label->setText("<font size=4><b>"+timeString+"</b></font><br/>  "+dateString);
+}
+
+void dashboard::ip_address_update()
+{
+	if(counter_for_ip_check >= 3600)
+	{
+		counter_for_ip_check = 0;
+		system("ifconfig `route | grep \"default\" | head -n1 | awk '{print $NF}'` | grep \"inet \" | awk '{print $2}' > ip_add.txt");
+		QFile file;
+		file.setFileName("ip_add.txt");
+
+		file.open(QIODevice::ReadOnly | QIODevice::Text);
+		QString IP = file.readAll();
+#ifdef ARC_TYPE
+		IP = IP.mid(5,-1);
+#endif
+		file.close();
+		ui->ip_address_label->setText("<font style=\"color:#204A87;\">&nbsp;&nbsp;IP:<b>"+IP+"</b></font>");
+
+		system("rm -rf ip_add.txt");
+	}
+	counter_for_ip_check++;
 }
 
 // init method contain network->get()
@@ -531,6 +562,7 @@ void dashboard::get_i2c_web_status()
 void dashboard::render_i2c_data()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+
 	if(device_controller_api_response_parse())
 	{
 		ui->online_offline_label->setText("<b><font color='#228B22'>Online</font></b>");
@@ -587,6 +619,8 @@ void dashboard::render_i2c_data()
 				//}
 				data_to_send = 0;
 			}
+
+			ui->module_current_status_btn->setEnabled(true);
 
 			// get_room_device_status api call
 			if(api_i2c_data.length() == tmp_api_resp.length())
@@ -797,4 +831,9 @@ void dashboard::on_logout_button_clicked()
 	main_window_show(true);
 	dashboard_window_show(false);
 	mainwindow_reset_on_logout();
+}
+
+void dashboard::on_module_current_status_btn_clicked()
+{
+	module_status_window_show(true);
 }

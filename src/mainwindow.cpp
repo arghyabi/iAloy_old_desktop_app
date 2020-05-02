@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->setupUi(this);
 
 	get_pi_name_timer_flag = true;
+	counter_for_ip_check = 3600;
 
 	ui->online_offline_label->setText("<b><font color='#000000'>Connecting...</font></b>");
 	ui->ialoy_logo_label->setText("<b><font size=8 color='#1e93b6'>i</font><font size=8 color='#555'>Aloy</font></b>");
@@ -34,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	QTimer *timer_for_get_pi_name = new QTimer(this);
 	connect(timer_for_datatime_mm, SIGNAL(timeout()), this, SLOT(update_time()));
 	connect(timer_for_get_pi_name, SIGNAL(timeout()), this, SLOT(get_pi_name_with_timer_slot()));
+	connect(timer_for_get_pi_name, SIGNAL(timeout()), this, SLOT(ip_address_update()));
 	timer_for_datatime_mm->start(1000);
 
 	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_settings_icon_path())));
@@ -41,6 +43,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->keyboard_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_keyboad_icon_path())));
 	ui->app_update_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_update_icon_path())));
 	ui->power_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_power_icon_path())));
+
+	ui->module_current_status_btn->setIcon(QIcon(QString::fromStdString(MainWindow::get_ic_normal_icon_path())));
+	ui->new_module_info_btn->setIcon(QIcon(QString::fromStdString(MainWindow::get_ic_plus_brown_icon_path())));
+	ui->available_update_btn->setIcon(QIcon(QString::fromStdString(MainWindow::get_ic_warning_icon_path())));
 
 	NetworkManager = new QNetworkAccessManager();
 	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
@@ -96,6 +102,28 @@ void MainWindow::update_time()
 	QString timeString = dateTime.toString("hh:mm:ss ap");
 	QString dateString = dateTime.toString("dd-MMMM-yyyy");
 	ui->time_label->setText("<font size=4><b>"+timeString+"</b></font><br/>  "+dateString);
+}
+
+void MainWindow::ip_address_update()
+{
+	if(counter_for_ip_check >= 3600)
+	{
+		counter_for_ip_check = 0;
+		system("ifconfig `route | grep \"default\" | head -n1 | awk '{print $NF}'` | grep \"inet \" | awk '{print $2}' > ip_add.txt");
+		QFile file;
+		file.setFileName("ip_add.txt");
+
+		file.open(QIODevice::ReadOnly | QIODevice::Text);
+		QString IP = file.readAll();
+#ifdef ARC_TYPE
+		IP = IP.mid(5,-1);
+#endif
+		file.close();
+		ui->ip_address_label->setText("<font style=\"color:#204A87;\">&nbsp;&nbsp;IP:<b>"+IP+"</b></font>");
+
+		system("rm -rf ip_add.txt");
+	}
+	counter_for_ip_check++;
 }
 
 void MainWindow::mainwindow_reset_on_logout()

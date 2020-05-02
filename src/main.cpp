@@ -7,11 +7,13 @@
 #include "dashboard.h"
 #include "settings.h"
 #include "update_manager.h"
+#include "module_status.h"
 
 static MainWindow *mainwindow_pt;
 static dashboard *dashboardwindow_pt;
 static settings *settings_pt;
 static update_manager *update_manager_pt;
+static module_status *module_status_pt;
 
 void main_window_show(int mode)
 {
@@ -73,6 +75,18 @@ void update_manager_window_show(int mode)
 		update_manager_pt->hide();
 }
 
+void module_status_window_show(int mode)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ <<"    mode :" << mode << endl;
+	if(mode)
+	{
+		module_status_pt->show();
+		module_status_pt->init();
+	}
+	else
+		module_status_pt->hide();
+}
+
 int main(int argc, char *argv[])
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -88,11 +102,14 @@ int main(int argc, char *argv[])
 	dashboard dashboardwindow;
 	settings settingswindow;
 	update_manager updateManager;
+	module_status moduleStatus;
+
 
 	mainwindow_pt = &mainwindow;
 	dashboardwindow_pt = &dashboardwindow;
 	settings_pt = &settingswindow;
 	update_manager_pt = &updateManager;
+	module_status_pt = &moduleStatus;
 
 	main_window_show(true);
 

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 
 #include <QtNetwork/QNetworkAccessManager>
 #include "ialoy_data.h"
@@ -284,6 +285,31 @@ string ialoy_main_data::get_wifi_icon_path()
 	return this->wifi_icon_path;
 }
 
+string ialoy_main_data::get_ic_normal_icon_path()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	return this->ic_narmal_icon_path;
+}
+
+string ialoy_main_data::get_ic_plus_white_icon_path()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	return this->ic_plus_white_icon_path;
+}
+
+string ialoy_main_data::get_ic_plus_brown_icon_path()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	return this->ic_plus_brown_icon_path;
+}
+
+string ialoy_main_data::get_ic_warning_icon_path()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	return this->ic_warning_icon_path;
+}
+
+
 string ialoy_main_data::get_interface_up_script_path()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -333,66 +359,9 @@ string ialoy_main_data::get_device_controller_api_error_msg()
 string ialoy_main_data::int_to_hex(int int_data)
 {
 	string hex_data = "0x";
-
-	while(int_data > 0)
-	{
-		int rem = int_data % 16;
-		int_data = int_data / 16;
-
-		switch(rem)
-		{
-			case 0:
-				hex_data += "0";
-				break;
-			case 1:
-				hex_data += "1";
-				break;
-			case 2:
-				hex_data += "2";
-				break;
-			case 3:
-				hex_data += "3";
-				break;
-			case 4:
-				hex_data += "4";
-				break;
-			case 5:
-				hex_data += "5";
-				break;
-			case 6:
-				hex_data += "6";
-				break;
-			case 7:
-				hex_data += "7";
-				break;
-			case 8:
-				hex_data += "8";
-				break;
-			case 9:
-				hex_data += "9";
-				break;
-			case 10:
-				hex_data += "A";
-				break;
-			case 11:
-				hex_data += "B";
-				break;
-			case 12:
-				hex_data += "C";
-				break;
-			case 13:
-				hex_data += "D";
-				break;
-			case 14:
-				hex_data += "E";
-				break;
-			case 15:
-				hex_data += "F";
-				break;
-			default:
-				break;
-		}
-	}
+	stringstream sstream;
+	sstream << uppercase << std::hex << int_data;
+	hex_data += sstream.str();
 	return hex_data;
 }
 

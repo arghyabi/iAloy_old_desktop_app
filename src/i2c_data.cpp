@@ -51,8 +51,8 @@ void i2c_data::read_i2c_data(int mod_address, int curerent_data)
 
 	for(int i = 0; i < 8; i++)
 	{
-		received_data = received_data << 1; 		
-		received_data = received_data | (tmp_data & 1); 			
+		received_data = received_data << 1;
+		received_data = received_data | (tmp_data & 1);
 		tmp_data = tmp_data >> 1;
 	}
 	//received_data = received_data << 1;
@@ -60,5 +60,30 @@ void i2c_data::read_i2c_data(int mod_address, int curerent_data)
 	cout << "\n\n*****Mod_Add : " << mod_address <<"\tcurrent data : " << curerent_data << "\trecieved data : " << received_data << endl;
 	if(curerent_data != received_data)
 		emit receive_i2c_data_from_module(mod_address, received_data);
+#endif
+}
+
+void i2c_data::read_all_i2c_module_state(int *data_array)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+#ifdef ARC_TYPE
+	for(int i = 3; i < 120; i++)
+	{
+		int fd = wiringPiI2CSetup(i);
+		int received_data = wiringPiI2CRead(fd);
+
+		if(received_data != -1)
+			data_array[i-3] = 1;
+		else
+			data_array[i-3] = 0;
+	}
+#else
+	for(int i = 3; i < 120; i++)
+	{
+		if(i%2 == 1)
+			data_array[i-3] = 1;
+		else
+			data_array[i-3] = 0;
+	}
 #endif
 }

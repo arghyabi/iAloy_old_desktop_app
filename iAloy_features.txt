@@ -25,12 +25,18 @@ TODO: Update manager should be updated.
 ** Module flash button in head menu
 
 Status bar:
-    a. Online status
-    b. Available updates
-    c. IP address
-    d. New module info
-    e. Module current status
-    f. Virtual keyboard
+    a. Online status [lbl] ------------- done
+    b. IP address [lbl] ----------------
+    c. Available updates [btn] ---------
+            [BG-Color: yellow-> new_update || button->hide()]
+            [icon: ]
+    d. New module info [btn] -----------
+            [BG-Color: yellow-> new_added || button->hide()]
+            [icon: IC with "+"]
+    e. Module current status [btn] -----
+            [BG-Color: green-> ok || red-> !ok]
+            [icon: IC -> ok || IC with "!" -> !ok]
+    f. Virtual keyboard [btn] ----------
 
 Room device UI update:
     a. Scroll bar area,

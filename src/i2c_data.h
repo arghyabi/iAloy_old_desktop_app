@@ -16,6 +16,7 @@ signals:
 public slots:
 	void write_i2c_data(int, int);
 	void read_i2c_data(int, int);
+	void read_all_i2c_module_state(int *);
 };
 
 #endif // I2C_DATA_H

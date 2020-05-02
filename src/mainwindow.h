@@ -53,6 +53,7 @@ public:
 
 private slots:
 	void update_time();
+	void ip_address_update();
 	void get_pi_name_with_timer_slot();
 	void on_submit_button_clicked();
 	void on_form_back_btn_clicked();
@@ -68,6 +69,7 @@ private slots:
 private:
 	Ui::MainWindow *ui;
 	bool get_pi_name_timer_flag;
+	int counter_for_ip_check;
 };
 
 #endif // MAINWINDOW_H
