@@ -34,17 +34,21 @@ dashboard::dashboard(QWidget *parent) :
 	ui->module_current_status_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_normal_icon_path())));
 	ui->new_module_info_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_plus_brown_icon_path())));
 	ui->available_update_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_warning_icon_path())));
-	ui->module_current_status_btn->setEnabled(false);
+	ui->module_current_status_btn->hide();
 
 	i2c_data *i2c_thread_obj = new i2c_data(this);
 	// TODO: Warining comes from thread. but working on main thread.
-	i2c_thread_obj->moveToThread(&i2cWorkerThread);
+	// SOLVED
+	i2c_thread_obj->moveToThread(QApplication::instance()->thread());
 	connect(this, SIGNAL(send_i2c_data_to_module_signal(int, int)), i2c_thread_obj, SLOT(write_i2c_data(int, int)));
 	connect(this, SIGNAL(read_request_i2c_data_from_module_signal(int, int)), i2c_thread_obj, SLOT(read_i2c_data(int, int)));
 	connect(i2c_thread_obj, SIGNAL(receive_i2c_data_from_module(int, int)), this, SLOT(read_i2c_data_from_module(int, int)));
 
 	timer_for_i2c_data_read_from_mod = new QTimer(this);
 	connect(timer_for_i2c_data_read_from_mod, SIGNAL(timeout()), this, SLOT(read_request_i2c_data_from_module()));
+
+	module_status *module_status_obj = new module_status();
+	connect(this, SIGNAL(module_status_window_show_signal(QLinkedList<btn_node*>)), module_status_obj, SLOT(init(QLinkedList<btn_node*>)));
 }
 
 void dashboard::update_time()
@@ -387,6 +391,8 @@ void dashboard::render_dashboard_room_btn()
 				}
 
 				tmp_btn_nd->btn->setText(device_name);
+				tmp_btn_nd->device_name = device_name;
+				tmp_btn_nd->room_name = room_name;
 
 				verticalLayout->addWidget(tmp_btn_nd->btn);
 				verticalLayout->setStretch(0, 3);
@@ -579,20 +585,19 @@ void dashboard::render_i2c_data()
 			int data_to_send = 0;
 			int mod_Add;
 
-			struct mod_data_node *mod_data_nd;
-			mod_data_nd = new struct mod_data_node;
-			mod_data_nd->mod_add = 0;
-			mod_data_nd->current_web = 0;
-			mod_data_nd->prev_web = 0;
-			mod_data_nd->current_mod = 0;
-			mod_data_nd->prev_mod = 0;
-
 			if(!mod_data_list.isEmpty())
 				mod_data_list.clear();
 
 			//assign value
 			foreach(const QJsonValue mod_info, i2c_array)
 			{
+				struct mod_data_node *mod_data_nd = new struct mod_data_node;
+				mod_data_nd->mod_add = 0;
+				mod_data_nd->current_web = 0;
+				mod_data_nd->prev_web = 0;
+				mod_data_nd->current_mod = 0;
+				mod_data_nd->prev_mod = 0;
+
 				mod_Add = hex_to_int(mod_info.toObject().value("mod_add").toString().toStdString());
 
 				QJsonArray status_array = mod_info.toObject().value("pin_status").toArray();
@@ -620,7 +625,7 @@ void dashboard::render_i2c_data()
 				data_to_send = 0;
 			}
 
-			ui->module_current_status_btn->setEnabled(true);
+			ui->module_current_status_btn->show();
 
 			// get_room_device_status api call
 			if(api_i2c_data.length() == tmp_api_resp.length())
@@ -835,5 +840,5 @@ void dashboard::on_logout_button_clicked()
 
 void dashboard::on_module_current_status_btn_clicked()
 {
-	module_status_window_show(true);
+	emit module_status_window_show_signal(btn_list);
 }

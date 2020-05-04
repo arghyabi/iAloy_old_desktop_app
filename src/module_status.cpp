@@ -7,29 +7,8 @@ module_status::module_status(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	// QNetworkAccessManager *NetworkManager;
-	// QNetworkRequest NetworkRequest;
-
 	i2c_data *i2c_thread_obj = new i2c_data(this);
 	connect(this, SIGNAL(read_all_i2c_module_state_signal(int*)), i2c_thread_obj, SLOT(read_all_i2c_module_state(int*)));
-	// string url = "http://ialoy.arghyabiswas.com/desktop_api/device_controller_req_mngr.php?dco=2";
-	// NetworkRequest.setUrl(QString::fromStdString(url));
-
-	// NetworkManager = new QNetworkAccessManager();
-	// QObject::connect(NetworkManager., &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
-	// 		set_device_controller_api_response("");
-	// 		if (reply->error())
-	// 		{
-	// 			cout << "Error : " << reply->errorString().toStdString() << endl;
-	// 			ui->online_offline_label->setText("<b><font color='#FF4500'>Offline</font></b>");
-	// 			return;
-	// 		}
-	// 		QString response = reply->readAll();
-	// 		cout << "\ndevice controlelr api response : " << response.toStdString() << endl << endl;
-	// 		//set_device_controller_api_response(response.toStdString());
-	// 		render_module_status_status(response.toStdString());
-	// 	}
-	// );
 }
 
 module_status::~module_status()
@@ -42,142 +21,165 @@ void module_status::button_clicked_slot(QString mod_add)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	cout << "buttton pressed: " << mod_add.toStdString() << endl;
+	QMessageBox msgBox;
+	msgBox.setStyleSheet("QPushButton{padding: 10px; background-color:#3465A4; color: #FFF;}QMessageBox{height: auto; width: auto; padding-left: 20px; padding-right: 20px;}");
+	msgBox.setText("<font>" + mod_add + "</font>");
+	msgBox.exec();
+
 }
 
-// QJsonArray module_status::get_json_array_from_response(string response)
-// {
-// 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-// 	string room_device_state_data = response;
-// 	QString room_device_status_info = QString::fromStdString(room_device_state_data);
-// 	QJsonDocument jsonDocument = QJsonDocument::fromJson(room_device_status_info.toUtf8());
-// 	QJsonObject jsonObject = jsonDocument.object();
-// 	QJsonValue ArrayValue;
-// 	ArrayValue = jsonObject.value("room_device_status");
-// 	QJsonArray result_Array = ArrayValue.toArray();
-// 	return result_Array;
-// }
-
-// bool module_status::device_controller_api_response_parse(string result)
-// {
-// 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-// 	string device_controller_api_res = result;
-// 	if(device_controller_api_res.substr(0, 1) != "1")
-// 		return false;
-
-// 	device_controller_api_res = device_controller_api_res.substr(1, device_controller_api_res.length()-1);
-// 	if(device_controller_api_res == "0Please Login first.")
-// 	{
-// 		cout << ">>>> " << __PRETTY_FUNCTION__ << "logout function called due to session failure" << endl;
-// 		on_logout_button_clicked();
-// 		return false;
-// 	}
-// 	return true;
-// }
-
-/*
-Struct
-{
-	int mod_add;
-	string room;
-}
-
-*/
-// void module_status::render_module_status_state(string result)
-// {
-// 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-// 	if(device_controller_api_response_parse(result))
-// 	{
-// 		cout << "\n\nRender dashboard_room_btn_state data : " << get_device_controller_api_response() << endl << endl;
-// 		QJsonArray roomArray = get_json_array_from_response(result);
-
-// 		foreach (const QJsonValue &room, roomArray)
-// 		{
-// 			QJsonArray dev_array = room.toObject().value("dev_list").toArray();
-// 			foreach (const QJsonValue &device, dev_array)
-// 			{
-// 				// setting up temp variables
-// 				QString device_id = device.toObject().value("dev_id").toString();
-// 				QString device_status_value = device.toObject().value("dev_status").toString();
-// 				QString device_var_value = device.toObject().value("var_value").toString();
-
-// 				struct btn_node *btn_nd;
-// 				foreach(btn_nd, btn_list)
-// 				{
-// 					if(btn_nd->device_id == device_id)
-// 					{
-// 						if(device_status_value == "1")
-// 						{
-// 							btn_nd->btn_state = 1;
-// 							// turning btn on
-// 							btn_nd->btn->setStyleSheet("padding: 10%;background-color: #317AD7;color: #FFF;");
-// 						}
-// 						else
-// 						{
-// 							btn_nd->btn_state = 0;
-// 							// turning btn off
-// 							btn_nd->btn->setStyleSheet("padding: 10%;background-color: #525252;color: #FFF;");
-// 						}
-// 						// checking is_var enabled or not
-// 						if(btn_nd->is_var)
-// 						{
-// 							btn_nd->slider->setValue(stoi(device_var_value.toStdString()));
-// 							btn_nd->slider_val = stoi(device_var_value.toStdString());
-// 						}
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// }
-
-void module_status::init()
+void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	this->show();
+
 	int col = 0;
 	int row = 0;
 	int status_array[117];
+	int module_active_count = 0;
+	int module_available_count = 0;
+	int module_disconnected_count = 0;
+	int module_not_available_count = 0;
+
+	QString head_style = "padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px; text-align: center; background-color: #005DD5; color: #FFF;";
+	QString body_style = "border: 1px solid #ddd; padding: 4px; text-align: center;";
+	QString table_start = "<table style='border-collapse: collapse width: 100%; margin: 10px; margin-right: 30px;' border=1> <tr> <th style='" + head_style + "'>Device</th> <th style='" + head_style + "'>Pin</th> <th style='" + head_style + "'>Status</th> <th style='" + head_style + "'>Slider</th> </tr>";
+	QString body_start = "<tr><td><center>";
+	QString body_end = "</center></td></tr>";
+	QString table_end = "</table>";
+	QString body_joint = "</center></td><td><center>";
 
 	emit read_all_i2c_module_state_signal(status_array);
 
 	for (int index = 0; index < 117; index++)
 	{
 		// adding pushbutton to grid
-		int int_mod_add = index+3;
-		QString mod_add = QString::number(int_mod_add);
-		btn = new QPushButton(mod_add);
-		struct mod_data_node *mod_data_nd;
+		int mod_add = index+3;
+		struct btn_node *btn_nd;
 		bool isFound = false;
+		QString module_info;
 
-		foreach(mod_data_nd, mod_data_list)
+		QString room_name_array[8];
+		QString final_module_details_string;
+		int room_count = 0;
+
+		foreach(btn_nd, tmp_btn_list)
 		{
-			cout << "mod add from ll:" << mod_data_nd->mod_add << " int_mod_add:" << int_mod_add << endl;
-			if(mod_data_nd->mod_add == int_mod_add)
+			if(btn_nd->mod_add == mod_add)
 			{
 				isFound = true;
-				break;
+				QString tmp_room_name = btn_nd->room_name;
+				bool roomFound = false;
+
+				for(int i = 0; i <= room_count ; i++)
+				{
+					if(room_name_array[i] != NULL)
+					{
+						if(room_name_array[i].mid(3,tmp_room_name.length()) == tmp_room_name)
+						{
+							QString state = "";
+							QString slider = "-";
+
+							if(btn_nd->btn_state)
+								state = "<font color='#005DD5'>ON</font>";
+							else
+								state = "<font color='#525252'>OFF</font>";
+
+							if(btn_nd->is_var)
+								slider = QString::number(btn_nd->slider_val)+"%";
+
+							room_name_array[i] = room_name_array[i] + body_start + btn_nd->device_name + body_joint + QString::number(btn_nd->pin_num) + body_joint + state + body_joint + slider + body_end;
+							roomFound = true;
+							break;
+						}
+					}
+				}
+
+				if(!roomFound)
+				{
+					if(room_count > 0)
+						room_name_array[room_count - 1] += table_end;
+
+					QString state = "";
+					QString slider = "-";
+
+					if(btn_nd->btn_state)
+						state = "<font color='#005DD5'>ON</font>";
+					else
+						state = "<font color='#525252'>OFF</font>";
+
+					if(btn_nd->is_var)
+						slider = QString::number(btn_nd->slider_val)+"%";
+
+					room_name_array[room_count++] = "<b>" + tmp_room_name + "</b>:<br/>" + table_start + body_start + btn_nd->device_name + body_joint + QString::number(btn_nd->pin_num) + body_joint + state + body_joint + slider + body_end;
+				}
+				roomFound = false;
 			}
 		}
 
+		for(int i = 0; i < room_count; i++)
+		{
+			if(i != 0)
+				final_module_details_string += "<br/><br/>" + room_name_array[i];
+			else
+				final_module_details_string = room_name_array[i];
+		}
+
+		if(status_array[index] == 1)
+			final_module_details_string += table_end + "<br/><br/><font color='#1F6600'><b>Module perfectly working.</b></font>";
+		else
+			final_module_details_string += table_end + "<br/><br/><font color='#FF0000'><b>Module is not working.</b></font>";
+
+		if(isFound == false && room_count == 0)
+		{
+			if(status_array[index] == 1)
+				final_module_details_string = "<font><b>Module connected, but not linked</b></font>";
+			else if(status_array[index] == 0)
+				final_module_details_string = "<font><b>Address is available to burn new Module</b></font>";
+		}
+
+
+		btn = new QPushButton(final_module_details_string);
 		if(isFound == true)
 		{
 			if(status_array[index] == 1)
+			{
 				btn->setStyleSheet(QString::fromUtf8("height: 16px; padding: 5%; background-color: #00FF00; color: #000;"));
+				module_active_count++;
+			}
 			else if(status_array[index] == 0)
+			{
 				btn->setStyleSheet(QString::fromUtf8("height: 16px; padding: 5%; background-color: #FF0000; color: #000;"));
+				module_disconnected_count++;
+			}
 		}
 		else
 		{
 			if(status_array[index] == 1)
+			{
 				btn->setStyleSheet(QString::fromUtf8("height: 16px; padding: 5%; background-color: #FFFF00; color: #000;"));
+				module_available_count++;
+			}
 			else if(status_array[index] == 0)
+			{
 				btn->setStyleSheet(QString::fromUtf8("height: 16px; padding: 5%; background-color: #525252; color: #000;"));
+				module_not_available_count++;
+			}
 		}
 
-		btn->setText(QString::fromStdString(int_to_hex(int_mod_add)));
+		btn->setText(QString::fromStdString(int_to_hex(mod_add)));
 		ui->status_grid_layout->addWidget(btn, row, col, 1,1);
 
+		QString active_module_status_msg = "<font color=#000000>Active : </font><font color=#1b9300 size=4>"+QString::number(module_active_count)+"</font>";
+		QString inactive_module_status_msg = "<font color=#000000>Inactive : </font><font color=#BC0000 size=4>"+QString::number(module_disconnected_count)+"</font>";
+		QString unlinked_module_status_msg = "<font color=#000000>Unlinked : </font><font color=#BFBF00 size=4>"+QString::number(module_available_count)+"</font>";
+		QString not_available_module_status_msg = "<font color=#000000>Not available : </font><font color=#434338 size=4>"+QString::number(module_not_available_count)+"</font>";
+
+		QString overall_module_status_msg = active_module_status_msg+"&nbsp;&nbsp;&nbsp;&nbsp;"+inactive_module_status_msg+"<br/>"+unlinked_module_status_msg+"&nbsp;&nbsp;&nbsp;&nbsp;"+not_available_module_status_msg;
+		ui->overall_module_status->setText(overall_module_status_msg);
+
 		signalMapper = new QSignalMapper(this);
-		signalMapper->setMapping(btn, mod_add);
+		signalMapper->setMapping(btn, final_module_details_string);
 
 		connect(btn, SIGNAL(clicked()), signalMapper, SLOT(map()));
 		connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(button_clicked_slot(QString)));

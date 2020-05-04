@@ -37,6 +37,7 @@
 #include "device_controller_api.h"
 #include "main.h"
 #include "i2c_data.h"
+#include "module_status.h"
 
 using namespace std;
 
@@ -90,6 +91,7 @@ public:
 signals:
 	void send_i2c_data_to_module_signal(int, int);
 	void read_request_i2c_data_from_module_signal(int, int);
+	void module_status_window_show_signal(QLinkedList<btn_node*>);
 
 private slots:
 	void update_time();

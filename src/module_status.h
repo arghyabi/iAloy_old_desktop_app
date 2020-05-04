@@ -5,6 +5,7 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
 #include <QSignalMapper>
+#include <QMessageBox>
 
 #include"ialoy_data.h"
 #include "i2c_data.h"
@@ -24,7 +25,6 @@ public:
 	explicit module_status(QWidget *parent = nullptr);
 	~module_status();
 
-	void init();
 	QJsonArray get_json_array_from_response(string);
 	void render_module_status_state(string);
 	bool device_controller_api_response_parse(string);
@@ -34,6 +34,7 @@ signals:
 
 private slots:
 	void button_clicked_slot(QString);
+	void init(QLinkedList<btn_node*>);
 
 
 private:

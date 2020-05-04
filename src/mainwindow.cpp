@@ -44,9 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->app_update_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_update_icon_path())));
 	ui->power_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_power_icon_path())));
 
-	ui->module_current_status_btn->setIcon(QIcon(QString::fromStdString(MainWindow::get_ic_normal_icon_path())));
-	ui->new_module_info_btn->setIcon(QIcon(QString::fromStdString(MainWindow::get_ic_plus_brown_icon_path())));
-	ui->available_update_btn->setIcon(QIcon(QString::fromStdString(MainWindow::get_ic_warning_icon_path())));
+	ui->available_update_btn->setIcon(QIcon(QString::fromStdString(MainWindow::get_ic_plus_brown_icon_path())));
 
 	NetworkManager = new QNetworkAccessManager();
 	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {

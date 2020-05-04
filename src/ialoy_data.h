@@ -172,14 +172,16 @@ public:
 	struct btn_node
 	{
 		QPushButton *btn;
-		int btn_state;
 		QSlider *slider;
 		QLabel *label;
-		bool is_var;
-		int slider_val;
 		QString device_id;
+		QString device_name;
+		QString room_name;
+		int btn_state;
+		int slider_val;
 		int pin_num;
 		int mod_add;
+		bool is_var;
 	};
 
 	struct mod_data_node
