@@ -10,6 +10,7 @@ chmod 777 /usr/bin/iAloy
 cp /usr/share/iAloy/.temp/iAloy_update_package/resource/fonts/* /usr/share/iAloy/fonts/
 cp /usr/share/iAloy/.temp/iAloy_update_package/resource/photos/* /usr/share/iAloy/photos/
 cp /usr/share/iAloy/.temp/iAloy_update_package/resource/scripts/* /usr/share/iAloy/scripts/
+cp /usr/share/iAloy/.temp/iAloy_update_package/resource/hex/* /usr/share/iAloy/hex/
 
 chmod 777 /usr/share/iAloy/scripts/*
 

@@ -149,7 +149,7 @@ void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 			}
 			else if(status_array[index] == 0)
 			{
-				btn->setStyleSheet(QString::fromUtf8("height: 16px; padding: 5%; background-color: #FF0000; color: #000;"));
+				btn->setStyleSheet(QString::fromUtf8("height: 16px; padding: 5%; background-color: #FF0000; color: #FFF;"));
 				module_disconnected_count++;
 			}
 		}
@@ -162,7 +162,7 @@ void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 			}
 			else if(status_array[index] == 0)
 			{
-				btn->setStyleSheet(QString::fromUtf8("height: 16px; padding: 5%; background-color: #525252; color: #000;"));
+				btn->setStyleSheet(QString::fromUtf8("height: 16px; padding: 5%; background-color: #525252; color: #FFF;"));
 				module_not_available_count++;
 			}
 		}

@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(248, 221, 180);</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <spacer name="verticalSpacer_2">
@@ -213,6 +216,9 @@ color: rgb(255, 255, 255);</string>
    </item>
    <item>
     <widget class="QProgressBar" name="progressBar">
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);</string>
+     </property>
      <property name="value">
       <number>24</number>
      </property>
@@ -226,6 +232,9 @@ color: rgb(255, 255, 255);</string>
    </item>
    <item>
     <widget class="QProgressBar" name="download_progress">
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);</string>
+     </property>
      <property name="value">
       <number>24</number>
      </property>
@@ -247,7 +256,11 @@ color: rgb(255, 255, 255);</string>
       </spacer>
      </item>
      <item>
-      <widget class="QTextEdit" name="console_area"/>
+      <widget class="QTextEdit" name="console_area">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 255, 255);</string>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">

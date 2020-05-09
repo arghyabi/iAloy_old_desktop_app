@@ -14,7 +14,7 @@
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: #fff5e6;</string>
+   <string notr="true">background-color: rgb(248, 221, 180);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>

@@ -133,6 +133,7 @@ private:
 	string ic_plus_brown_icon = "ic_plus_brown.png";
 	string ic_plus_white_icon = "ic_plus_white.png";
 	string ic_warning_icon = "ic_warning.png";
+	string refresh_icon = "refresh.png";
 	string interface_up_script = "iAloy-interface-up.sh";
 
 	string user_credential_path = user + share + iAloy_folder + conf_folder + ucp_file;
@@ -147,6 +148,7 @@ private:
 	string ic_plus_brown_icon_path = user + share + iAloy_folder + photos_folder + ic_plus_brown_icon;
 	string ic_plus_white_icon_path = user + share + iAloy_folder + photos_folder + ic_plus_white_icon;
 	string ic_warning_icon_path = user + share + iAloy_folder + photos_folder + ic_warning_icon;
+	string refresh_icon_path = user + share + iAloy_folder + photos_folder + refresh_icon;
 	string interface_up_script_path = user + share + iAloy_folder + scripts_folder + interface_up_script;
 
 	// for dev_controller class
@@ -258,6 +260,7 @@ public:
 	string get_ic_plus_white_icon_path();
 	string get_ic_plus_brown_icon_path();
 	string get_ic_warning_icon_path();
+	string get_refresh_icon_path();
 
 	string get_interface_up_script_path();
 

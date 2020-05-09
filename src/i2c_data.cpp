@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 #ifdef ARC_TYPE
 #include <wiringPiI2C.h>
 #endif
@@ -37,6 +38,7 @@ void i2c_data::write_i2c_data(int mod_address, int data)
 		for(int t = 0; t < 1000000; t++);
 	}
 	wiringPiI2CWrite(fd, end_data);
+	close(fd);
 #endif
 }
 
@@ -48,6 +50,8 @@ void i2c_data::read_i2c_data(int mod_address, int curerent_data)
 	for(int t = 0; t < 1000000; t++);
 	int tmp_data = wiringPiI2CRead(fd);
 	int received_data = 0;
+
+	close(fd);
 
 	for(int i = 0; i < 8; i++)
 	{
@@ -76,6 +80,8 @@ void i2c_data::read_all_i2c_module_state(int *data_array)
 			data_array[i-3] = 1;
 		else
 			data_array[i-3] = 0;
+
+		close(fd);
 	}
 #else
 	for(int i = 3; i < 120; i++)

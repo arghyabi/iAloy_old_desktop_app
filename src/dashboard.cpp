@@ -49,6 +49,9 @@ dashboard::dashboard(QWidget *parent) :
 
 	module_status *module_status_obj = new module_status();
 	connect(this, SIGNAL(module_status_window_show_signal(QLinkedList<btn_node*>)), module_status_obj, SLOT(init(QLinkedList<btn_node*>)));
+
+	module_manager *module_manager_obj = new module_manager();
+	connect(this, SIGNAL(module_manager_window_show_signal(QLinkedList<btn_node*>)), module_manager_obj, SLOT(init(QLinkedList<btn_node*>)));
 }
 
 void dashboard::update_time()
@@ -313,7 +316,6 @@ void dashboard::render_dashboard_room_btn()
 							background-color: #FFFFFF; \
 							color: #0A75E1; \
 							subcontrol-origin: margin; \
-							margin-left: 10px; \
 							margin-top: 8px; \
 							border-radius: 5px; \
 							padding: 6px; \
@@ -334,7 +336,6 @@ void dashboard::render_dashboard_room_btn()
 							background-color: #FFFFFF; \
 							color: #2D84DB; \
 							subcontrol-origin: margin; \
-							margin-left: 10px; \
 							margin-top: 8px; \
 							border-radius: 5px; \
 							padding: 6px; \
@@ -841,4 +842,9 @@ void dashboard::on_logout_button_clicked()
 void dashboard::on_module_current_status_btn_clicked()
 {
 	emit module_status_window_show_signal(btn_list);
+}
+
+void dashboard::on_new_module_info_btn_clicked()
+{
+	emit module_manager_window_show_signal(btn_list);
 }

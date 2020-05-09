@@ -36,6 +36,8 @@ SOURCES += \
 	src/update_manager_thread.cpp \
         src/i2c_data.cpp \
         src/module_status.cpp \
+        src/module_manager.cpp \
+        src/module_manager_thread.cpp \
 
 
 HEADERS += \
@@ -49,6 +51,8 @@ HEADERS += \
 	src/update_manager_thread.h \
         src/i2c_data.h \
         src/module_status.h \
+        src/module_manager.h \
+        src/module_manager_thread.h \
 
 
 FORMS += \
@@ -57,6 +61,7 @@ FORMS += \
 	resource/ui/dashboard.ui \
 	resource/ui/settings.ui \
 	resource/ui/update_manager.ui \
+        resource/ui/module_manager.ui \
 
 
 OTHER_FILES += \

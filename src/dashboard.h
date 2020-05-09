@@ -38,6 +38,7 @@
 #include "main.h"
 #include "i2c_data.h"
 #include "module_status.h"
+#include "module_manager.h"
 
 using namespace std;
 
@@ -92,6 +93,7 @@ signals:
 	void send_i2c_data_to_module_signal(int, int);
 	void read_request_i2c_data_from_module_signal(int, int);
 	void module_status_window_show_signal(QLinkedList<btn_node*>);
+	void module_manager_window_show_signal(QLinkedList<btn_node*>);
 
 private slots:
 	void update_time();
@@ -107,7 +109,8 @@ private slots:
 	void read_i2c_data_from_module(int, int);
 	void button_clicked_slot(QString);
 
-    void on_module_current_status_btn_clicked();
+	void on_module_current_status_btn_clicked();
+	void on_new_module_info_btn_clicked();
 
 private:
 	Ui::dashboard *ui;

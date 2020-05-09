@@ -309,6 +309,11 @@ string ialoy_main_data::get_ic_warning_icon_path()
 	return this->ic_warning_icon_path;
 }
 
+string ialoy_main_data::get_refresh_icon_path()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	return this->refresh_icon_path;
+}
 
 string ialoy_main_data::get_interface_up_script_path()
 {
