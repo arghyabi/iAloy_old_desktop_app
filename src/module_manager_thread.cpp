@@ -3,6 +3,15 @@
 module_manager_thread::module_manager_thread(QObject *parent) : QObject(parent)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	mProcess = new QProcess(this);
+
+	connect(mProcess, SIGNAL(started()), this, SLOT(start_burning_tmp_slot()));
+	connect(mProcess, SIGNAL(readyReadStandardOutput()),this,SLOT(burning_module_tmp_slot()));
+	connect(mProcess, SIGNAL(finished(int)), this, SLOT(burn_complete_tmp_slot(int)));
+	connect(mProcess, &QProcess::errorOccurred, [=](QProcess::ProcessError error)
+	{
+		cout << "error enum val = " << error << endl;
+	});
 }
 
 int module_manager_thread::hex_to_int(string hex_data)
@@ -92,10 +101,13 @@ string module_manager_thread::modify_code(string data, int address)
 void module_manager_thread::burn_module_slot(int address)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	// removing previously kept .hex file
+	system("rm -rf /usr/share/iAloy/.temp/*.hex");
 	string line;
 	ifstream myfile("/usr/share/iAloy/hex/template.hex");
 	ofstream outfile("/usr/share/iAloy/.temp/out-file.hex");
 	int line_index = 1;
+
 	if (myfile.is_open() && outfile.is_open())
 	{
 		while (getline(myfile,line))
@@ -104,19 +116,38 @@ void module_manager_thread::burn_module_slot(int address)
 				line = modify_code(line, address);
 			outfile << line << endl;
 			line_index++;
-			// for(long long int i = 0; i < 10000; i++)
-			// 	cout << i << endl;
 		}
 		myfile.close();
 		outfile.close();
 	}
-
 	else
+	{
 		cout << "Unable to open file";
+	}
 
-	system("avrdude -C/usr/share/arduino/conf/avrdude.conf -v -v -v -v -patmega328p -carduino -P/dev/ttyUSB0 -b115200 -D -Uflash:w:/usr/share/iAloy/.temp/out-file.hex:i -l/usr/share/iAloy/.temp/avrdude.log");
+	// "avrdude -C/usr/share/arduino/conf/avrdude.conf -v -v -v -v -patmega328p -carduino -P/dev/ttyUSB0 -b115200 -D -Uflash:w:/usr/share/iAloy/.temp/out-file.hex:i -l/usr/share/iAloy/.temp/avrdude.log"
+	// "/usr/share/iAloy/.temp/out-file.hex"
+	QString avrdude = "avrdude";
+	QStringList arguments;
+	arguments << "-C/usr/share/arduino/conf/avrdude.conf" << "-v" << "-v" << "-v" << "-v" << "-patmega328p" << "-carduino" << "-P/dev/ttyUSB0" << "-b115200" << "-D" << "-Uflash:w:/usr/share/iAloy/.temp/out-file.hex:i" << "-l/usr/share/iAloy/.temp/avrdude.log";
 
-	system("/usr/share/iAloy/.temp/out-file.hex");
+	mProcess->start(avrdude, arguments);
+}
 
+void module_manager_thread::start_burning_tmp_slot()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	emit start_burning_signal();
+}
+
+void module_manager_thread::burning_module_tmp_slot()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	emit console_print_signal(mProcess->readAllStandardOutput());
+}
+
+void module_manager_thread::burn_complete_tmp_slot(int temp)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	emit burn_complete_signal();
 }

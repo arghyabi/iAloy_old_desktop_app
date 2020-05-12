@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include <QObject>
+#include <QProcess>
 
 using namespace std;
 
@@ -15,12 +16,20 @@ class module_manager_thread : public QObject
 	Q_OBJECT
 public:
 	explicit module_manager_thread(QObject *parent = nullptr);
+	QProcess *mProcess;
+	QString mOutputString;
 
 signals:
+	void start_burning();
+	void start_burning_signal();
+	void console_print_signal(QString);
 	void burn_complete_signal();
 
 public slots:
 	void burn_module_slot(int);
+	void start_burning_tmp_slot();
+	void burning_module_tmp_slot();
+	void burn_complete_tmp_slot(int);
 
 private:
 	string modify_code(string data, int address);

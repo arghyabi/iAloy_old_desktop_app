@@ -6,6 +6,7 @@ module_manager::module_manager(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::module_manager)
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	ui->setupUi(this);
 	ui->refresh_tool_button->setIcon(QIcon(QString::fromStdString(module_manager::get_refresh_icon_path())));
 	ui->usb_refresh_tool_button->setIcon(QIcon(QString::fromStdString(module_manager::get_refresh_icon_path())));
@@ -15,7 +16,10 @@ module_manager::module_manager(QWidget *parent) :
 	connect(this, SIGNAL(read_all_i2c_module_state_signal(int*)), i2c_thread_obj, SLOT(read_all_i2c_module_state(int*)));
 
 	module_manager_thread *mm_thread_obj = new module_manager_thread(this);
+
 	connect(this, SIGNAL(burn_module_signal(int)), mm_thread_obj, SLOT(burn_module_slot(int)));
+	connect(mm_thread_obj, SIGNAL(start_burning_signal()), this, SLOT(start_burning_slot()));
+	connect(mm_thread_obj, SIGNAL(console_print_signal(QString)),this,SLOT(burning_module_slot(QString)));
 	connect(mm_thread_obj, SIGNAL(burn_complete_signal()), this, SLOT(burn_complete_slot()));
 }
 
@@ -126,13 +130,26 @@ void module_manager::button_clicked_slot(QString mod_add)
 void module_manager::on_burn_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	ui->burn_button->setEnabled(false);
-	ui->overall_module_status->setText("Uploading...");
 	emit burn_module_signal(selected_mod_address);
+}
+
+void module_manager::start_burning_slot()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	ui->burn_button->setEnabled(false);
+	console_print("Burning...");
+}
+
+void module_manager::burning_module_slot(QString data)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	console_print(data);
 }
 
 void module_manager::burn_complete_slot()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+
 	QFile file;
 	file.setFileName("/usr/share/iAloy/.temp/avrdude.log");
 
@@ -140,9 +157,10 @@ void module_manager::burn_complete_slot()
 	QString log = file.readAll();
 	file.close();
 
+
 	ui->burn_button->setEnabled(true);
 	ui->progressBar->setValue(100);
-	ui->overall_module_status->setText("Upload Complete");
+	console_print("Burn Completed");
 	console_print(log);
 }
 

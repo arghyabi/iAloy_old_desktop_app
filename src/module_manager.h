@@ -21,6 +21,8 @@ class module_manager : public QDialog, public ialoy_main_data
 public:
 	QPushButton *add_btn;
 	QSignalMapper *signalMapper;
+	QProcess *mmt_Process;
+	QString mOutputString;
 	int selected_mod_address;
 	explicit module_manager(QWidget *parent = nullptr);
 	~module_manager();
@@ -30,6 +32,9 @@ public:
 public slots:
 	void init(QLinkedList<btn_node*>);
 	void button_clicked_slot(QString);
+
+	void start_burning_slot();
+	void burning_module_slot(QString);
 	void burn_complete_slot();
 
 private slots:
