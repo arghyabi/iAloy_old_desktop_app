@@ -101,7 +101,16 @@ enum device_controller_api_request_type
 	GET_CONNECTED_PI_LIST,
 	UPDATE_STATUS_FOR_PI,
 	UPDATE_RANGE_FOR_PI,
-	GET_I2C_DATA
+	GET_I2C_DATA,
+	ADD_NEW_MODULE
+};
+
+enum module_linking_stage
+{
+	MODULE_NEED_TO_BE_LINKED = 0,
+	MODULE_LINKING_PROGRESS,
+	MODULE_LINKING_DONE,
+	MODULE_LINKING_FAILED
 };
 
 class ialoy_main_data{

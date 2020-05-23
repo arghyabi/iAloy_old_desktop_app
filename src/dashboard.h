@@ -70,6 +70,7 @@ public:
 	QTimer *timer_for_i2c_data_read_from_mod;
 
 	QSignalMapper *signalMapper;
+	bool addModuleReq;
 
 	explicit dashboard(QWidget *parent = 0);
 	void addBgImage();
@@ -94,6 +95,7 @@ signals:
 	void read_request_i2c_data_from_module_signal(int, int);
 	void module_status_window_show_signal(QLinkedList<btn_node*>);
 	void module_manager_window_show_signal(QLinkedList<btn_node*>);
+	void add_new_module_api_resp_signal(string);
 
 private slots:
 	void update_time();
@@ -111,6 +113,10 @@ private slots:
 
 	void on_module_current_status_btn_clicked();
 	void on_new_module_info_btn_clicked();
+	//void refresh_module_manager_slot();
+
+public slots:
+	void add_new_module_api_request_slot(string);
 
 private:
 	Ui::dashboard *ui;

@@ -10,6 +10,7 @@ dashboard::dashboard(QWidget *parent) :
 	ui(new Ui::dashboard)
 {
 	ui->setupUi(this);
+	addModuleReq = false;
 
 	counter_for_ip_check = 3600;
 
@@ -52,6 +53,19 @@ dashboard::dashboard(QWidget *parent) :
 
 	module_manager *module_manager_obj = new module_manager();
 	connect(this, SIGNAL(module_manager_window_show_signal(QLinkedList<btn_node*>)), module_manager_obj, SLOT(init(QLinkedList<btn_node*>)));
+	connect(module_manager_obj, SIGNAL(refresh_module_manager_signal()), this, SLOT(on_new_module_info_btn_clicked()));
+	connect(module_manager_obj, SIGNAL(add_new_module_api_request_signal(string)), this, SLOT(add_new_module_api_request_slot(string)));
+	connect(this, SIGNAL(add_new_module_api_resp_signal(string)), module_manager_obj, SLOT(add_new_module_api_resp_slot(string)));
+}
+
+void dashboard::add_new_module_api_request_slot(string mod_add)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+
+	this->set_mod_add(mod_add);
+	addModuleReq = true;
+	set_device_controller_api_request(ADD_NEW_MODULE);
+	send_device_controller_api_request();
 }
 
 void dashboard::update_time()
@@ -98,9 +112,27 @@ void dashboard::init()
 				return;
 			}
 			QString response = reply->readAll();
-			cout << "\ndevice controlelr api response : " << response.toStdString() << endl << endl;
-			set_device_controller_api_response(response.toStdString());
-			update_dashboard_gui();
+			cout << "gadfuyhkfduiogviuhoiuf : " << response.mid(0,2).toStdString() << endl;
+			if(response.mid(0,2) == "1{")
+			{
+				cout << "\ndevice controlelr api response : " << response.toStdString() << endl << endl;
+				set_device_controller_api_response(response.toStdString());
+				update_dashboard_gui();
+			}
+			else
+			{
+				if(device_controller_api_request_type_flag == DEVICE_CONTROLLER_LOGIN_USING_TOKEN)
+				{
+					cout << "\ndevice controlelr api response : " << response.toStdString() << endl << endl;
+					set_device_controller_api_response(response.toStdString());
+					update_dashboard_gui();
+				}
+				else
+				{
+					cout << "Add module : " << response.toStdString() << endl;
+					emit add_new_module_api_resp_signal(response.toStdString());
+				}
+			}
 		}
 	);
 
@@ -302,54 +334,58 @@ void dashboard::render_dashboard_room_btn()
 		{
 			QString room_name = room_item.toObject().value("room_name").toString();
 
-			room = new QGroupBox(scrollAreaWidgetContents);
-			QSizePolicy sizePolicy2(QSizePolicy::Expanding, QSizePolicy::Fixed);
-			sizePolicy2.setHeightForWidth(room->sizePolicy().hasHeightForWidth());
-			room->setSizePolicy(sizePolicy2);
-			room->setTitle(room_name);
 
-			if(rm%2 == 0)
+			if(room_name != "-1")
 			{
-				room->setStyleSheet(QString::fromUtf8(" \
-						QGroupBox::title \
-						{ \
-							background-color: #FFFFFF; \
-							color: #0A75E1; \
-							subcontrol-origin: margin; \
-							margin-top: 8px; \
-							border-radius: 5px; \
-							padding: 6px; \
-							border: 1px solid #000000; \
-						} \
-						QGroupBox \
-						{ \
-							background-color: rgb(240, 240, 240); \
-							font-size: 16px; \
-						}" \
-				));
-			}
-			else
-			{
-				room->setStyleSheet(QString::fromUtf8(" \
-						QGroupBox::title \
-						{ \
-							background-color: #FFFFFF; \
-							color: #2D84DB; \
-							subcontrol-origin: margin; \
-							margin-top: 8px; \
-							border-radius: 5px; \
-							padding: 6px; \
-							border: 1px solid #000000; \
-						} \
-						QGroupBox \
-						{ \
-							background-color: rgb(208, 223, 232); \
-							font-size: 16px; \
-						}" \
-				));
-			}
+				room = new QGroupBox(scrollAreaWidgetContents);
+				QSizePolicy sizePolicy2(QSizePolicy::Expanding, QSizePolicy::Fixed);
+				sizePolicy2.setHeightForWidth(room->sizePolicy().hasHeightForWidth());
+				room->setSizePolicy(sizePolicy2);
+				room->setTitle(room_name);
 
-			room->setAlignment(Qt::AlignLeading|Qt::AlignVCenter|Qt::AlignVCenter);
+				if(rm%2 == 0)
+				{
+					room->setStyleSheet(QString::fromUtf8(" \
+							QGroupBox::title \
+							{ \
+								background-color: #FFFFFF; \
+								color: #0A75E1; \
+								subcontrol-origin: margin; \
+								margin-top: 8px; \
+								border-radius: 5px; \
+								padding: 6px; \
+								border: 1px solid #000000; \
+							} \
+							QGroupBox \
+							{ \
+								background-color: rgb(240, 240, 240); \
+								font-size: 16px; \
+							}" \
+					));
+				}
+				else
+				{
+					room->setStyleSheet(QString::fromUtf8(" \
+							QGroupBox::title \
+							{ \
+								background-color: #FFFFFF; \
+								color: #2D84DB; \
+								subcontrol-origin: margin; \
+								margin-top: 8px; \
+								border-radius: 5px; \
+								padding: 6px; \
+								border: 1px solid #000000; \
+							} \
+							QGroupBox \
+							{ \
+								background-color: rgb(208, 223, 232); \
+								font-size: 16px; \
+							}" \
+					));
+				}
+
+				room->setAlignment(Qt::AlignLeading|Qt::AlignVCenter|Qt::AlignVCenter);
+			}
 			gridLayoutForRoom = new QGridLayout(room);
 
 			QJsonArray dev_array = room_item.toObject().value("dev_list").toArray();
@@ -395,8 +431,11 @@ void dashboard::render_dashboard_room_btn()
 				tmp_btn_nd->device_name = device_name;
 				tmp_btn_nd->room_name = room_name;
 
-				verticalLayout->addWidget(tmp_btn_nd->btn);
+				if(room_name != "-1")
+					verticalLayout->addWidget(tmp_btn_nd->btn);
+
 				verticalLayout->setStretch(0, 3);
+
 				if(device_is_var == "1")
 				{
 					tmp_btn_nd->slider = new QSlider(room);
@@ -408,7 +447,8 @@ void dashboard::render_dashboard_room_btn()
 
 					tmp_btn_nd->slider->setValue(stoi(slider_value.toStdString()));
 					tmp_btn_nd->slider_val = stoi(slider_value.toStdString());
-					verticalLayout->addWidget(tmp_btn_nd->slider);
+					if(room_name != "-1")
+						verticalLayout->addWidget(tmp_btn_nd->slider);
 					tmp_btn_nd->label = NULL;
 					tmp_btn_nd->is_var = true;
 				}
@@ -419,12 +459,14 @@ void dashboard::render_dashboard_room_btn()
 						tmp_btn_nd->label->setStyleSheet(QString::fromUtf8("font-size: 0px;background-color: rgb(240, 240, 240);"));
 					else
 						tmp_btn_nd->label->setStyleSheet(QString::fromUtf8("font-size: 0px;background-color: rgb(208, 223, 232);"));
-					verticalLayout->addWidget(tmp_btn_nd->label);
+					if(room_name != "-1")
+						verticalLayout->addWidget(tmp_btn_nd->label);
 					tmp_btn_nd->slider = NULL;
 					tmp_btn_nd->slider_val = 0;
 					tmp_btn_nd->is_var = false;
 				}
-				gridLayoutForRoom->addLayout(verticalLayout, row, col, 1, 1);
+				if(room_name != "-1")
+					gridLayoutForRoom->addLayout(verticalLayout, row, col, 1, 1);
 
 				if(col == 7)
 				{
@@ -439,14 +481,18 @@ void dashboard::render_dashboard_room_btn()
 
 				btn_list.append(tmp_btn_nd);
 			}
-			for(int sp = 0; sp < 8; sp++)
+			if(room_name != "-1")
 			{
-				horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-				gridLayoutForRoom->addItem(horizontalSpacer, row+1, sp, 1, 1);
-			}
-			gridLayout->addWidget(room, rm, 0, 1, 1);
+				for(int sp = 0; sp < 8; sp++)
+				{
+					horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+					gridLayoutForRoom->addItem(horizontalSpacer, row+1, sp, 1, 1);
+				}
 
-			rm++;
+				gridLayout->addWidget(room, rm, 0, 1, 1);
+				rm++;
+			}
+
 		}
 		if(rm)
 		{

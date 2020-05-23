@@ -83,6 +83,11 @@ void device_controller_api::set_device_controller_api_request(device_controller_
 			this->req_url = this->url+"?dco="+dco;
 			break;
 
+		case ADD_NEW_MODULE:
+			{
+				this->req_url = this->url+"?dco="+dco+"&mod_add="+this->get_mod_add();
+			}
+
 		default:
 			break;
 	}
