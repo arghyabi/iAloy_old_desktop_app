@@ -35,7 +35,7 @@ public:
 	QWidget *scrollAreaWidgetContents;
 
 	int link_mod_add_array[117][2];
-	int link_button_length;
+	int link_button_array_length;
 	int module_index;
 
 	explicit module_manager(QWidget *parent = nullptr);
@@ -66,6 +66,7 @@ signals:
 	void render_link_button_list_signal();
 	void refresh_module_manager_signal();
 	void add_new_module_api_request_signal(string);
+	void new_module_linked_signal();
 
 private:
 	Ui::module_manager *ui;

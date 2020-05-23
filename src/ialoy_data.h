@@ -120,6 +120,11 @@ private:
 	string pi_add, pi_name, product_id, password, first_name, last_name, phone,\
 		 otp, api_error_msg, api_response, device_controller_api_response, device_controller_api_error_msg;
 
+	string device_controller_login_using_token_response,get_device_detail_status_response, \
+		get_room_device_list_response, get_room_device_status_response, update_status_response, \
+		update_range_response, get_connected_pi_list_response, update_status_for_pi_response, \
+		update_range_for_pi_response, get_i2c_data_response, add_new_module_response;
+
 	string email, token;
 
 	string user = "/usr/";
@@ -240,7 +245,7 @@ public:
 	void set_range(string range);
 	void set_mod_add(string mod_add);
 	void set_pin(string pin);
-	void set_device_controller_api_response(string resp);
+	void set_device_controller_api_response(int response_type, string resp);
 	void set_device_controller_api_error_msg(string msg);
 
 	// getter methods for setup class private variables.
@@ -279,7 +284,7 @@ public:
 	string get_range();
 	string get_mod_add();
 	string get_pin();
-	string get_device_controller_api_response();
+	string get_device_controller_api_response(int response_type);
 	string get_device_controller_api_error_msg();
 
 	int hex_to_int(string);

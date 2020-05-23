@@ -56,6 +56,7 @@ dashboard::dashboard(QWidget *parent) :
 	connect(module_manager_obj, SIGNAL(refresh_module_manager_signal()), this, SLOT(on_new_module_info_btn_clicked()));
 	connect(module_manager_obj, SIGNAL(add_new_module_api_request_signal(string)), this, SLOT(add_new_module_api_request_slot(string)));
 	connect(this, SIGNAL(add_new_module_api_resp_signal(string)), module_manager_obj, SLOT(add_new_module_api_resp_slot(string)));
+	connect(module_manager_obj, SIGNAL(new_module_linked_signal()), this, SLOT(new_module_linked_slot()));
 }
 
 void dashboard::add_new_module_api_request_slot(string mod_add)
@@ -74,6 +75,12 @@ void dashboard::update_time()
 	QString timeString = dateTime.toString("hh:mm:ss ap");
 	QString dateString = dateTime.toString("dd-MMMM-yyyy");
 	ui->time_label->setText("<font size=4><b>"+timeString+"</b></font><br/>  "+dateString);
+}
+
+void dashboard::new_module_linked_slot()
+{
+	set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
+	send_device_controller_api_request();
 }
 
 void dashboard::ip_address_update()
@@ -104,34 +111,36 @@ void dashboard::init()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	DBNetworkManager = new QNetworkAccessManager();
 	QObject::connect(DBNetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
-			set_device_controller_api_response("");
 			if (reply->error())
 			{
 				cout << "Error : " << reply->errorString().toStdString() << endl;
 				ui->online_offline_label->setText("<b><font color='#FF4500'>Offline</font></b>");
 				return;
 			}
-			QString response = reply->readAll();
-			cout << "gadfuyhkfduiogviuhoiuf : " << response.mid(0,2).toStdString() << endl;
-			if(response.mid(0,2) == "1{")
+			string response = reply->readAll().toStdString();
+
+			cout << "Response from web:" << response << endl;
+			int response_type;
+			if(response.substr(0,1) == "1")
 			{
-				cout << "\ndevice controlelr api response : " << response.toStdString() << endl << endl;
-				set_device_controller_api_response(response.toStdString());
-				update_dashboard_gui();
-			}
-			else
-			{
-				if(device_controller_api_request_type_flag == DEVICE_CONTROLLER_LOGIN_USING_TOKEN)
+				if(device_controller_api_request_type_flag != DEVICE_CONTROLLER_LOGIN_USING_TOKEN)
 				{
-					cout << "\ndevice controlelr api response : " << response.toStdString() << endl << endl;
-					set_device_controller_api_response(response.toStdString());
-					update_dashboard_gui();
+					response_type = stoi(response.substr(1,2));
+					cout << "response_type:" << response_type << endl;
+					set_device_controller_api_response(response_type, response.substr(3));
 				}
 				else
 				{
-					cout << "Add module : " << response.toStdString() << endl;
-					emit add_new_module_api_resp_signal(response.toStdString());
+					// for login
+					if(response.substr(1,2) != "0")
+					{
+						this->set_pi_name(response.substr(2));
+						response_type = DEVICE_CONTROLLER_LOGIN_USING_TOKEN;
+					}
+					else
+						on_logout_button_clicked();
 				}
+				update_dashboard_gui(response_type);
 			}
 		}
 	);
@@ -162,11 +171,11 @@ void dashboard::send_device_controller_api_request()
 
 // update_dashboard_gui method to call specific render method
 // wrt device_controller_api_request_type
-void dashboard::update_dashboard_gui()
+void dashboard::update_dashboard_gui(int response_type)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	cout << "DB-Flag:" << device_controller_api_request_type_flag << endl;
-	switch(device_controller_api_request_type_flag)
+	cout << "DB-Flag:" << response_type << endl;
+	switch(response_type)
 	{
 		case DEVICE_CONTROLLER_LOGIN_USING_TOKEN:
 			timer_for_i2c_data_read_from_web->start(1000);
@@ -179,13 +188,11 @@ void dashboard::update_dashboard_gui()
 
 		case GET_ROOM_DEVICE_LIST:
 			// render room_device_list
-			cout << "Entering render_dashboard_room_btn() " << endl;
 			render_dashboard_room_btn();
 			break;
 
 		case GET_ROOM_DEVICE_STATUS:
 			// render room_device_status
-			cout << "Entering render_dashboard_room_btn_status() " << endl;
 			render_dashboard_room_btn_state();
 			break;
 
@@ -212,7 +219,10 @@ void dashboard::update_dashboard_gui()
 			// render i2c data
 			render_i2c_data();
 			break;
-
+		case ADD_NEW_MODULE:
+			// link new module
+			emit add_new_module_api_resp_signal(get_device_controller_api_response(ADD_NEW_MODULE));
+			break;
 		default:
 			break;
 	}
@@ -222,53 +232,22 @@ void dashboard::update_dashboard_gui()
 void dashboard::render_dashboard_login()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(device_controller_api_response_parse() && this->get_device_controller_api_response().substr(0,1) == "1")
-	{
-		cout << "DB-LOGIN STATUS : Success" << endl;
-		ui->pi_name_label->setText(QString::fromStdString("<center><b><font size=5>"+this->get_pi_name()+"</font></b><br/>"+this->get_email()+"</center>"));
-		set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
-		send_device_controller_api_request();
-	}
-	else
-	{
-		cout << "Response : " << this->get_device_controller_api_response() << endl;
-		cout << "DB-LOGIN STATUS : Fail... Redirecting to MainWindow" << endl;
-		main_window_show(true);
-		dashboard_window_show(false);
-	}
+
+	cout << "DashBoard-LOGIN STATUS : Success" << endl;
+	ui->pi_name_label->setText(QString::fromStdString("<center><b><font size=5>"+this->get_pi_name()+"</font></b><br/>"+this->get_email()+"</center>"));
+	set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
+	send_device_controller_api_request();
 }
 
-bool dashboard::device_controller_api_response_parse()
+QJsonArray dashboard::get_json_array_from_response(int response_type)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	string device_controller_api_res = this->get_device_controller_api_response();
-	if(device_controller_api_res.substr(0, 1) != "1")
-		return false;
-
-	device_controller_api_res = device_controller_api_res.substr(1, device_controller_api_res.length()-1);
-	if(device_controller_api_res == "0Please Login first.")
-	{
-		cout << ">>>> " << __PRETTY_FUNCTION__ << "logout function called due to session failure" << endl;
-		on_logout_button_clicked();
-		return false;
-	}
-	this->set_pi_name(device_controller_api_res.substr(1, device_controller_api_res.length()-1));
-	cout << "Pi_name from dashboard : " << this->get_pi_name() << endl;
-
-	this->set_device_controller_api_response(device_controller_api_res);
-
-	return true;
-}
-
-QJsonArray dashboard::get_json_array_from_response()
-{
-	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	string room_device_state_data = this->get_device_controller_api_response();
+	string room_device_state_data = this->get_device_controller_api_response(response_type);
 	QString room_device_status_info = QString::fromStdString(room_device_state_data);
 	QJsonDocument jsonDocument = QJsonDocument::fromJson(room_device_status_info.toUtf8());
 	QJsonObject jsonObject = jsonDocument.object();
 	QJsonValue ArrayValue;
-	switch(this->device_controller_api_request_type_flag)
+	switch(response_type)
 	{
 		case GET_ROOM_DEVICE_LIST:
 			ArrayValue = jsonObject.value("room_device_details");
@@ -304,259 +283,256 @@ void dashboard::clearLayout(QLayout* layout)
 void dashboard::render_dashboard_room_btn()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(this->device_controller_api_response_parse())
+
+	// store response in structure_linked_list here
+	struct btn_node *tmp_btn_nd;
+	if(!btn_list.isEmpty())
 	{
-		// store response in structure_linked_list here
-		struct btn_node *tmp_btn_nd;
-		if(!btn_list.isEmpty())
-		{
-			btn_list.clear();
-		}
-		clearLayout(ui->verticalLayoutForRooms);
-
-		QJsonArray roomArray = get_json_array_from_response();
-
-		// creating main_room_container
-		scrollArea = new QScrollArea();
-		QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-		sizePolicy.setHorizontalStretch(0);
-		sizePolicy.setVerticalStretch(0);
-		sizePolicy.setHeightForWidth(scrollArea->sizePolicy().hasHeightForWidth());
-		scrollArea->setSizePolicy(sizePolicy);
-		scrollArea->setLayoutDirection(Qt::LeftToRight);
-		scrollArea->setWidgetResizable(true);
-
-		scrollAreaWidgetContents = new QWidget();
-		gridLayout = new QGridLayout(scrollAreaWidgetContents);
-		int rm = 0;
-
-		foreach (const QJsonValue &room_item, roomArray)
-		{
-			QString room_name = room_item.toObject().value("room_name").toString();
-
-
-			if(room_name != "-1")
-			{
-				room = new QGroupBox(scrollAreaWidgetContents);
-				QSizePolicy sizePolicy2(QSizePolicy::Expanding, QSizePolicy::Fixed);
-				sizePolicy2.setHeightForWidth(room->sizePolicy().hasHeightForWidth());
-				room->setSizePolicy(sizePolicy2);
-				room->setTitle(room_name);
-
-				if(rm%2 == 0)
-				{
-					room->setStyleSheet(QString::fromUtf8(" \
-							QGroupBox::title \
-							{ \
-								background-color: #FFFFFF; \
-								color: #0A75E1; \
-								subcontrol-origin: margin; \
-								margin-top: 8px; \
-								border-radius: 5px; \
-								padding: 6px; \
-								border: 1px solid #000000; \
-							} \
-							QGroupBox \
-							{ \
-								background-color: rgb(240, 240, 240); \
-								font-size: 16px; \
-							}" \
-					));
-				}
-				else
-				{
-					room->setStyleSheet(QString::fromUtf8(" \
-							QGroupBox::title \
-							{ \
-								background-color: #FFFFFF; \
-								color: #2D84DB; \
-								subcontrol-origin: margin; \
-								margin-top: 8px; \
-								border-radius: 5px; \
-								padding: 6px; \
-								border: 1px solid #000000; \
-							} \
-							QGroupBox \
-							{ \
-								background-color: rgb(208, 223, 232); \
-								font-size: 16px; \
-							}" \
-					));
-				}
-
-				room->setAlignment(Qt::AlignLeading|Qt::AlignVCenter|Qt::AlignVCenter);
-			}
-			gridLayoutForRoom = new QGridLayout(room);
-
-			QJsonArray dev_array = room_item.toObject().value("dev_list").toArray();
-
-			int row = 0;
-			int col = 0;
-
-			foreach (const QJsonValue &device, dev_array)
-			{
-				tmp_btn_nd = new struct btn_node;
-
-				QString device_name = device.toObject().value("d_name").toString();
-				QString device_id = device.toObject().value("dev_id").toString();
-				QString status = device.toObject().value("status").toString();
-				QString device_is_var = device.toObject().value("is_var").toString();
-				QString slider_value = device.toObject().value("slider_value").toString();
-
-				tmp_btn_nd->pin_num = device.toObject().value("pin").toInt();
-				tmp_btn_nd->mod_add = hex_to_int(device.toObject().value("mod_add").toString().toStdString());
-
-				tmp_btn_nd->device_id = device_id;
-
-				verticalLayout = new QVBoxLayout();
-				verticalLayout->setSpacing(6);
-				verticalLayout->setContentsMargins(5, 20, 5, -1);
-				tmp_btn_nd->btn = new QPushButton(device_id);
-
-				signalMapper = new QSignalMapper(this);
-				signalMapper->setMapping(tmp_btn_nd->btn, device_id);
-
-				if(status == "1")
-				{
-					tmp_btn_nd->btn->setStyleSheet(QString::fromUtf8("padding: 10%;background-color: #317AD7;color: #FFF;"));
-					tmp_btn_nd->btn_state = 1;
-				}
-				else
-				{
-					tmp_btn_nd->btn->setStyleSheet(QString::fromUtf8("padding: 10%;background-color: #525252;color: #FFF;"));
-					tmp_btn_nd->btn_state = 0;
-				}
-
-				tmp_btn_nd->btn->setText(device_name);
-				tmp_btn_nd->device_name = device_name;
-				tmp_btn_nd->room_name = room_name;
-
-				if(room_name != "-1")
-					verticalLayout->addWidget(tmp_btn_nd->btn);
-
-				verticalLayout->setStretch(0, 3);
-
-				if(device_is_var == "1")
-				{
-					tmp_btn_nd->slider = new QSlider(room);
-					tmp_btn_nd->slider->setOrientation(Qt::Horizontal);
-					if(rm%2 == 0)
-						tmp_btn_nd->slider->setStyleSheet(QString::fromUtf8("background-color: rgb(240, 240, 240);"));
-					else
-						tmp_btn_nd->slider->setStyleSheet(QString::fromUtf8("background-color: rgb(208, 223, 232);"));
-
-					tmp_btn_nd->slider->setValue(stoi(slider_value.toStdString()));
-					tmp_btn_nd->slider_val = stoi(slider_value.toStdString());
-					if(room_name != "-1")
-						verticalLayout->addWidget(tmp_btn_nd->slider);
-					tmp_btn_nd->label = NULL;
-					tmp_btn_nd->is_var = true;
-				}
-				else
-				{
-					tmp_btn_nd->label = new QLabel();
-					if(rm%2 == 0)
-						tmp_btn_nd->label->setStyleSheet(QString::fromUtf8("font-size: 0px;background-color: rgb(240, 240, 240);"));
-					else
-						tmp_btn_nd->label->setStyleSheet(QString::fromUtf8("font-size: 0px;background-color: rgb(208, 223, 232);"));
-					if(room_name != "-1")
-						verticalLayout->addWidget(tmp_btn_nd->label);
-					tmp_btn_nd->slider = NULL;
-					tmp_btn_nd->slider_val = 0;
-					tmp_btn_nd->is_var = false;
-				}
-				if(room_name != "-1")
-					gridLayoutForRoom->addLayout(verticalLayout, row, col, 1, 1);
-
-				if(col == 7)
-				{
-					col = 0;
-					row++;
-				}
-				else
-					col++;
-
-				connect(tmp_btn_nd->btn, SIGNAL(clicked()), signalMapper, SLOT(map()));
-				connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(button_clicked_slot(QString)));
-
-				btn_list.append(tmp_btn_nd);
-			}
-			if(room_name != "-1")
-			{
-				for(int sp = 0; sp < 8; sp++)
-				{
-					horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-					gridLayoutForRoom->addItem(horizontalSpacer, row+1, sp, 1, 1);
-				}
-
-				gridLayout->addWidget(room, rm, 0, 1, 1);
-				rm++;
-			}
-
-		}
-		if(rm)
-		{
-			verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Expanding);
-			gridLayout->addItem(verticalSpacer, rm+1, 0, 1, 1);
-		}
-
-		scrollArea->setWidget(scrollAreaWidgetContents);
-		ui->verticalLayoutForRooms->addWidget(scrollArea);
-
-		cout << "------------- Room device render success --------------------" << endl;
-		get_i2c_web_status();
+		btn_list.clear();
 	}
+	clearLayout(ui->verticalLayoutForRooms);
+
+	QJsonArray roomArray = get_json_array_from_response(GET_ROOM_DEVICE_LIST);
+
+	// creating main_room_container
+	scrollArea = new QScrollArea();
+	QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	sizePolicy.setHorizontalStretch(0);
+	sizePolicy.setVerticalStretch(0);
+	sizePolicy.setHeightForWidth(scrollArea->sizePolicy().hasHeightForWidth());
+	scrollArea->setSizePolicy(sizePolicy);
+	scrollArea->setLayoutDirection(Qt::LeftToRight);
+	scrollArea->setWidgetResizable(true);
+
+	scrollAreaWidgetContents = new QWidget();
+	gridLayout = new QGridLayout(scrollAreaWidgetContents);
+	int rm = 0;
+
+	foreach (const QJsonValue &room_item, roomArray)
+	{
+		QString room_name = room_item.toObject().value("room_name").toString();
+		QString room_id = room_item.toObject().value("room_id").toString();
+
+		if(room_id != "-1")
+		{
+			room = new QGroupBox(scrollAreaWidgetContents);
+			QSizePolicy sizePolicy2(QSizePolicy::Expanding, QSizePolicy::Fixed);
+			sizePolicy2.setHeightForWidth(room->sizePolicy().hasHeightForWidth());
+			room->setSizePolicy(sizePolicy2);
+			room->setTitle(room_name);
+
+			if(rm%2 == 0)
+			{
+				room->setStyleSheet(QString::fromUtf8(" \
+						QGroupBox::title \
+						{ \
+							background-color: #FFFFFF; \
+							color: #0A75E1; \
+							subcontrol-origin: margin; \
+							margin-top: 8px; \
+							border-radius: 5px; \
+							padding: 6px; \
+							border: 1px solid #000000; \
+						} \
+						QGroupBox \
+						{ \
+							background-color: rgb(240, 240, 240); \
+							font-size: 16px; \
+						}" \
+				));
+			}
+			else
+			{
+				room->setStyleSheet(QString::fromUtf8(" \
+						QGroupBox::title \
+						{ \
+							background-color: #FFFFFF; \
+							color: #2D84DB; \
+							subcontrol-origin: margin; \
+							margin-top: 8px; \
+							border-radius: 5px; \
+							padding: 6px; \
+							border: 1px solid #000000; \
+						} \
+						QGroupBox \
+						{ \
+							background-color: rgb(208, 223, 232); \
+							font-size: 16px; \
+						}" \
+				));
+			}
+
+			room->setAlignment(Qt::AlignLeading|Qt::AlignVCenter|Qt::AlignVCenter);
+		}
+		gridLayoutForRoom = new QGridLayout(room);
+
+		QJsonArray dev_array = room_item.toObject().value("dev_list").toArray();
+
+		int row = 0;
+		int col = 0;
+
+		foreach (const QJsonValue &device, dev_array)
+		{
+			tmp_btn_nd = new struct btn_node;
+
+			QString device_name = device.toObject().value("d_name").toString();
+			QString device_id = device.toObject().value("dev_id").toString();
+			QString status = device.toObject().value("status").toString();
+			QString device_is_var = device.toObject().value("is_var").toString();
+			QString slider_value = device.toObject().value("slider_value").toString();
+
+			tmp_btn_nd->pin_num = device.toObject().value("pin").toInt();
+			//tmp_btn_nd->mod_add = hex_to_int(device.toObject().value("mod_add").toString().toStdString());
+			// int mod_add_int = stoi(mod_add.toStdString().substr(2, 2), 0, 16);
+			tmp_btn_nd->mod_add = stoi(device.toObject().value("mod_add").toString().toStdString().substr(2, 2), 0, 16);
+
+			tmp_btn_nd->device_id = device_id;
+
+			verticalLayout = new QVBoxLayout();
+			verticalLayout->setSpacing(6);
+			verticalLayout->setContentsMargins(5, 20, 5, -1);
+			tmp_btn_nd->btn = new QPushButton(device_id);
+
+			signalMapper = new QSignalMapper(this);
+			signalMapper->setMapping(tmp_btn_nd->btn, device_id);
+
+			if(status == "1")
+			{
+				tmp_btn_nd->btn->setStyleSheet(QString::fromUtf8("padding: 10%;background-color: #317AD7;color: #FFF;"));
+				tmp_btn_nd->btn_state = 1;
+			}
+			else
+			{
+				tmp_btn_nd->btn->setStyleSheet(QString::fromUtf8("padding: 10%;background-color: #525252;color: #FFF;"));
+				tmp_btn_nd->btn_state = 0;
+			}
+
+			tmp_btn_nd->btn->setText(device_name);
+			tmp_btn_nd->device_name = device_name;
+			tmp_btn_nd->room_name = room_name;
+
+			if(room_id != "-1")
+				verticalLayout->addWidget(tmp_btn_nd->btn);
+
+			verticalLayout->setStretch(0, 3);
+
+			if(device_is_var == "1")
+			{
+				tmp_btn_nd->slider = new QSlider(room);
+				tmp_btn_nd->slider->setOrientation(Qt::Horizontal);
+				if(rm%2 == 0)
+					tmp_btn_nd->slider->setStyleSheet(QString::fromUtf8("background-color: rgb(240, 240, 240);"));
+				else
+					tmp_btn_nd->slider->setStyleSheet(QString::fromUtf8("background-color: rgb(208, 223, 232);"));
+
+				tmp_btn_nd->slider->setValue(stoi(slider_value.toStdString()));
+				tmp_btn_nd->slider_val = stoi(slider_value.toStdString());
+				if(room_id != "-1")
+					verticalLayout->addWidget(tmp_btn_nd->slider);
+				tmp_btn_nd->label = NULL;
+				tmp_btn_nd->is_var = true;
+			}
+			else
+			{
+				tmp_btn_nd->label = new QLabel();
+				if(rm%2 == 0)
+					tmp_btn_nd->label->setStyleSheet(QString::fromUtf8("font-size: 0px;background-color: rgb(240, 240, 240);"));
+				else
+					tmp_btn_nd->label->setStyleSheet(QString::fromUtf8("font-size: 0px;background-color: rgb(208, 223, 232);"));
+				if(room_id != "-1")
+					verticalLayout->addWidget(tmp_btn_nd->label);
+				tmp_btn_nd->slider = NULL;
+				tmp_btn_nd->slider_val = 0;
+				tmp_btn_nd->is_var = false;
+			}
+			if(room_id != "-1")
+				gridLayoutForRoom->addLayout(verticalLayout, row, col, 1, 1);
+
+			if(col == 7)
+			{
+				col = 0;
+				row++;
+			}
+			else
+				col++;
+
+			connect(tmp_btn_nd->btn, SIGNAL(clicked()), signalMapper, SLOT(map()));
+			connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(button_clicked_slot(QString)));
+
+			btn_list.append(tmp_btn_nd);
+		}
+		if(room_id != "-1")
+		{
+			for(int sp = 0; sp < 8; sp++)
+			{
+				horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+				gridLayoutForRoom->addItem(horizontalSpacer, row+1, sp, 1, 1);
+			}
+
+			gridLayout->addWidget(room, rm, 0, 1, 1);
+			rm++;
+		}
+
+	}
+	if(rm)
+	{
+		verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Expanding);
+		gridLayout->addItem(verticalSpacer, rm+1, 0, 1, 1);
+	}
+
+	scrollArea->setWidget(scrollAreaWidgetContents);
+	ui->verticalLayoutForRooms->addWidget(scrollArea);
+
+	cout << "------------- Room device render success --------------------" << endl;
+	get_i2c_web_status();
 }
 
 void dashboard::render_dashboard_room_btn_state()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	// render using dco = 3 data
-	if(device_controller_api_response_parse())
-	{
-		cout << "\n\nRender dashboard_room_btn_state data : " << get_device_controller_api_response() << endl << endl;
-		QJsonArray roomArray = get_json_array_from_response();
-		foreach (const QJsonValue &room, roomArray)
-		{
-			QJsonArray dev_array = room.toObject().value("dev_list").toArray();
-			foreach (const QJsonValue &device, dev_array)
-			{
-				// setting up temp variables
-				QString device_id = device.toObject().value("dev_id").toString();
-				QString device_status_value = device.toObject().value("dev_status").toString();
-				QString device_var_value = device.toObject().value("var_value").toString();
 
-				struct btn_node *btn_nd;
-				foreach(btn_nd, btn_list)
+	cout << "\n\nDashboard_room_btn_state: " << get_device_controller_api_response(GET_ROOM_DEVICE_STATUS) << endl << endl;
+	QJsonArray roomArray = get_json_array_from_response(GET_ROOM_DEVICE_STATUS);
+	foreach (const QJsonValue &room, roomArray)
+	{
+		QJsonArray dev_array = room.toObject().value("dev_list").toArray();
+		foreach (const QJsonValue &device, dev_array)
+		{
+			// setting up temp variables
+			QString device_id = device.toObject().value("dev_id").toString();
+			QString device_status_value = device.toObject().value("dev_status").toString();
+			QString device_var_value = device.toObject().value("var_value").toString();
+
+			struct btn_node *btn_nd;
+			foreach(btn_nd, btn_list)
+			{
+				if(btn_nd->device_id == device_id)
 				{
-					if(btn_nd->device_id == device_id)
+					if(device_status_value == "1")
 					{
-						if(device_status_value == "1")
-						{
-							btn_nd->btn_state = 1;
-							// turning btn on
-							btn_nd->btn->setStyleSheet("padding: 10%;background-color: #317AD7;color: #FFF;");
-						}
-						else
-						{
-							btn_nd->btn_state = 0;
-							// turning btn off
-							btn_nd->btn->setStyleSheet("padding: 10%;background-color: #525252;color: #FFF;");
-						}
-						// checking is_var enabled or not
-						if(btn_nd->is_var)
-						{
-							btn_nd->slider->setValue(stoi(device_var_value.toStdString()));
-							btn_nd->slider_val = stoi(device_var_value.toStdString());
-						}
+						btn_nd->btn_state = 1;
+						// turning btn on
+						btn_nd->btn->setStyleSheet("padding: 10%;background-color: #317AD7;color: #FFF;");
+					}
+					else
+					{
+						btn_nd->btn_state = 0;
+						// turning btn off
+						btn_nd->btn->setStyleSheet("padding: 10%;background-color: #525252;color: #FFF;");
+					}
+					// checking is_var enabled or not
+					if(btn_nd->is_var)
+					{
+						btn_nd->slider->setValue(stoi(device_var_value.toStdString()));
+						btn_nd->slider_val = stoi(device_var_value.toStdString());
 					}
 				}
 			}
 		}
-		cout << "------------- state render success --------------------" << endl;
-
-		get_i2c_web_status();
 	}
+	cout << "------------- state render success --------------------" << endl;
+
+	get_i2c_web_status();
 }
 
 void dashboard::button_clicked_slot(QString device_id)
@@ -616,75 +592,75 @@ void dashboard::render_i2c_data()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 
-	if(device_controller_api_response_parse())
+	ui->online_offline_label->setText("<b><font color='#228B22'>Online</font></b>");
+	timer_for_i2c_data_read_from_mod->start(1000);
+	string tmp_api_resp = dashboard::get_device_controller_api_response(GET_I2C_DATA);
+	cout << "\n\nI2C data : " << tmp_api_resp << endl << endl;
+	// checking if device state is updated or not
+	if(api_i2c_data == "" || api_i2c_data != tmp_api_resp)
 	{
-		ui->online_offline_label->setText("<b><font color='#228B22'>Online</font></b>");
-		timer_for_i2c_data_read_from_mod->start(1000);
-		string tmp_api_resp = dashboard::get_device_controller_api_response();
-		cout << "\n\nI2C data : \n" << tmp_api_resp << endl << endl;
-		// checking if device state is updated or not
-		if(api_i2c_data == "" || api_i2c_data != tmp_api_resp)
-		{
-			// set updated device state in temp variable
+		// set updated device state in temp variable
+		if(api_i2c_data == "")
 			api_i2c_data = tmp_api_resp;
-			QJsonArray i2c_array = get_json_array_from_response();
+		QJsonArray i2c_array = get_json_array_from_response(GET_I2C_DATA);
 
-			int data_to_send = 0;
-			int mod_Add;
+		int data_to_send = 0;
+		int mod_Add;
 
-			if(!mod_data_list.isEmpty())
-				mod_data_list.clear();
+		if(!mod_data_list.isEmpty())
+			mod_data_list.clear();
 
-			//assign value
-			foreach(const QJsonValue mod_info, i2c_array)
+		//assign value
+		foreach(const QJsonValue mod_info, i2c_array)
+		{
+			struct mod_data_node *mod_data_nd = new struct mod_data_node;
+			mod_data_nd->mod_add = 0;
+			mod_data_nd->current_web = 0;
+			mod_data_nd->prev_web = 0;
+			mod_data_nd->current_mod = 0;
+			mod_data_nd->prev_mod = 0;
+
+			mod_Add = hex_to_int(mod_info.toObject().value("mod_add").toString().toStdString());
+
+			QJsonArray status_array = mod_info.toObject().value("pin_status").toArray();
+
+			int tmp = 1;
+			for(int i = 0; i < 8; i++)
 			{
-				struct mod_data_node *mod_data_nd = new struct mod_data_node;
-				mod_data_nd->mod_add = 0;
-				mod_data_nd->current_web = 0;
-				mod_data_nd->prev_web = 0;
-				mod_data_nd->current_mod = 0;
-				mod_data_nd->prev_mod = 0;
-
-				mod_Add = hex_to_int(mod_info.toObject().value("mod_add").toString().toStdString());
-
-				QJsonArray status_array = mod_info.toObject().value("pin_status").toArray();
-
-				int tmp = 1;
-				for(int i = 0; i < 8; i++)
-				{
-					if(status_array[i] == 1)
-						data_to_send += tmp;
-					tmp *= 2;
-				}
-
-				cout << "\n\nMod address : " << mod_Add << "\nStatus Code : " << data_to_send << endl;
-				mod_data_nd->mod_add = mod_Add;
-				mod_data_nd->prev_web = mod_data_nd->current_web;
-				mod_data_nd->current_web = data_to_send;
-
-				mod_data_list.append(mod_data_nd);
-
-				// if(mod_data_nd->current_mod != mod_data_nd->current_web)
-				// {	//ERROR: ervdery time the current_mod is 0 due to fresh initilization
-					cout << "current mod: " << mod_data_nd->current_mod << "\t current_web: " << mod_data_nd->current_web << endl;
-					emit send_i2c_data_to_module_signal(mod_Add, data_to_send);
-				//}
-				data_to_send = 0;
+				if(status_array[i] == 1)
+					data_to_send += tmp;
+				tmp *= 2;
 			}
 
-			ui->module_current_status_btn->show();
+			cout << "\n\nMod address : " << mod_Add << "\nStatus Code : " << data_to_send << endl;
+			mod_data_nd->mod_add = mod_Add;
+			mod_data_nd->prev_web = mod_data_nd->current_web;
+			mod_data_nd->current_web = data_to_send;
 
-			// get_room_device_status api call
-			if(api_i2c_data.length() == tmp_api_resp.length())
-			{
-				set_device_controller_api_request(GET_ROOM_DEVICE_STATUS);
-				send_device_controller_api_request();
-			}
-			else
-			{
-				set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
-				send_device_controller_api_request();
-			}
+			mod_data_list.append(mod_data_nd);
+
+			// if(mod_data_nd->current_mod != mod_data_nd->current_web)
+			// {	//ERROR: ervdery time the current_mod is 0 due to fresh initilization
+				cout << "current mod: " << mod_data_nd->current_mod << "\t current_web: " << mod_data_nd->current_web << endl;
+				emit send_i2c_data_to_module_signal(mod_Add, data_to_send);
+			//}
+			data_to_send = 0;
+		}
+
+		ui->module_current_status_btn->show();
+
+		// get_room_device_status api call
+		if(api_i2c_data.length() == tmp_api_resp.length())
+		{
+			api_i2c_data = tmp_api_resp;
+			set_device_controller_api_request(GET_ROOM_DEVICE_STATUS);
+			send_device_controller_api_request();
+		}
+		else
+		{
+			api_i2c_data = tmp_api_resp;
+			set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
+			send_device_controller_api_request();
 		}
 	}
 }

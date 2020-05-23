@@ -33,6 +33,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <iostream>
+#include <string>
 
 #include "device_controller_api.h"
 #include "main.h"
@@ -78,9 +79,8 @@ public:
 	void set_dashboard_network_interface(QNetworkAccessManager *QNAM, QNetworkRequest *QNR);
 	bool dashboard_login_using_token();
 
-	void update_dashboard_gui();
+	void update_dashboard_gui(int response_type);
 	void send_device_controller_api_request();
-	bool device_controller_api_response_parse();
 
 	// render methods
 	void render_dashboard_login();
@@ -113,7 +113,7 @@ private slots:
 
 	void on_module_current_status_btn_clicked();
 	void on_new_module_info_btn_clicked();
-	//void refresh_module_manager_slot();
+	void new_module_linked_slot();
 
 public slots:
 	void add_new_module_api_request_slot(string);
@@ -122,7 +122,7 @@ private:
 	Ui::dashboard *ui;
 	int counter_for_ip_check;
 
-	QJsonArray get_json_array_from_response();
+	QJsonArray get_json_array_from_response(int);
 	int hex_to_int(string hex);
 };
 

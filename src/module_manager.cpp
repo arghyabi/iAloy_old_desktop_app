@@ -27,24 +27,22 @@ module_manager::module_manager(QWidget *parent) :
 }
 void module_manager::add_new_module_api_resp_slot(string resp)
 {
-	if(resp == "11" || resp == "12")
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	if(resp == "1" || resp == "2")
 		link_mod_add_array[module_index][1] = MODULE_LINKING_DONE;
 	else
 		link_mod_add_array[module_index][1] = MODULE_LINKING_FAILED;
 
 	render_link_button_list();
+
+	if(link_mod_add_array[module_index][1] == MODULE_LINKING_DONE)
+		emit new_module_linked_signal();
 }
 
 module_manager::~module_manager()
 {
 	delete ui;
 }
-
-// void module_manager::send_add_module_api_request()
-// {
-// 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-// 	this->DBNetworkManager->get(NetworkRequest);
-// }
 
 void module_manager::init(QLinkedList<btn_node*> tmp_btn_list)
 {
@@ -55,7 +53,7 @@ void module_manager::init(QLinkedList<btn_node*> tmp_btn_list)
 
 	//////////////////////////////////////////////////////////////
 
-	link_button_length = 0;
+	link_button_array_length = 0;
 	for(int index = 0; index < 117; index++)
 	{
 		int mod_add = index + 3;
@@ -73,8 +71,8 @@ void module_manager::init(QLinkedList<btn_node*> tmp_btn_list)
 
 		if(!isFound && module_status_array[index] == 1)
 		{
-			link_mod_add_array[link_button_length][0] = mod_add;
-			link_mod_add_array[link_button_length++][1] = MODULE_NEED_TO_BE_LINKED;
+			link_mod_add_array[link_button_array_length][0] = mod_add;
+			link_mod_add_array[link_button_array_length++][1] = MODULE_NEED_TO_BE_LINKED;
 		}
 	}
 	render_link_button_list();
@@ -142,7 +140,7 @@ void module_manager::render_link_button_list()
 	clearLayout(ui->vLayout_linking_area);
 	scrollAreaWidgetContents = new QWidget();
 
-	for(int count = 0; count < link_button_length; count++)
+	for(int count = 0; count < link_button_array_length; count++)
 	{
 		hLayoutLinkModule = new QHBoxLayout();
 		CountLabel = new QLabel(scrollAreaWidgetContents);
@@ -152,7 +150,7 @@ void module_manager::render_link_button_list()
 		hSpacerLinkModuleRight = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
 		QString mod_add_str = QString::fromStdString(int_to_hex(link_mod_add_array[count][0]));
-		CountLabel->setText("<font style=\"font-size:14pt; font-weight:600; color:#3465a4;\">"+QString::number(count)+" : </font>");
+		CountLabel->setText("<font style=\"font-size:14pt; font-weight:600; color:#3465a4;\">"+QString::number(count+1)+" : </font>");
 
 		hLayoutLinkModule->addItem(hSpacerLinkModuleLeft);
 		hLayoutLinkModule->addWidget(CountLabel);

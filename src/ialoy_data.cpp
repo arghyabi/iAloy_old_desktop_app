@@ -147,11 +147,45 @@ void ialoy_main_data::set_pin(string pin)
 	this->pin = pin;
 }
 
-void ialoy_main_data::set_device_controller_api_response(string resp)
+void ialoy_main_data::set_device_controller_api_response(int response_type, string resp)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	cout << "Response data to store : " << resp << endl;
-	this->device_controller_api_response = resp;
+	switch(response_type)
+	{
+		case DEVICE_CONTROLLER_LOGIN_USING_TOKEN:
+			this->device_controller_login_using_token_response = resp;
+			break;
+		case GET_DEVICE_DETAIL_STATUS:
+			this->get_device_detail_status_response = resp;
+			break;
+		case GET_ROOM_DEVICE_LIST:
+			this->get_room_device_list_response = resp;
+			break;
+		case GET_ROOM_DEVICE_STATUS:
+			this->get_room_device_status_response = resp;
+			break;
+		case UPDATE_STATUS:
+			this->update_status_response = resp;
+			break;
+		case UPDATE_RANGE:
+			this->update_range_response = resp;
+			break;
+		case GET_CONNECTED_PI_LIST:
+			this->get_connected_pi_list_response = resp;
+			break;
+		case UPDATE_STATUS_FOR_PI:
+			this->update_status_for_pi_response = resp;
+			break;
+		case UPDATE_RANGE_FOR_PI:
+			this->update_range_for_pi_response = resp;
+			break;
+		case GET_I2C_DATA:
+			this->get_i2c_data_response = resp;
+			break;
+		case ADD_NEW_MODULE:
+			this->add_new_module_response = resp;
+			break;
+	}
 }
 
 void ialoy_main_data::set_device_controller_api_error_msg(string msg)
@@ -349,10 +383,46 @@ string ialoy_main_data::get_pin()
 	return this->pin;
 }
 
-string ialoy_main_data::get_device_controller_api_response()
+string ialoy_main_data::get_device_controller_api_response(int response_type)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	return this->device_controller_api_response;
+	switch(response_type)
+	{
+		case DEVICE_CONTROLLER_LOGIN_USING_TOKEN:
+			return this->device_controller_login_using_token_response;
+			break;
+		case GET_DEVICE_DETAIL_STATUS:
+			return this->get_device_detail_status_response;
+			break;
+		case GET_ROOM_DEVICE_LIST:
+			return this->get_room_device_list_response;
+			break;
+		case GET_ROOM_DEVICE_STATUS:
+			return this->get_room_device_status_response;
+			break;
+		case UPDATE_STATUS:
+			return this->update_status_response;
+			break;
+		case UPDATE_RANGE:
+			return this->update_range_response;
+			break;
+		case GET_CONNECTED_PI_LIST:
+			return this->get_connected_pi_list_response;
+			break;
+		case UPDATE_STATUS_FOR_PI:
+			return this->update_status_for_pi_response;
+			break;
+		case UPDATE_RANGE_FOR_PI:
+			return this->update_range_for_pi_response;
+			break;
+		case GET_I2C_DATA:
+			return this->get_i2c_data_response;
+			break;
+		case ADD_NEW_MODULE:
+			return this->add_new_module_response;
+			break;
+	}
+	return NULL;
 }
 
 string ialoy_main_data::get_device_controller_api_error_msg()

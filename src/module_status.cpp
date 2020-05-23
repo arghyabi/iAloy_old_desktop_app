@@ -17,13 +17,13 @@ module_status::~module_status()
 	delete ui;
 }
 
-void module_status::button_clicked_slot(QString mod_add)
+void module_status::button_clicked_slot(QString btn_msg)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	cout << "buttton pressed: " << mod_add.toStdString() << endl;
+	cout << "buttton pressed: " << btn_msg.toStdString() << endl;
 	QMessageBox msgBox;
 	msgBox.setStyleSheet("QPushButton{padding: 10px; background-color:#3465A4; color: #FFF;}QMessageBox{height: auto; width: auto; padding-left: 20px; padding-right: 20px;}");
-	msgBox.setText("<font>" + mod_add + "</font>");
+	msgBox.setText("<font>" + btn_msg + "</font>");
 	msgBox.exec();
 
 }
@@ -40,6 +40,8 @@ void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 	int module_available_count = 0;
 	int module_disconnected_count = 0;
 	int module_not_available_count = 0;
+	int linked_module_available_count = 0;
+	int linked_module_not_available_count = 0;
 
 	QString head_style = "padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px; text-align: center; background-color: #005DD5; color: #FFF;";
 	QString body_style = "border: 1px solid #ddd; padding: 4px; text-align: center;";
@@ -56,7 +58,7 @@ void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 		// adding pushbutton to grid
 		int mod_add = index+3;
 		struct btn_node *btn_nd;
-		bool isFound = false;
+		int isFound = 0;
 		QString module_info;
 
 		QString room_name_array[8];
@@ -67,7 +69,10 @@ void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 		{
 			if(btn_nd->mod_add == mod_add)
 			{
-				isFound = true;
+				if(btn_nd->device_id == "-1")
+					isFound = -1;
+				else
+					isFound = 1;
 				QString tmp_room_name = btn_nd->room_name;
 				bool roomFound = false;
 
@@ -130,7 +135,7 @@ void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 		else
 			final_module_details_string += table_end + "<br/><br/><font color='#FF0000'><b>Module is not working.</b></font>";
 
-		if(isFound == false && room_count == 0)
+		if(isFound == 0 && room_count == 0)
 		{
 			if(status_array[index] == 1)
 				final_module_details_string = "<font><b>Module connected, but not linked</b></font>";
@@ -138,9 +143,17 @@ void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 				final_module_details_string = "<font><b>Address is available to burn new Module</b></font>";
 		}
 
+		if(isFound == -1)
+		{
+			if(status_array[index] == 1)
+				final_module_details_string = "<center><font color='#0000FF'><b>Module connected & linked<br/>Add button from Web</b></font></center>";
+			else if(status_array[index] == 0)
+				final_module_details_string = "<font><b>Module linked but not connected.</b></font>";
+		}
+
 
 		btn = new QPushButton(final_module_details_string);
-		if(isFound == true)
+		if(isFound == 1)
 		{
 			if(status_array[index] == 1)
 			{
@@ -153,7 +166,7 @@ void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 				module_disconnected_count++;
 			}
 		}
-		else
+		else if(isFound == 0)
 		{
 			if(status_array[index] == 1)
 			{
@@ -166,16 +179,33 @@ void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 				module_not_available_count++;
 			}
 		}
+		else
+		{
+			if(status_array[index] == 1)
+			{
+				btn->setStyleSheet(QString::fromUtf8("height: 16px; padding: 5%; background-color: #0000FF; color: #FFF;"));
+				linked_module_available_count++;
+			}
+			else if(status_array[index] == 0)
+			{
+				btn->setStyleSheet(QString::fromUtf8("height: 16px; padding: 5%; background-color: #FFFFFF; color: #000;"));
+				linked_module_not_available_count++;
+			}
+		}
+
 
 		btn->setText(QString::fromStdString(int_to_hex(mod_add)));
 		ui->status_grid_layout->addWidget(btn, row, col, 1,1);
 
-		QString active_module_status_msg = "<font color=#000000>Active : </font><font color=#1b9300 size=4>"+QString::number(module_active_count)+"</font>";
-		QString inactive_module_status_msg = "<font color=#000000>Inactive : </font><font color=#BC0000 size=4>"+QString::number(module_disconnected_count)+"</font>";
-		QString unlinked_module_status_msg = "<font color=#000000>Unlinked : </font><font color=#BFBF00 size=4>"+QString::number(module_available_count)+"</font>";
-		QString not_available_module_status_msg = "<font color=#000000>Not available : </font><font color=#434338 size=4>"+QString::number(module_not_available_count)+"</font>";
+		QString active_module_status_msg = "<font color=#000000>Active : </font><font style=\"color:#FFFFFF; background-color:#1b9300;\">&nbsp;&nbsp;"+QString::number(module_active_count)+"&nbsp;&nbsp;</font>";
+		QString inactive_module_status_msg = "<font color=#000000>Inactive : </font><font style=\"color:#FFFFFF; background-color:#BC0000;\">&nbsp;&nbsp;"+QString::number(module_disconnected_count)+"&nbsp;&nbsp;</font>";
+		QString unlinked_module_status_msg = "<font color=#000000>Unlinked : </font><font style=\"color:#FFFFFF; background-color:#BFBF00;\">&nbsp;&nbsp;"+QString::number(module_available_count)+"&nbsp;&nbsp;</font>";
+		QString not_available_module_status_msg = "<font color=#000000>Not available : </font><font style=\"color:#FFFFFF; background-color:#434338;\">&nbsp;&nbsp;"+QString::number(module_not_available_count)+"&nbsp;&nbsp;</font>";
+		QString linked_connected_module_status_msg = "<font color=#000000>Linked & connected : </font><font style=\"color:#FFFFFF; background-color:#0000FF;\">&nbsp;&nbsp;"+QString::number(linked_module_available_count)+"&nbsp;&nbsp;</font>";
+		QString linked_not_connected_module_status_msg = "<font color=#000000>Linked & not connected : </font><font style=\"color:#000000; background-color:#FFFFFF;\">&nbsp;&nbsp;"+QString::number(linked_module_not_available_count)+"&nbsp;&nbsp;</font>";
 
-		QString overall_module_status_msg = active_module_status_msg+"&nbsp;&nbsp;&nbsp;&nbsp;"+inactive_module_status_msg+"<br/>"+unlinked_module_status_msg+"&nbsp;&nbsp;&nbsp;&nbsp;"+not_available_module_status_msg;
+		QString overall_module_status_msg = active_module_status_msg+"&nbsp;&nbsp;&nbsp;&nbsp;"+inactive_module_status_msg+"<br/>"+unlinked_module_status_msg+"&nbsp;&nbsp;&nbsp;&nbsp;"+not_available_module_status_msg \
+				+"<br/>"+linked_connected_module_status_msg+"&nbsp;&nbsp;&nbsp;&nbsp;"+linked_not_connected_module_status_msg;
 		ui->overall_module_status->setText(overall_module_status_msg);
 
 		signalMapper = new QSignalMapper(this);
@@ -184,7 +214,7 @@ void module_status::init(QLinkedList<btn_node*> tmp_btn_list)
 		connect(btn, SIGNAL(clicked()), signalMapper, SLOT(map()));
 		connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(button_clicked_slot(QString)));
 
-		if(col == 12)
+		if(col == 10)
 		{
 			col = 0;
 			row++;
