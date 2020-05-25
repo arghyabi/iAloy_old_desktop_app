@@ -12,14 +12,15 @@ Features :
 TODO: Update manager should be updated.
 
 5. Settings
-    a. fonts
-    b. display
-        i. resulation
-        ii. brightness
-    c. date & time
-    d. Network
+    a. Network
         i. Wifi,
         ii. Proxy,
+    b. display
+        i. fonts,
+        ii. resulation,
+        iii. brightness
+    c. date & time
+    d. Users
     e. about
 
 ** Module flash button in head menu

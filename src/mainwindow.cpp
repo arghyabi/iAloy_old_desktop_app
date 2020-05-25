@@ -46,6 +46,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	ui->available_update_btn->setIcon(QIcon(QString::fromStdString(MainWindow::get_ic_plus_brown_icon_path())));
 
+	settings *settings_obj = new settings();
+	connect(this, SIGNAL(settings_window_show_signal(int)), settings_obj, SLOT(init(int)));
+
 	NetworkManager = new QNetworkAccessManager();
 	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
 			set_api_response("");
@@ -905,7 +908,7 @@ void MainWindow::on_wifi_tool_button_clicked()
 void MainWindow::on_settings_tool_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	settings_window_show(true);
+	emit settings_window_show_signal(0);
 }
 
 void MainWindow::on_app_update_button_clicked()

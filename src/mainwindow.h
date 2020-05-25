@@ -66,6 +66,9 @@ private slots:
 	void on_app_update_button_clicked();
 	void on_power_tool_button_clicked();
 
+signals:
+	void settings_window_show_signal(int);
+
 private:
 	Ui::MainWindow *ui;
 	bool get_pi_name_timer_flag;

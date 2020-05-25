@@ -122,6 +122,15 @@ void ialoy_web_api::set_api_request(api_request_type genarate_url_flag)
 				}
 			}
 			break;
+
+		case VERIFY_PASSWORD:
+			this->req_url = url+"?aco="+aco+"password="+this->get_password();
+			break;
+
+		case UPDATE_PASSWORD:
+			this->req_url = url+"?aco="+aco+"password="+this->get_password();
+			break;
+
 		default:
 			break;
 	}

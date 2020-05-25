@@ -102,7 +102,9 @@ enum device_controller_api_request_type
 	UPDATE_STATUS_FOR_PI,
 	UPDATE_RANGE_FOR_PI,
 	GET_I2C_DATA,
-	ADD_NEW_MODULE
+	ADD_NEW_MODULE,
+	VERIFY_PASSWORD,
+	UPDATE_PASSWORD
 };
 
 enum module_linking_stage
@@ -123,7 +125,8 @@ private:
 	string device_controller_login_using_token_response,get_device_detail_status_response, \
 		get_room_device_list_response, get_room_device_status_response, update_status_response, \
 		update_range_response, get_connected_pi_list_response, update_status_for_pi_response, \
-		update_range_for_pi_response, get_i2c_data_response, add_new_module_response;
+		update_range_for_pi_response, get_i2c_data_response, add_new_module_response, verify_password_response, \
+		update_password_response;
 
 	string email, token;
 

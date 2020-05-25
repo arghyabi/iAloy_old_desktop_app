@@ -185,6 +185,12 @@ void ialoy_main_data::set_device_controller_api_response(int response_type, stri
 		case ADD_NEW_MODULE:
 			this->add_new_module_response = resp;
 			break;
+		case VERIFY_PASSWORD:
+			this->verify_password_response = resp;
+			break;
+		case UPDATE_PASSWORD:
+			this->update_password_response = resp;
+			break;
 	}
 }
 
@@ -420,6 +426,12 @@ string ialoy_main_data::get_device_controller_api_response(int response_type)
 			break;
 		case ADD_NEW_MODULE:
 			return this->add_new_module_response;
+			break;
+		case VERIFY_PASSWORD:
+			return this->verify_password_response;
+			break;
+		case UPDATE_PASSWORD:
+			return this->update_password_response;
 			break;
 	}
 	return NULL;

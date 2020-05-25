@@ -84,9 +84,22 @@ void device_controller_api::set_device_controller_api_request(device_controller_
 			break;
 
 		case ADD_NEW_MODULE:
-			{
-				this->req_url = this->url+"?dco="+dco+"&mod_add="+this->get_mod_add();
-			}
+			this->req_url = this->url+"?dco="+dco+"&mod_add="+this->get_mod_add();
+			break;
+
+		case VERIFY_PASSWORD:
+		{
+			string login_url = "http://ialoy.arghyabiswas.com/desktop_api/set_up_req_mngr.php";
+			this->req_url = login_url+"?aco=11&password="+this->get_password();
+			break;
+		}
+
+		case UPDATE_PASSWORD:
+		{
+			string login_url = "http://ialoy.arghyabiswas.com/desktop_api/set_up_req_mngr.php";
+			this->req_url = login_url+"?aco=12&password="+this->get_password();
+			break;
+		}
 
 		default:
 			break;

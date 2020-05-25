@@ -40,6 +40,7 @@
 #include "i2c_data.h"
 #include "module_status.h"
 #include "module_manager.h"
+#include "settings.h"
 
 using namespace std;
 
@@ -97,6 +98,10 @@ signals:
 	void module_manager_window_show_signal(QLinkedList<btn_node*>);
 	void add_new_module_api_resp_signal(string);
 
+	void verify_password_response_signal(bool);
+	void update_password_response_signal(bool);
+	void settings_window_show_signal(int);
+
 private slots:
 	void update_time();
 	void ip_address_update();
@@ -114,6 +119,9 @@ private slots:
 	void on_module_current_status_btn_clicked();
 	void on_new_module_info_btn_clicked();
 	void new_module_linked_slot();
+
+	void verify_password_slot(string);
+	void update_password_slot(string);
 
 public slots:
 	void add_new_module_api_request_slot(string);

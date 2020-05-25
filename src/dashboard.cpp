@@ -57,6 +57,31 @@ dashboard::dashboard(QWidget *parent) :
 	connect(module_manager_obj, SIGNAL(add_new_module_api_request_signal(string)), this, SLOT(add_new_module_api_request_slot(string)));
 	connect(this, SIGNAL(add_new_module_api_resp_signal(string)), module_manager_obj, SLOT(add_new_module_api_resp_slot(string)));
 	connect(module_manager_obj, SIGNAL(new_module_linked_signal()), this, SLOT(new_module_linked_slot()));
+
+	settings *settings_obj = new settings();
+	connect(this, SIGNAL(settings_window_show_signal(int)), settings_obj, SLOT(init(int)));
+	connect(settings_obj, SIGNAL(verify_password_signal(string)), this, SLOT(verify_password_slot(string)));
+	connect(settings_obj, SIGNAL(update_password_signal(string)), this, SLOT(update_password_slot(string)));
+	connect(this, SIGNAL(verify_password_response_signal(bool)), settings_obj, SLOT(verify_password_response_slot(bool)));
+	connect(this, SIGNAL(update_password_response_signal(bool)), settings_obj, SLOT(update_password_response_slot(bool)));
+}
+
+void dashboard::verify_password_slot(string pwd)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	timer_for_i2c_data_read_from_web->stop();
+	this->set_password(pwd);
+	set_device_controller_api_request(VERIFY_PASSWORD);
+	send_device_controller_api_request();
+}
+
+void dashboard::update_password_slot(string pwd)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	timer_for_i2c_data_read_from_web->stop();
+	this->set_password(pwd);
+	set_device_controller_api_request(UPDATE_PASSWORD);
+	send_device_controller_api_request();
 }
 
 void dashboard::add_new_module_api_request_slot(string mod_add)
@@ -79,6 +104,7 @@ void dashboard::update_time()
 
 void dashboard::new_module_linked_slot()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
 	send_device_controller_api_request();
 }
@@ -223,6 +249,23 @@ void dashboard::update_dashboard_gui(int response_type)
 			// link new module
 			emit add_new_module_api_resp_signal(get_device_controller_api_response(ADD_NEW_MODULE));
 			break;
+
+		case VERIFY_PASSWORD:
+			if(get_device_controller_api_response(VERIFY_PASSWORD) == "1")
+				emit verify_password_response_signal(true);
+			else
+				emit verify_password_response_signal(false);
+			timer_for_i2c_data_read_from_web->start(1000);
+			break;
+
+		case UPDATE_PASSWORD:
+			if(get_device_controller_api_response(UPDATE_PASSWORD) == "1")
+				emit update_password_response_signal(true);
+			else
+				emit update_password_response_signal(false);
+			timer_for_i2c_data_read_from_web->start(1000);
+			break;
+
 		default:
 			break;
 	}
@@ -831,7 +874,7 @@ void dashboard::on_power_tool_button_clicked()
 void dashboard::on_settings_tool_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	settings_window_show(true);
+	emit settings_window_show_signal(1);
 }
 
 void dashboard::on_wifi_tool_button_clicked()
