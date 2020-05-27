@@ -13,6 +13,7 @@ if [ $(cat /proc/cpuinfo | grep 'model name' | awk '{print tolower($4)}' | cut -
 	cp -r ../resource/photos/ iAloy_update_package/resource/
 	cp -r ../resource/scripts/ iAloy_update_package/resource/
 	cp -r ../resource/hex/ iAloy_update_package/resource/
+	cp -r ../resource/conf/ iAloy_update_package/resource/
 
 	if ls ../src/iAloy_Desktop_App > /dev/null; then
 		cp ../src/iAloy_Desktop_App iAloy_update_package/bin/iAloy

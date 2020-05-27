@@ -7,10 +7,22 @@ cp /usr/share/iAloy/.temp/iAloy_update_package/bin/iAloy /usr/bin
 
 chmod 777 /usr/bin/iAloy
 
+
+mkdir -p /usr/share/iAloy/photos/
+mkdir -p /usr/share/iAloy/scripts/
+mkdir -p /usr/share/iAloy/fonts/
+mkdir -p /usr/share/iAloy/hex/
+mkdir -p /usr/share/iAloy/.conf/
+mkdir -p /usr/share/iAloy/.temp/
+
+mkdir -p /usr/share/arduino
+mkdir -p /usr/share/arduino/conf
+
 cp /usr/share/iAloy/.temp/iAloy_update_package/resource/fonts/* /usr/share/iAloy/fonts/
 cp /usr/share/iAloy/.temp/iAloy_update_package/resource/photos/* /usr/share/iAloy/photos/
 cp /usr/share/iAloy/.temp/iAloy_update_package/resource/scripts/* /usr/share/iAloy/scripts/
 cp /usr/share/iAloy/.temp/iAloy_update_package/resource/hex/* /usr/share/iAloy/hex/
+cp /usr/share/iAloy/.temp/iAloy_update_package/resource/conf/* /usr/share/arduino/conf/
 
 chmod 777 /usr/share/iAloy/scripts/*
 

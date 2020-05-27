@@ -66,17 +66,34 @@ string module_manager_thread::modify(int address)
 	string str_address = int_to_hex(address << 1);
 	string first;
 	string last;
-	if(str_address.substr(2,1) != "")
-		first = str_address.substr(2,1);
-	else
+	string final_data;
+
+	if(str_address.substr(3,1) == "")
+	{
 		first = "0";
-
-	if(str_address.substr(3,1) != "")
-		last = str_address.substr(3,1);
+		last = str_address.substr(2,1);
+	}
 	else
-		last = "0";
+	{
+		first = str_address.substr(2,1);
+		last = str_address.substr(3,1);
+	}
 
-	string final_data = "8" + last + "E" + first + "8093";
+	switch(this->module_type_flag)
+	{
+		case ATMEGA328P:
+		{
+			final_data = "8" + last + "E" + first + "8093";
+			break;
+		}
+		case ATTINY88:
+		{
+			final_data = "91F78" + last + "E" + first;
+			break;
+		}
+	}
+
+
 	cout << "first:" << first << " last:" << last << " Final:" << final_data << endl;
 	return final_data;
 }
@@ -84,8 +101,25 @@ string module_manager_thread::modify(int address)
 string module_manager_thread::modify_code(string data, int address)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	string prefix = data.substr(0, 33);
-	string suffix = "";
+	string prefix;
+	string suffix;
+
+	switch(this->module_type_flag)
+	{
+		case ATMEGA328P:
+		{
+			prefix = data.substr(0, 33);
+			suffix = "";
+			break;
+		}
+		case ATTINY88:
+		{
+			prefix = data.substr(0, 25);
+			suffix = data.substr(33, 8);
+			break;
+		}
+	}
+
 	cout << "prefix: " << prefix << endl;
 	cout << "suffix: " << suffix << endl;
 	string modified_data = modify(address);
@@ -98,38 +132,66 @@ string module_manager_thread::modify_code(string data, int address)
 	return final_string;
 }
 
-void module_manager_thread::burn_module_slot(int address)
+void module_manager_thread::burn_module_slot(int address, int module_type_index)
 {
-	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	// removing previously kept .hex file
+	cout << ">>>> " << __PRETTY_FUNCTION__ << " address:" << address << endl;
 	system("rm -rf /usr/share/iAloy/.temp/*.hex");
+
 	string line;
-	ifstream myfile("/usr/share/iAloy/hex/template.hex");
-	ofstream outfile("/usr/share/iAloy/.temp/out-file.hex");
 	int line_index = 1;
-
-	if (myfile.is_open() && outfile.is_open())
-	{
-		while (getline(myfile,line))
-		{
-			if(line_index == 138)
-				line = modify_code(line, address);
-			outfile << line << endl;
-			line_index++;
-		}
-		myfile.close();
-		outfile.close();
-	}
-	else
-	{
-		cout << "Unable to open file";
-	}
-
-	// "avrdude -C/usr/share/arduino/conf/avrdude.conf -v -v -v -v -patmega328p -carduino -P/dev/ttyUSB0 -b115200 -D -Uflash:w:/usr/share/iAloy/.temp/out-file.hex:i -l/usr/share/iAloy/.temp/avrdude.log"
-	// "/usr/share/iAloy/.temp/out-file.hex"
 	QString avrdude = "avrdude";
 	QStringList arguments;
-	arguments << "-C/usr/share/arduino/conf/avrdude.conf" << "-v" << "-v" << "-v" << "-v" << "-patmega328p" << "-carduino" << "-P/dev/ttyUSB0" << "-b115200" << "-D" << "-Uflash:w:/usr/share/iAloy/.temp/out-file.hex:i" << "-l/usr/share/iAloy/.temp/avrdude.log";
+	this->module_type_flag = (module_type)module_type_index;
+	ofstream outfile("/usr/share/iAloy/.temp/out-file.hex");
+
+	switch (this->module_type_flag)
+	{
+		case ATTINY88:
+		{
+			ifstream myfile("/usr/share/iAloy/hex/template_for_attiny88.hex");
+			if (myfile.is_open() && outfile.is_open())
+			{
+				while (getline(myfile,line))
+				{
+					if(line_index == 124)
+						line = modify_code(line, address);
+					outfile << line << endl;
+					line_index++;
+				}
+				myfile.close();
+				outfile.close();
+			}
+			else
+				cout << "Unable to open file";
+
+			arguments << "-v" << "-C/usr/share/arduino/conf/avrdude.conf" << "-pattiny88" << "-clinuxgpio" << "-e" << "-Uflash:w:/usr/share/iAloy/.temp/out-file.hex" << "-l/usr/share/iAloy/.temp/avrdude.log";
+			break;
+		}
+
+		case ATMEGA328P:
+		{
+			ifstream myfile("/usr/share/iAloy/hex/template_for_atmega328.hex");
+			if (myfile.is_open() && outfile.is_open())
+			{
+				while (getline(myfile,line))
+				{
+					if(line_index == 138)
+						line = modify_code(line, address);
+					outfile << line << endl;
+					line_index++;
+				}
+				myfile.close();
+				outfile.close();
+			}
+			else
+				cout << "Unable to open file";
+
+			arguments << "-v" << "-C/usr/share/arduino/conf/avrdude.conf" << "-pm328p" << "-clinuxgpio" << "-e" << "-Uflash:w:/usr/share/iAloy/.temp/out-file.hex" << "-l/usr/share/iAloy/.temp/avrdude.log";
+			break;
+		}
+	}
+
+	cout << "Selected Module type : " << this->module_type_flag << endl;
 
 	mProcess->start(avrdude, arguments);
 }

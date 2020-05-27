@@ -22,10 +22,31 @@ void module_status::button_clicked_slot(QString btn_msg)
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	cout << "buttton pressed: " << btn_msg.toStdString() << endl;
 	QMessageBox msgBox;
+	QAbstractButton *link_button, *burn_button;
+	if(btn_msg == "<font><b>Module connected, but not linked</b></font>")
+	{
+		link_button = msgBox.addButton(tr("Link Module"), QMessageBox::YesRole);
+	}
+	else if(btn_msg == "<font><b>Address is available to burn new Module</b></font>")
+	{
+		burn_button = msgBox.addButton(tr("Burn Module"), QMessageBox::YesRole);
+	}
+
 	msgBox.setStyleSheet("QPushButton{padding: 10px; background-color:#3465A4; color: #FFF;}QMessageBox{height: auto; width: auto; padding-left: 20px; padding-right: 20px;}");
 	msgBox.setText("<font>" + btn_msg + "</font>");
+	msgBox.addButton(tr("Ok"), QMessageBox::NoRole);
 	msgBox.exec();
 
+	if (msgBox.clickedButton() == link_button)
+	{
+		this->hide();
+		emit link_module_manager_signal(LINK_MODULE_TAB);
+	}
+	else if(msgBox.clickedButton() == burn_button)
+	{
+		this->hide();
+		emit link_module_manager_signal(BURN_MODULE_TAB);
+	}
 }
 
 void module_status::init(QLinkedList<btn_node*> tmp_btn_list)

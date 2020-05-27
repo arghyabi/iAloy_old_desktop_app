@@ -115,6 +115,19 @@ enum module_linking_stage
 	MODULE_LINKING_FAILED
 };
 
+enum module_type
+{
+	ATTINY88 = 0,
+	ATMEGA328P
+};
+
+enum module_manager_window_tabs
+{
+	LINK_MODULE_TAB = 0,
+	BURN_MODULE_TAB,
+	BURN_TAB,
+};
+
 class ialoy_main_data{
 
 private:
@@ -181,6 +194,7 @@ public:
 	otp_send_status otp_send_status_flag;
 	otp_verification_status otp_verification_status_flag;
 	device_controller_api_request_type device_controller_api_request_type_flag;
+	module_type module_type_flag;
 
 	string api_i2c_data;
 

@@ -50,10 +50,11 @@ dashboard::dashboard(QWidget *parent) :
 
 	module_status *module_status_obj = new module_status();
 	connect(this, SIGNAL(module_status_window_show_signal(QLinkedList<btn_node*>)), module_status_obj, SLOT(init(QLinkedList<btn_node*>)));
+	connect(module_status_obj, SIGNAL(link_module_manager_signal(int)), this, SLOT(refresh_module_manager_slot(int)));
 
 	module_manager *module_manager_obj = new module_manager();
-	connect(this, SIGNAL(module_manager_window_show_signal(QLinkedList<btn_node*>)), module_manager_obj, SLOT(init(QLinkedList<btn_node*>)));
-	connect(module_manager_obj, SIGNAL(refresh_module_manager_signal()), this, SLOT(on_new_module_info_btn_clicked()));
+	connect(this, SIGNAL(module_manager_window_show_signal(QLinkedList<btn_node*>, int)), module_manager_obj, SLOT(init(QLinkedList<btn_node*>, int)));
+	connect(module_manager_obj, SIGNAL(refresh_module_manager_signal(int)), this, SLOT(refresh_module_manager_slot(int)));
 	connect(module_manager_obj, SIGNAL(add_new_module_api_request_signal(string)), this, SLOT(add_new_module_api_request_slot(string)));
 	connect(this, SIGNAL(add_new_module_api_resp_signal(string)), module_manager_obj, SLOT(add_new_module_api_resp_slot(string)));
 	connect(module_manager_obj, SIGNAL(new_module_linked_signal()), this, SLOT(new_module_linked_slot()));
@@ -865,7 +866,8 @@ void dashboard::on_power_tool_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 #ifdef ARC_TYPE
-	system("reboot");
+	//system("reboot");
+	this->close();
 #else
 	this->close();
 #endif
@@ -906,10 +908,18 @@ void dashboard::on_logout_button_clicked()
 
 void dashboard::on_module_current_status_btn_clicked()
 {
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	emit module_status_window_show_signal(btn_list);
 }
 
 void dashboard::on_new_module_info_btn_clicked()
 {
-	emit module_manager_window_show_signal(btn_list);
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	emit module_manager_window_show_signal(btn_list, LINK_MODULE_TAB);
+}
+
+void dashboard::refresh_module_manager_slot(int index)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	emit module_manager_window_show_signal(btn_list, index);
 }

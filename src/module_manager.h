@@ -37,6 +37,7 @@ public:
 	int link_mod_add_array[117][2];
 	int link_button_array_length;
 	int module_index;
+	bool burn_btn_func;
 
 	explicit module_manager(QWidget *parent = nullptr);
 	~module_manager();
@@ -46,7 +47,7 @@ public:
 	void clearLayout(QLayout* layout);
 
 public slots:
-	void init(QLinkedList<btn_node*>);
+	void init(QLinkedList<btn_node*>, int);
 	void button_clicked_slot(QString);
 
 	void start_burning_slot();
@@ -59,12 +60,13 @@ public slots:
 private slots:
 	void on_burn_button_clicked();
 	void on_refresh_tool_button_clicked();
+	void on_moudle_type_comboBox_currentIndexChanged(int index);
 
 signals:
 	void read_all_i2c_module_state_signal(int*);
-	void burn_module_signal(int);
+	void burn_module_signal(int, int);
 	void render_link_button_list_signal();
-	void refresh_module_manager_signal();
+	void refresh_module_manager_signal(int);
 	void add_new_module_api_request_signal(string);
 	void new_module_linked_signal();
 

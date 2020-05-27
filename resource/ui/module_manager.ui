@@ -243,35 +243,31 @@
             </spacer>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox_2">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(255, 255, 255);
-color: rgb(52, 101, 164);
-
-selection-background-color: rgb(52, 101, 164);
-selection-color: rgb(255, 255, 255);</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBox">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(255, 255, 255);
-color: rgb(52, 101, 164);
-
-selection-background-color: rgb(52, 101, 164);
-selection-color: rgb(255, 255, 255);</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QToolButton" name="usb_refresh_tool_button">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(52, 101, 164);</string>
-             </property>
+            <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>...</string>
+              <string>Select Module Type:</string>
              </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="moudle_type_comboBox">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(52, 101, 164);
+
+selection-background-color: rgb(52, 101, 164);
+selection-color: rgb(255, 255, 255);</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Attiny88</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Atmega328p</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item>

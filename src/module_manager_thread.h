@@ -9,15 +9,18 @@
 #include <QObject>
 #include <QProcess>
 
+#include "ialoy_data.h"
+
 using namespace std;
 
-class module_manager_thread : public QObject
+class module_manager_thread : public QObject, public ialoy_main_data
 {
 	Q_OBJECT
 public:
 	explicit module_manager_thread(QObject *parent = nullptr);
 	QProcess *mProcess;
 	QString mOutputString;
+	module_type module_type_flag;
 
 signals:
 	void start_burning();
@@ -26,7 +29,7 @@ signals:
 	void burn_complete_signal();
 
 public slots:
-	void burn_module_slot(int);
+	void burn_module_slot(int, int);
 	void start_burning_tmp_slot();
 	void burning_module_tmp_slot();
 	void burn_complete_tmp_slot(int);

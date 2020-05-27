@@ -31,6 +31,7 @@ public:
 
 signals:
 	void read_all_i2c_module_state_signal(int*);
+	void link_module_manager_signal(int);
 
 private slots:
 	void button_clicked_slot(QString);

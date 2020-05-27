@@ -22,6 +22,19 @@ else
 	fi
 fi
 
+if [ $(dpkg -s avrdude | grep -c "ok installed") -ne 0 ]; then
+	echo "${GREEN}avrdude package is  already installed${NC}\n"
+else
+	echo "${YELLOW}avrdude is not installed.\nInstalling package ...${NC}\n"
+	sudo apt-get update
+	sudo apt-get install avrdude -y
+	if [ $(dpkg -s avrdude | grep -c "ok installed") -ne 0 ]; then
+		echo "\n${GREEN}avrdude package installation successful${NC}\n\n"
+	else
+		echo "\n${RED}avrdude package installtion failed... Do it manually.${NC}\n\n"
+	fi
+fi
+
 echo "${PURPLE}Processor Type:" $(cat /proc/cpuinfo | grep 'model name' | awk -F'[:,]' '{for(i=1;i<=NF;i=i+2) printf("%s%s", $(i+1), (i+2>NF)?ORS:OFS)}' | head -n1) ${NC}
 
 if [ -f Makefile_h ]; then

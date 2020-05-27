@@ -95,7 +95,7 @@ signals:
 	void send_i2c_data_to_module_signal(int, int);
 	void read_request_i2c_data_from_module_signal(int, int);
 	void module_status_window_show_signal(QLinkedList<btn_node*>);
-	void module_manager_window_show_signal(QLinkedList<btn_node*>);
+	void module_manager_window_show_signal(QLinkedList<btn_node*>, int);
 	void add_new_module_api_resp_signal(string);
 
 	void verify_password_response_signal(bool);
@@ -119,6 +119,7 @@ private slots:
 	void on_module_current_status_btn_clicked();
 	void on_new_module_info_btn_clicked();
 	void new_module_linked_slot();
+	void refresh_module_manager_slot(int);
 
 	void verify_password_slot(string);
 	void update_password_slot(string);
