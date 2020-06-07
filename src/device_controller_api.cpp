@@ -22,9 +22,8 @@ void device_controller_api::set_device_controller_api_request(device_controller_
 	{
 		case DEVICE_CONTROLLER_LOGIN_USING_TOKEN:
 			{
-				string login_url = "http://ialoy.arghyabiswas.com/desktop_api/set_up_req_mngr.php";
-
-				this->req_url = login_url + "?aco=10&email=" + this->get_email() + "&token=" + QUrl::toPercentEncoding(this->get_token().c_str()).constData() + "&pi_add=" + this->get_pi_add();
+				string login_url = "http://ialoy.arghyabiswas.com/login_manager";
+				this->req_url = login_url + "?aco=20&email=" + this->get_email() + "&token=" + QUrl::toPercentEncoding(this->get_token().c_str()).constData() + "&pi_add=" + this->get_pi_add();
 				break;
 			}
 
@@ -58,9 +57,6 @@ void device_controller_api::set_device_controller_api_request(device_controller_
 				break;
 			}
 
-		case GET_CONNECTED_PI_LIST:
-			break;
-
 		case UPDATE_STATUS_FOR_PI:
 			{
 				if(this->get_pin() != "" && this->get_mod_add() != "" && this->get_status() != "")
@@ -89,15 +85,13 @@ void device_controller_api::set_device_controller_api_request(device_controller_
 
 		case VERIFY_PASSWORD:
 		{
-			string login_url = "http://ialoy.arghyabiswas.com/desktop_api/set_up_req_mngr.php";
-			this->req_url = login_url+"?aco=11&password="+this->get_password();
+			this->req_url = this->url+"?dco="+dco+"&password="+this->get_password();
 			break;
 		}
 
 		case UPDATE_PASSWORD:
 		{
-			string login_url = "http://ialoy.arghyabiswas.com/desktop_api/set_up_req_mngr.php";
-			this->req_url = login_url+"?aco=12&password="+this->get_password();
+			this->req_url = this->url+"?dco="+dco+"&password="+this->get_password();
 			break;
 		}
 

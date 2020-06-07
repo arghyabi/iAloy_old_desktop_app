@@ -275,7 +275,7 @@ color: rgb(255, 255, 255);</string>
           <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
            <widget class="QLabel" name="pi_name_label">
             <property name="text">
-             <string>TextLabel</string>
+             <string/>
             </property>
            </widget>
           </item>

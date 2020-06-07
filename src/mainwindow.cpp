@@ -31,8 +31,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->ialoy_logo_label->setText("<b><font size=8 color='#1e93b6'>i</font><font size=8 color='#555'>Aloy</font></b>");
 	ui->ialoy_tag_line_label->setText("<font size=4 color='#415c76'><b>Smart Home for Smart Future</b></font>");
 	ui->pi_name_label->setText(QString::fromStdString("<center><font size=3>Welcome to</font><b><br/><font size=5>"+this->get_pi_name()+"</font></b></center>"));
+
 	QTimer *timer_for_datatime_mm = new QTimer(this);
 	QTimer *timer_for_get_pi_name = new QTimer(this);
+
 	connect(timer_for_datatime_mm, SIGNAL(timeout()), this, SLOT(update_time()));
 	connect(timer_for_get_pi_name, SIGNAL(timeout()), this, SLOT(get_pi_name_with_timer_slot()));
 	connect(timer_for_get_pi_name, SIGNAL(timeout()), this, SLOT(ip_address_update()));
@@ -50,18 +52,25 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(this, SIGNAL(settings_window_show_signal(int)), settings_obj, SLOT(init(int)));
 
 	NetworkManager = new QNetworkAccessManager();
-	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
-			set_api_response("");
+	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply)
+		{
 			if (reply->error()) {
 				cout << "Error : " << reply->errorString().toStdString() << endl;
 				ui->online_offline_label->setText("<b><font color='#FF4500'>Offline</font></b>");
 				return;
 			}
-			QString response = reply->readAll();
-			cout << "MainWindow response : " << response.toStdString() << endl;
-			set_api_response(response.toStdString());
+			string response = reply->readAll().toStdString();
+
+			cout << "MainWindow response : " << response << endl;
 			ui->online_offline_label->setText("<b><font color='#228B22'>Online</font></b>");
-			update_mainwindow_gui();
+
+			int response_type;
+			if(stoi(response.substr(0,1)) == LOGIN_MANAGER_API)
+			{
+				response_type = stoi(response.substr(1,2));
+				set_login_manager_api_response(response_type, response.substr(3));
+				update_mainwindow_gui(response_type);
+			}
 		}
 	);
 
@@ -90,9 +99,15 @@ void MainWindow::get_pi_name_with_timer_slot()
 	if(get_pi_name_timer_flag)
 	{
 		if(!MainWindow::saved_credential_manager())
+		{
+			cout << "Saved credential not found..." << endl;
 			MainWindow::set_api_request(GET_PI_NAME);
+		}
 		else
+		{
+			cout << "Saved credential Found..." << endl;
 			MainWindow::set_api_request(LOGIN_USING_TOKEN);
+		}
 		send_api_request();
 	}
 }
@@ -164,11 +179,12 @@ void MainWindow::send_api_request()
 	}
 }
 
-void MainWindow::update_mainwindow_gui()
+void MainWindow::update_mainwindow_gui(int response_type)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	cout << "flag:" << api_request << endl;
-	switch(api_request)
+	cout << "flag:" << response_type << endl;
+
+	switch(response_type)
 	{
 		case CHECK_PI_STATUS:
 			break;
@@ -179,6 +195,7 @@ void MainWindow::update_mainwindow_gui()
 
 		case CHECK_EMAIL_STATUS:
 			break;
+
 		case CHECK_EMAIL_CONNECTED_PI:
 			render_password_or_user_details_form();
 			break;
@@ -219,273 +236,120 @@ void MainWindow::update_mainwindow_gui()
 void MainWindow::render_login_using_token()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(api_response_parse())
+
+	get_pi_name_timer_flag = false;
+
+	switch(stoi(this->get_login_manager_api_response(LOGIN_USING_TOKEN).substr(0,1)))
 	{
-		get_pi_name_timer_flag = false;
-
-		switch(user_login_status_flag)
-		{
-			case LOGIN_SUCCESS:
-				cout << "Login success... from render()" << endl;
-				dashboard_window_show(true);
-				main_window_show(false);
-				break;
-
-			case LOGIN_FAIL:
-				cout << "Login failed... from render()" << endl;
-				status_label_set_text("No proper saved credential found... Please login", "black");
-				MainWindow::set_api_request(GET_PI_NAME);
-				send_api_request();
-				break;
-		}
-	}
-}
-
-bool MainWindow::api_response_parse()
-{
-	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	string api_res = get_api_response();
-	if(api_res.substr(0, 1) != "1")
-		return false;
-
-	api_res = api_res.substr(1, api_res.length()-1);
-
-	switch(api_request)
-	{
-		case CHECK_PI_STATUS:
+		case LOGIN_SUCCESS:
+			cout << "Login success..." << endl;
+			dashboard_window_show(true);
+			main_window_show(false);
 			break;
 
-		case GET_PI_NAME:
-			{
-				if(stoi(api_res.substr(0,1)) == PI_REGISTERED)
-				{
-					api_res = api_res.substr(1, api_res.length()-1);
-					pi_reg_status_flag = PI_REGISTERED;
-					set_pi_name(api_res);
-				}
-				else if(stoi(api_res.substr(0,1)) == PI_NOT_REGISTERED)
-				{
-					pi_reg_status_flag = PI_NOT_REGISTERED;
-					set_pi_name("<font size=6><b>Pi not registered</b></font>");
-				}
-				break;
-			}
-
-		case CHECK_EMAIL_STATUS:
-			break;
-
-		case CHECK_EMAIL_CONNECTED_PI:
-			{
-				cout << "API_RESPONSE : " << api_res << endl;
-				switch(stoi(api_res))
-				{
-					case SUPER_USER_REGISTERED_PI:
-						reg_user_type_flag = EXISTING_USER;
-						email_connected_pi_status_flag = SUPER_USER_REGISTERED_PI;
-						break;
-					case PERMANENT_USER_REGISTERED_PI:
-						reg_user_type_flag = EXISTING_USER;
-						email_connected_pi_status_flag = PERMANENT_USER_REGISTERED_PI;
-						break;
-					case INVALID_USER_REGISTERED_PI:
-						reg_user_type_flag = NEW_USER;
-						email_connected_pi_status_flag = INVALID_USER_REGISTERED_PI;
-						break;
-					case PERMANENT_USER_UNREGISTERED_PI:
-						reg_user_type_flag = EXISTING_USER;
-						email_connected_pi_status_flag = PERMANENT_USER_UNREGISTERED_PI;
-						break;
-					case INVALID_USER_UNREGISTERED_PI:
-						reg_user_type_flag = NEW_USER;
-						email_connected_pi_status_flag = INVALID_USER_UNREGISTERED_PI;
-						break;
-				}
-				break;
-			}
-		case GET_USER_DETAILS:
-			{
-				int loc = api_res.find_first_of(",");
-				string first_name = api_res.substr(0, loc);
-				string last_name = api_res.substr(loc+1, api_res.find_first_of(",", loc+1));
-				cout << "Email : " << MainWindow::get_email() << "F_name : " << first_name << "L_name : " << last_name << endl;
-				MainWindow::set_first_name(first_name);
-				MainWindow::set_last_name(last_name);
-				break;
-			}
-		case CHECK_PRODUCT_KEY_STATUS:
-			{
-				switch(stoi(api_res))
-				{
-					case PRODUCT_KEY_AVAILABLE:
-						product_Key_status_flag = PRODUCT_KEY_AVAILABLE;
-						break;
-
-					case PRODUCT_KEY_NOT_AVAILABLE:
-						product_Key_status_flag = PRODUCT_KEY_NOT_AVAILABLE;
-						break;
-
-					case PRODUCT_KEY_INVALID:
-						product_Key_status_flag = PRODUCT_KEY_INVALID;
-						break;
-				}
-				break;
-			}
-
-		case SEND_OTP:
-			{
-				switch(stoi(api_res))
-				{
-					case OTP_SEND_SUCCESS:
-						otp_send_status_flag = OTP_SEND_SUCCESS;
-						break;
-
-					case OTP_SEND_FAIL:
-						otp_send_status_flag = OTP_SEND_FAIL;
-						break;
-				}
-				break;
-			}
-
-		case VERIFY_OTP:
-			{
-				if(stoi(api_res) == OTP_VERIFIED)
-					otp_verification_status_flag = OTP_VERIFIED;
-				else if(stoi(api_res) == OTP_NOT_VERIFIED)
-					otp_verification_status_flag = OTP_NOT_VERIFIED;
-				break;
-			}
-
-		case REGISTER_NEW_PI:
-			{
-				cout << "API_REG_RESP : " << api_res << endl;
-				switch(stoi(api_res))
-				{
-					case PI_REGISTERED:
-						pi_reg_status_flag = PI_REGISTERED;
-						break;
-
-					case PI_NOT_REGISTERED:
-						pi_reg_status_flag = PI_NOT_REGISTERED;
-						break;
-				}
-				break;
-			}
-
-		case LOGIN:
-			{
-				string login_stat = api_res.substr(0,1);
-				if(stoi(login_stat) == LOGIN_SUCCESS)
-				{
-					string token = api_res.substr(1, api_res.length()-1);
-					cout << "Token : " << token << endl;
-					if(token != "")
-					{
-						cout << "Login success..." << endl;
-						MainWindow::set_token(token);
-						MainWindow::store_user_credential();
-						user_login_status_flag = LOGIN_SUCCESS;
-					}
-					else
-					{
-						cout << "Login success... But token is empty" << endl;
-						MainWindow::set_token("");
-						user_login_status_flag = LOGIN_TOKEN_ERROR;
-					}
-				}
-				else
-				{
-					cout << "Login failed..." << endl;
-					MainWindow::set_token("");
-					user_login_status_flag = LOGIN_FAIL;
-				}
-			}
-			break;
-
-		case LOGIN_USING_TOKEN:
-			{
-				if(stoi(api_res) == LOGIN_SUCCESS)
-				{
-					cout << "Login success... from api_response_parse()" << endl;
-					user_login_status_flag = LOGIN_SUCCESS;
-				}
-				else
-				{
-					cout << "Login failed... from api_response_parse()" << endl;
-					user_login_status_flag = LOGIN_FAIL;
-				}
-			}
-			break;
-
-		default:
+		case LOGIN_FAIL:
+			cout << "Login failed..." << endl;
+			status_label_set_text("No valid saved credential found... Please login", "black");
+			MainWindow::set_api_request(GET_PI_NAME);
+			send_api_request();
 			break;
 	}
-	return true;
 }
 
 void MainWindow::render_registered_new_pi()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(api_response_parse())
-	{
-		switch(pi_reg_status_flag)
-		{
-			case PI_REGISTERED:
-				cout << "Pi registered success..." << endl;
-				status_label_set_text("Pi register sucess...", "green");
-				dashboard_window_show(true);
-				main_window_show(false);
-				break;
 
-			case PI_NOT_REGISTERED:
-				cout << "Pi registered error..." << endl;
-				status_label_set_text("Pi register error...", "red");
-				break;
+	switch(stoi(this->get_login_manager_api_response(REGISTER_NEW_PI).substr(0,1)))
+	{
+		case RESPONSE_SUCCESS:
+		{
+			cout << "Pi registered success..." << endl;
+			status_label_set_text("Pi register sucess...", "green");
+			dashboard_window_show(true);
+			main_window_show(false);
 		}
+		break;
+
+		case RESPONSE_FAILED:
+		{
+			cout << "Pi registered error..." << endl;
+			status_label_set_text("Pi register error...", "red");
+		}
+		break;
 	}
 }
 
 void MainWindow::render_product_key_validate_form()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(api_response_parse())
+
+	switch(stoi(this->get_login_manager_api_response(CHECK_PRODUCT_KEY_STATUS).substr(0,1)))
 	{
-		// render_product_key_validate_form
-		switch(product_Key_status_flag)
+		case RESPONSE_SUCCESS:
 		{
-			case PRODUCT_KEY_AVAILABLE:
-				set_api_request(SEND_OTP);
-				send_api_request();
-				break;
+			switch(stoi(this->get_login_manager_api_response(CHECK_PRODUCT_KEY_STATUS).substr(1,1)))
+			{
+				case PRODUCT_KEY_AVAILABLE:
+					status_label_set_text("Product key matched...", "green");
+					set_api_request(SEND_OTP);
+					send_api_request();
+					break;
 
-			case PRODUCT_KEY_NOT_AVAILABLE:
-				ui->SetUpLineEdit->setText("");
-				status_label_set_text("The product key you entered is not available... Please use different one", "black");
-				break;
-
-			case PRODUCT_KEY_INVALID:
-				ui->SetUpLineEdit->setText("");
-				status_label_set_text("The product key you entered is not valid... Please use correct one", "black");
-				break;
+				case PRODUCT_KEY_NOT_AVAILABLE:
+					ui->SetUpLineEdit->setText("");
+					status_label_set_text("The product key you entered is not available... Please use a different one", "red");
+					break;
+			}
 		}
-	}
-	else
-	{
-		cout << "Error in api_response_parse()... from render_product_key_validate_form()" << endl;
+		break;
+
+		case RESPONSE_FAILED:
+		{
+			ui->SetUpLineEdit->setText("");
+			status_label_set_text("The product key you entered is not valid... Please use a correct one", "red");
+		}
+		break;
 	}
 }
 
 void MainWindow::render_data_in_show_reg_form()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(api_response_parse())
+
+	switch(stoi(this->get_login_manager_api_response(GET_USER_DETAILS).substr(0,1)))
 	{
-		ui->f_name_edit->setText(QString::fromStdString(this->get_first_name()));
-		ui->l_name_edit->setText(QString::fromStdString(this->get_last_name()));
-		ui->email_id_edit->setText(QString::fromStdString(MainWindow::get_email()));
-	}
-	else
-	{
-		cout << "Error in api_response_parse()... from render_data_in_show_reg_form()" << endl;
+		case RESPONSE_SUCCESS:
+		{
+			if (this->get_login_manager_api_response(GET_USER_DETAILS).substr(1).find(',') != std::string::npos)
+			{
+				// store both first & last name in variable
+				string name_string = this->get_login_manager_api_response(GET_USER_DETAILS).substr(1);
+				int loc = name_string.find_first_of(",");
+				string first_name = name_string.substr(0, loc);
+				string last_name = name_string.substr(loc+1, name_string.find_first_of(",", loc+1));
+				cout << "Email : " << MainWindow::get_email() << "F_name : " << first_name << "L_name : " << last_name << endl;
+				MainWindow::set_first_name(first_name);
+				MainWindow::set_last_name(last_name);
+			}
+			else
+			{
+				MainWindow::set_first_name(this->get_login_manager_api_response(GET_USER_DETAILS).substr(1));
+				cout << "Email : " << MainWindow::get_email() << "F_name : " << MainWindow::get_first_name() << endl;
+			}
+			ui->f_name_edit->setText(QString::fromStdString(this->get_first_name()));
+			ui->l_name_edit->setText(QString::fromStdString(this->get_last_name()));
+			ui->email_id_edit->setText(QString::fromStdString(MainWindow::get_email()));
+		}
+		break;
+
+		case RESPONSE_FAILED:
+		{
+			MainWindow::set_first_name("");
+			MainWindow::set_last_name("");
+			status_label_set_text(MainWindow::get_email()+" has no user information", "Blue");
+		}
+		break;
 	}
 }
 
@@ -493,87 +357,84 @@ void MainWindow::render_otp_send_form()
 {
 	// OTP send form render
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(api_response_parse())
+
+	switch(stoi(this->get_login_manager_api_response(SEND_OTP).substr(0,1)))
 	{
-		switch (otp_send_status_flag)
-		{
 		case OTP_SEND_SUCCESS:
 			ui->SetUpLineEdit->setText("");
 			ui->SetUpLineEdit->setMaxLength(6);
 			ui->SetUpLineEdit->setPlaceholderText("Enter OTP...");
-			status_label_set_text("Check your email and enter the OTP...", "black");
+			status_label_set_text("We have send OTP to "+this->get_email()+"<br/>Check your email and enter the OTP...", "black");
 			SetUpLineEdit_stat = GET_INPUT_OTP_MODE;
 			break;
 
 		case OTP_SEND_FAIL:
-			// OTP send failed area.
+			status_label_set_text("Email send fail...", "red");
+			break;
+
+		case OTP_SEND_UNEXPECTED:
+			status_label_set_text("OTP generate failed...", "red");
 			break;
 
 		default:
 			break;
-		}
 	}
 }
 
 void MainWindow::render_otp_verified_form()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(api_response_parse())
+	switch(stoi(this->get_login_manager_api_response(VERIFY_OTP).substr(0,1)))
 	{
-		if(otp_verification_status_flag == OTP_VERIFIED)
-		{
+		case RESPONSE_SUCCESS:
 			status_label_set_text("OTP verified... Registering new Pi...", "green");
 			set_api_request(REGISTER_NEW_PI);
 			send_api_request();
-		}
-		else if(otp_verification_status_flag == OTP_NOT_VERIFIED)
-		{
-			// OTP verificatoin failed form render.
+			break;
+
+		case RESPONSE_FAILED:
+		case RESPONSE_UNEXPECTED:
 			ui->SetUpLineEdit->setText("");
 			status_label_set_text("OTP not matched... Please enter correct OTP", "red");
-		}
-	}
-	else
-	{
-		cout << "API response error." << endl;
+			break;
+
+		default:
+			break;
 	}
 }
 
 void MainWindow::render_pi_name()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(api_response_parse())
-	{
-		get_pi_name_timer_flag = false;
 
-		if(pi_reg_status_flag == PI_NOT_REGISTERED)
-		{
-			cout << this->get_pi_name() << endl;
-			status_label_set_text("", "black");
-			ui->pi_name_label->setText(QString::fromStdString("<font size=4><b>Pi not registered</b></font>"));
-			ui->SetUpLineEdit->setPlaceholderText("Enter email to register");
-		}
-		else
-		{
-			cout << "Pi_name : " << this->get_pi_name() << endl;
-			status_label_set_text("No proper saved credential found... Please login", "black");
-			ui->pi_name_label->setText(QString::fromStdString("<center><font size=3>Welcome to</font><b><br/><font size=5>"+this->get_pi_name()+"</font></b></center>"));
-		}
-		ui->SetUpLineEdit->setDisabled(0);
-		ui->submit_button->setDisabled(0);
+	get_pi_name_timer_flag = false;
+
+	if(stoi(this->get_login_manager_api_response(GET_PI_NAME).substr(0,1)) == 0)
+	{
+		status_label_set_text("", "black");
+		ui->pi_name_label->setText(QString::fromStdString("<font size=4><b>Pi not registered</b></font>"));
+		ui->SetUpLineEdit->setPlaceholderText("Enter email to register");
 	}
 	else
 	{
-		cout << "API response error." << endl;
+		this->set_pi_name(this->get_login_manager_api_response(GET_PI_NAME).substr(1));
+		ui->SetUpLineEdit->setPlaceholderText("Enter email to login");
+		ui->SetUpLineEdit->setMaxLength(50);
+		status_label_set_text("No proper saved credential found... Please login", "black");
+		ui->pi_name_label->setText(QString::fromStdString("<center><font size=3>Welcome to</font><b><br/><font size=5>"+this->get_pi_name()+"</font></b></center>"));
 	}
+
+	ui->SetUpLineEdit->setDisabled(0);
+	ui->submit_button->setDisabled(0);
 }
 
 void MainWindow::render_password_or_user_details_form()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(api_response_parse())
+
+	switch(stoi(this->get_login_manager_api_response(CHECK_EMAIL_CONNECTED_PI)))
 	{
-		if (email_connected_pi_status_flag == SUPER_USER_REGISTERED_PI)
+		case SUPER_USER_REGISTERED_PI:
 		{
 			cout << MainWindow::get_email() << " is a super user account" << endl;
 			status_label_set_text(MainWindow::get_email()+" is a super user account", "green");
@@ -583,8 +444,9 @@ void MainWindow::render_password_or_user_details_form()
 			ui->SetUpLineEdit->setEchoMode(QLineEdit::Password);
 			ui->submit_button->setText("Login");
 			SetUpLineEdit_stat = GET_INPUT_PASSWORD_MODE;
+			break;
 		}
-		else if(email_connected_pi_status_flag == PERMANENT_USER_REGISTERED_PI)
+		case PERMANENT_USER_REGISTERED_PI:
 		{
 			cout << MainWindow::get_email() << " is a permanent user account" << endl;
 			status_label_set_text(MainWindow::get_email()+" is a permanent user account", "green");
@@ -594,50 +456,83 @@ void MainWindow::render_password_or_user_details_form()
 			ui->SetUpLineEdit->setEchoMode(QLineEdit::Password);
 			ui->submit_button->setText("Login");
 			SetUpLineEdit_stat = GET_INPUT_PASSWORD_MODE;
+			break;
 		}
-		else if(email_connected_pi_status_flag == INVALID_USER_REGISTERED_PI)
+		case INVALID_USER_REGISTERED_PI:
 		{
 			// user_details form render.
 			status_label_set_text("Invalid user of this Pi... Please enter a registered email", "red");
 			ui->SetUpLineEdit->setText("");
+			break;
 		}
-		else if(email_connected_pi_status_flag == PERMANENT_USER_UNREGISTERED_PI || email_connected_pi_status_flag == INVALID_USER_UNREGISTERED_PI)
+		case PERMANENT_USER_UNREGISTERED_PI:
 		{
 			// user_details form render.
+			reg_user_type_flag = EXISTING_USER;
 			show_reg_form();
+			break;
 		}
-	}
-	else
-	{
-		cout << "API response error." << endl;
+		case INVALID_USER_UNREGISTERED_PI:
+		{
+			// user_details form render.
+			reg_user_type_flag = NEW_USER;
+			show_reg_form();
+			break;
+		}
+		default:
+			cout << "API response error" << endl;
+			break;
 	}
 }
 
 void MainWindow::render_after_login()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if(api_response_parse())
+
+	int login_stat = stoi(this->get_login_manager_api_response(LOGIN).substr(0,1));
+
+	switch(login_stat)
 	{
-		if(user_login_status_flag == LOGIN_SUCCESS)
+		case LOGIN_SUCCESS:
 		{
-			dashboard_window_show(true);
-			main_window_show(false);
+			string token = this->get_login_manager_api_response(LOGIN).substr(1);
+			cout << "Token : " << token << endl;
+			if(token != "")
+			{
+				cout << "Login success..." << endl;
+				MainWindow::set_token(token);
+				MainWindow::store_user_credential();
+				user_login_status_flag = LOGIN_SUCCESS;
+				dashboard_window_show(true);
+				main_window_show(false);
+			}
+			else
+			{
+				cout << "Login success... But token is empty" << endl;
+				MainWindow::set_token("");
+				user_login_status_flag = LOGIN_TOKEN_ERROR;
+				ui->SetUpLineEdit->setText("");
+				status_label_set_text("Something went wrong... Please try again", "red");
+			}
 		}
-		else if(user_login_status_flag == LOGIN_TOKEN_ERROR)
+		break;
+
+		case LOGIN_FAIL:
+		{
+			cout << "Login failed..." << endl;
+			MainWindow::set_token("");
+			user_login_status_flag = LOGIN_FAIL;
+			ui->SetUpLineEdit->setText("");
+			status_label_set_text("Wrong password... Try again", "red");
+		}
+		break;
+
+		default:
 		{
 			ui->SetUpLineEdit->setText("");
 			status_label_set_text("Something went wrong... Please try again", "red");
 		}
-		else
-		{
-			ui->SetUpLineEdit->setText("");
-			status_label_set_text("Wrong password... Try again", "red");
-		}
-	}
-	else
-	{
-		ui->SetUpLineEdit->setText("");
-		status_label_set_text("Something went wrong... Please try again", "red");
+		break;
 	}
 }
 
@@ -719,104 +614,116 @@ void MainWindow::addBgImage()
 void MainWindow::on_submit_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	if (SetUpLineEdit_stat == GET_INPUT_EMAIL_MODE)
-	{
-		// Email id proccessing section
-		if (ui->SetUpLineEdit->text() != "")
-		{
-			ui->status_label->setText("Checking account...");
-			// check email is right formatted or not
-			if(validateEmail(ui->SetUpLineEdit->text().toStdString()))
-			{
-				MainWindow::set_email(ui->SetUpLineEdit->text().toStdString());
-				set_api_request(CHECK_EMAIL_CONNECTED_PI);
-				send_api_request();
-			}
-			else
-			{
-				ui->SetUpLineEdit->setText("");
-				status_label_set_text("This is not an valid email... ", "red");
-			}
-		}
-		else
-		{
-			QMessageBox::warning(this, "Email is empty",
-								 "Email can't be empty. Please put "
-								 "your email to continue",QMessageBox::Ok);
-		}
-	}
-	else if (SetUpLineEdit_stat == GET_INPUT_PASSWORD_MODE)
-	{
-		if(ui->SetUpLineEdit->text() != "")
-		{
-			string password = ui->SetUpLineEdit->text().toStdString();
-			MainWindow::set_password(password);
-			status_label_set_text("Logging in...","black");
-			set_api_request(LOGIN);
-			send_api_request();
-		}
-		else
-		{
-			QMessageBox::warning(this, "Password is empty",
-								 "Password can't be empty. Please put "
-								 "your password to continue",QMessageBox::Ok);
-		}
-	}
-	else if(SetUpLineEdit_stat == GET_INPUT_OTP_MODE)
-	{
 
-		if(ui->SetUpLineEdit->text().toStdString() != "" && ui->SetUpLineEdit->text().toStdString().length() == 6)
-		{
-			status_label_set_text("Checking OTP...", "black");
-			MainWindow::set_otp(ui->SetUpLineEdit->text().toStdString());
-			set_api_request(VERIFY_OTP);
-			send_api_request();
-		}
-		else
-		{
-			ui->SetUpLineEdit->setText("");
-			status_label_set_text("Your OTP should be 6 digit long... Please enter again.", "red");
-		}
-	}
-	else if(SetUpLineEdit_stat == GET_INPUT_PI_NAME_MODE)
+	switch(SetUpLineEdit_stat)
 	{
-		if(ui->SetUpLineEdit->text() != "")
+		case GET_INPUT_EMAIL_MODE:
 		{
-			MainWindow::set_pi_name(ui->SetUpLineEdit->text().toStdString());
-			cout << "Pi_name : " << MainWindow::get_pi_name() << endl;
-			// show product_key enter field
-			status_label_set_text("Enter 16 digit product key to register", "black");
-			ui->SetUpLineEdit->setPlaceholderText("Enter Product Key...");
-			ui->SetUpLineEdit->setText("");
-			ui->SetUpLineEdit->setMaxLength(16);
-			ui->submit_button->setText("Procced");
-			SetUpLineEdit_stat = GET_INPUT_PROD_KEY_MODE;
-		}
-	}
-	else if (SetUpLineEdit_stat == GET_INPUT_PROD_KEY_MODE)
-	{
-		// Product key processing section
-		if (ui->SetUpLineEdit->text() != "")
-		{
-			if(ui->SetUpLineEdit->text().toStdString().length() == 16)
+			// Email id proccessing section
+			if (ui->SetUpLineEdit->text() != "")
 			{
-				MainWindow::set_product_id(ui->SetUpLineEdit->text().toStdString());
-				status_label_set_text("Product key validating...", "black");
-				set_api_request(CHECK_PRODUCT_KEY_STATUS);
+				ui->status_label->setText("Checking account...");
+				// check email is right formatted or not
+				if(validateEmail(ui->SetUpLineEdit->text().toStdString()))
+				{
+					MainWindow::set_email(ui->SetUpLineEdit->text().toStdString());
+					set_api_request(CHECK_EMAIL_CONNECTED_PI);
+					send_api_request();
+				}
+				else
+				{
+					ui->SetUpLineEdit->setText("");
+					status_label_set_text("This is not an valid email... ", "red");
+				}
+			}
+			else
+			{
+				QMessageBox::warning(this, "Email is empty",
+									"Email can't be empty. Please put "
+									"your email to continue",QMessageBox::Ok);
+			}
+		}
+		break;
+
+		case GET_INPUT_PASSWORD_MODE:
+		{
+			if(ui->SetUpLineEdit->text() != "")
+			{
+				string password = ui->SetUpLineEdit->text().toStdString();
+				MainWindow::set_password(password);
+				status_label_set_text("Logging in...","black");
+				set_api_request(LOGIN);
 				send_api_request();
 			}
 			else
 			{
-				status_label_set_text("Product key must be 16 digit long", "red");
-				ui->SetUpLineEdit->setText("");
+				QMessageBox::warning(this, "Password is empty",
+									"Password can't be empty. Please put "
+									"your password to continue",QMessageBox::Ok);
 			}
 		}
-		else
+		break;
+
+		case GET_INPUT_OTP_MODE:
 		{
-			QMessageBox::warning(this, "Product Id is empty",
-								 "Product Id can't be empty. Please put "
-								 "your Product Id to continue",QMessageBox::Ok);
+			if(ui->SetUpLineEdit->text().toStdString() != "" && ui->SetUpLineEdit->text().toStdString().length() == 6)
+			{
+				status_label_set_text("Checking OTP...", "black");
+				MainWindow::set_otp(ui->SetUpLineEdit->text().toStdString());
+				set_api_request(VERIFY_OTP);
+				send_api_request();
+			}
+			else
+			{
+				ui->SetUpLineEdit->setText("");
+				status_label_set_text("Your OTP should be 6 digit long... Please enter again.", "red");
+			}
 		}
+		break;
+
+		case GET_INPUT_PI_NAME_MODE:
+		{
+			if(ui->SetUpLineEdit->text() != "")
+			{
+				MainWindow::set_pi_name(ui->SetUpLineEdit->text().toStdString());
+				cout << "Pi_name : " << MainWindow::get_pi_name() << endl;
+				// show product_key enter field
+				status_label_set_text("Enter 16 digit product key to register", "black");
+				ui->SetUpLineEdit->setPlaceholderText("Enter Product Key...");
+				ui->SetUpLineEdit->setText("");
+				ui->SetUpLineEdit->setMaxLength(16);
+				ui->submit_button->setText("Procced");
+				SetUpLineEdit_stat = GET_INPUT_PROD_KEY_MODE;
+			}
+		}
+		break;
+
+		case GET_INPUT_PROD_KEY_MODE:
+		{
+			// Product key processing section
+			if (ui->SetUpLineEdit->text() != "")
+			{
+				if(ui->SetUpLineEdit->text().toStdString().length() == 16)
+				{
+					MainWindow::set_product_id(ui->SetUpLineEdit->text().toStdString());
+					status_label_set_text("Product key validating...", "black");
+					set_api_request(CHECK_PRODUCT_KEY_STATUS);
+					send_api_request();
+				}
+				else
+				{
+					status_label_set_text("Product key must be 16 digit long", "red");
+					ui->SetUpLineEdit->setText("");
+				}
+			}
+			else
+			{
+				QMessageBox::warning(this, "Product Id is empty",
+									"Product Id can't be empty. Please put "
+									"your Product Id to continue",QMessageBox::Ok);
+			}
+		}
+		break;
 	}
 }
 

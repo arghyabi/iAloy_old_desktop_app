@@ -46,6 +46,14 @@ Room device UI update:
 
 
 
+OTP-Handleing
+    a. OTP life time 5mins
+    b. If resend happend within life time, same OTP send & update time in DB [resend button should be added]
+    c. OTP verification should delete all the perspective entry of the valid email
+
+**************
+TODO : Dashboard login using token error aco = 10
+**************
 
 /////////////////////////////////////////////////////////////////////////
 

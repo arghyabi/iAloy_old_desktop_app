@@ -33,9 +33,8 @@ public:
 	void hide_reg_form();
 	bool validateEmail(string email);
 
-	void update_mainwindow_gui();
+	void update_mainwindow_gui(int response_type);
 	bool try_login_using_token();
-	bool api_response_parse();
 	void send_api_request();
 
 	void render_pi_name();

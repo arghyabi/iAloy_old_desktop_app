@@ -19,12 +19,11 @@ class device_controller_api : public ialoy_web_api
 private:
 	string protocol = "http://";
 	string sub_domain = "ialoy";
-	string domain = "arghyabiswas.com";
-	string api = "desktop_api";
-	string dco_req_manager = "device_controller_req_mngr.php";
+	string domain = "arghyabiswas.com/";
+	string dco_req_manager = "device_controller";
 
 public:
-	string url = protocol+sub_domain+"."+domain+"/"+api+"/"+dco_req_manager;
+	string url = protocol+sub_domain+"."+domain+dco_req_manager;
 	string req_url;
 
 public:

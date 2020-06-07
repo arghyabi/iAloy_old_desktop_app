@@ -12,6 +12,10 @@
 #include "main.h"
 #include "hardware.h"
 
+/*
+	Compatible with web api : ialoy.arghyabiswas.com/desktop_api_v1/
+*/
+
 using namespace std;
 
 string ialoy_web_api::get_req_url()
@@ -30,14 +34,12 @@ void ialoy_web_api::set_api_request(api_request_type genarate_url_flag)
 	switch(genarate_url_flag)
 	{
 		case CHECK_PI_STATUS:
-			if(this->get_pi_add() == "")
-				this->set_pi_add();
+			if(this->get_pi_add() == "") this->set_pi_add();
 			this->req_url = this->url+"?aco="+aco+"&pi_add="+this->get_pi_add();
 			break;
 
 		case GET_PI_NAME:
-			if(this->get_pi_add() == "")
-				this->set_pi_add();
+			if(this->get_pi_add() == "") this->set_pi_add();
 			this->req_url = this->url+"?aco="+aco+"&pi_add="+this->get_pi_add();
 			break;
 
@@ -92,14 +94,21 @@ void ialoy_web_api::set_api_request(api_request_type genarate_url_flag)
 					this->req_url = this->url+"?aco="+aco+"&type="+to_string(reg_user_type_flag)+"&prod_key="+this->get_product_id()+"&pi_add="+this->get_pi_add()+"&su_mail="+this->get_email()+ \
 							"&pi_name="+this->get_pi_name()+"&f_name="+this->get_first_name()+"&l_name="+this->get_last_name()+"&password="+this->get_password();
 				else
+				{
+					this->req_url = this->url+"?aco="+aco+"&type="+to_string(reg_user_type_flag)+"&prod_key="+this->get_product_id()+"&pi_add="+this->get_pi_add()+"&su_mail="+this->get_email()+ \
+							"&pi_name="+this->get_pi_name()+"&f_name="+this->get_first_name()+"&l_name="+this->get_last_name()+"&password="+this->get_password();
 					this->set_api_error_msg("One or more data(s) are missing...");
+				}
 			}
 			else
 			{
 				if((this->get_email() != "") && (this->get_pi_add() != "") && (this->get_pi_name() != "") && (this->get_product_id() != "") )
 					this->req_url = this->url+"?aco="+aco+"&type="+to_string(reg_user_type_flag)+"&prod_key="+this->get_product_id()+"&pi_add="+this->get_pi_add()+"&su_mail="+this->get_email()+"&pi_name="+this->get_pi_name();
 				else
+				{
+					this->req_url = this->url+"?aco="+aco+"&type="+to_string(reg_user_type_flag)+"&prod_key="+this->get_product_id()+"&pi_add="+this->get_pi_add()+"&su_mail="+this->get_email()+"&pi_name="+this->get_pi_name();
 					this->set_api_error_msg("One or more data(s) are missing...");
+				}
 			}
 			break;
 
@@ -121,14 +130,6 @@ void ialoy_web_api::set_api_request(api_request_type genarate_url_flag)
 					this->set_api_error_msg("Email & token can't be blank...");
 				}
 			}
-			break;
-
-		case VERIFY_PASSWORD:
-			this->req_url = url+"?aco="+aco+"password="+this->get_password();
-			break;
-
-		case UPDATE_PASSWORD:
-			this->req_url = url+"?aco="+aco+"password="+this->get_password();
 			break;
 
 		default:

@@ -109,10 +109,57 @@ void ialoy_main_data::set_api_error_msg(string msg)
 	this->api_error_msg = msg;
 }
 
-void ialoy_main_data::set_api_response(string response)
+void ialoy_main_data::set_login_manager_api_response(int response_type, string response)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	this->api_response = response;
+
+	switch(response_type)
+	{
+		case CHECK_PI_STATUS:
+			this->check_pi_status_response = response;
+			break;
+
+		case GET_PI_NAME:
+			this->get_pi_name_response = response;
+			break;
+
+		case CHECK_EMAIL_STATUS:
+			this->check_email_status_response = response;
+			break;
+
+		case CHECK_EMAIL_CONNECTED_PI:
+			this->check_email_connected_pi_response = response;
+			break;
+
+		case GET_USER_DETAILS:
+			this->get_user_details_response = response;
+			break;
+
+		case CHECK_PRODUCT_KEY_STATUS:
+			this->check_product_key_status_response = response;
+			break;
+
+		case SEND_OTP:
+			this->send_otp_response = response;
+			break;
+
+		case VERIFY_OTP:
+			this->verify_otp_response = response;
+			break;
+
+		case REGISTER_NEW_PI:
+			this->register_new_pi_response = response;
+			break;
+
+		case LOGIN:
+			this->login_response = response;
+			break;
+
+		case LOGIN_USING_TOKEN:
+			this->login_using_token_response = response;
+			break;
+
+	}
 }
 
 // setter methods for dev_controller class private variables.
@@ -150,6 +197,7 @@ void ialoy_main_data::set_pin(string pin)
 void ialoy_main_data::set_device_controller_api_response(int response_type, string resp)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+
 	switch(response_type)
 	{
 		case DEVICE_CONTROLLER_LOGIN_USING_TOKEN:
@@ -169,9 +217,6 @@ void ialoy_main_data::set_device_controller_api_response(int response_type, stri
 			break;
 		case UPDATE_RANGE:
 			this->update_range_response = resp;
-			break;
-		case GET_CONNECTED_PI_LIST:
-			this->get_connected_pi_list_response = resp;
 			break;
 		case UPDATE_STATUS_FOR_PI:
 			this->update_status_for_pi_response = resp;
@@ -269,10 +314,49 @@ string ialoy_main_data::get_api_error_msg()
 	return this->api_error_msg;
 }
 
-string ialoy_main_data::get_api_response()
+string ialoy_main_data::get_login_manager_api_response(int response_type)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	return this->api_response;
+
+	switch(response_type)
+	{
+		case CHECK_PI_STATUS:
+			return this->check_pi_status_response;
+			break;
+		case GET_PI_NAME:
+			return this->get_pi_name_response;
+			break;
+		case CHECK_EMAIL_STATUS:
+			return this->check_email_status_response;
+			break;
+		case CHECK_EMAIL_CONNECTED_PI:
+			return this->check_email_connected_pi_response;
+			break;
+		case GET_USER_DETAILS:
+			return this->get_user_details_response;
+			break;
+		case CHECK_PRODUCT_KEY_STATUS:
+			return this->check_product_key_status_response;
+			break;
+		case SEND_OTP:
+			return this->send_otp_response;
+			break;
+		case VERIFY_OTP:
+			return this->verify_otp_response;
+			break;
+		case REGISTER_NEW_PI:
+			return this->register_new_pi_response;
+			break;
+		case LOGIN:
+			return this->login_response;
+			break;
+		case LOGIN_USING_TOKEN:
+			return this->login_using_token_response;
+			break;
+		default:
+			break;
+	}
+	return "";
 }
 
 // getter methods for path_variables
@@ -411,9 +495,6 @@ string ialoy_main_data::get_device_controller_api_response(int response_type)
 			break;
 		case UPDATE_RANGE:
 			return this->update_range_response;
-			break;
-		case GET_CONNECTED_PI_LIST:
-			return this->get_connected_pi_list_response;
 			break;
 		case UPDATE_STATUS_FOR_PI:
 			return this->update_status_for_pi_response;

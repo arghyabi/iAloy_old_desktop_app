@@ -20,10 +20,9 @@ class ialoy_web_api : public ialoy_main_data
 private:
 	string protocol = "http://";
 	string sub_domain = "ialoy";
-	string domain = "arghyabiswas.com";
-	string api = "desktop_api";
-	string req_manager = "set_up_req_mngr.php";
-	string url = protocol+sub_domain+"."+domain+"/"+api+"/"+req_manager;
+	string domain = "arghyabiswas.com/";
+	string req_manager = "login_manager";
+	string url = protocol+sub_domain+"."+domain+req_manager;
 	string req_url;
 
 public:

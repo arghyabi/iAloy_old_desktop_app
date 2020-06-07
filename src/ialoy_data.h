@@ -41,7 +41,7 @@ enum product_Key_status
 {
 	PRODUCT_KEY_AVAILABLE = 0,
 	PRODUCT_KEY_NOT_AVAILABLE,
-	PRODUCT_KEY_INVALID
+	PRODUCT_KEY_INVALID = -1
 };
 
 enum pi_reg_status
@@ -65,6 +65,7 @@ enum user_login_status
 
 enum otp_send_status
 {
+	OTP_SEND_UNEXPECTED = -1,
 	OTP_SEND_FAIL = 0,
 	OTP_SEND_SUCCESS
 };
@@ -73,6 +74,12 @@ enum otp_verification_status
 {
 	OTP_NOT_VERIFIED = 0,
 	OTP_VERIFIED
+};
+
+enum requested_url
+{
+	LOGIN_MANAGER_API = 1,
+	DEVICE_MANAGER_API
 };
 
 enum api_request_type
@@ -92,19 +99,18 @@ enum api_request_type
 
 enum device_controller_api_request_type
 {
-	DEVICE_CONTROLLER_LOGIN_USING_TOKEN = 0,
-	GET_DEVICE_DETAIL_STATUS,
+	GET_DEVICE_DETAIL_STATUS = 1,
 	GET_ROOM_DEVICE_LIST,
 	GET_ROOM_DEVICE_STATUS,
 	UPDATE_STATUS,
 	UPDATE_RANGE,
-	GET_CONNECTED_PI_LIST,
 	UPDATE_STATUS_FOR_PI,
 	UPDATE_RANGE_FOR_PI,
 	GET_I2C_DATA,
 	ADD_NEW_MODULE,
 	VERIFY_PASSWORD,
-	UPDATE_PASSWORD
+	UPDATE_PASSWORD,
+	DEVICE_CONTROLLER_LOGIN_USING_TOKEN = 20,
 };
 
 enum module_linking_stage
@@ -128,21 +134,34 @@ enum module_manager_window_tabs
 	BURN_TAB,
 };
 
+enum api_response_status
+{
+	RESPONSE_FAILED = 0,
+	RESPONSE_SUCCESS,
+	RESPONSE_UNEXPECTED = 9,
+};
+
 class ialoy_main_data{
 
 private:
-	// for setup class
-	string pi_add, pi_name, product_id, password, first_name, last_name, phone,\
-		 otp, api_error_msg, api_response, device_controller_api_response, device_controller_api_error_msg;
+	// for login manager
+	string pi_add, pi_name, product_id, password, first_name, last_name, phone, otp, api_error_msg, \
+		device_controller_api_error_msg, email, token;
 
+	// response varibles for device controller
 	string device_controller_login_using_token_response,get_device_detail_status_response, \
 		get_room_device_list_response, get_room_device_status_response, update_status_response, \
 		update_range_response, get_connected_pi_list_response, update_status_for_pi_response, \
 		update_range_for_pi_response, get_i2c_data_response, add_new_module_response, verify_password_response, \
 		update_password_response;
 
-	string email, token;
+	// response varibles for login manager
+	string check_pi_status_response, check_email_status_response, check_email_connected_pi_response, \
+		get_user_details_response, check_product_key_status_response, send_otp_response, verify_otp_response, \
+		register_new_pi_response, login_response, login_using_token_response, get_pi_name_response;
 
+
+	// resource variables
 	string user = "/usr/";
 	string share = "share/";
 	string iAloy_folder = "iAloy/";
@@ -254,7 +273,7 @@ public:
 	void set_token(string token);
 	void set_otp(string otp);
 	void set_api_error_msg(string msg);
-	void set_api_response(string response);
+	void set_login_manager_api_response(int response_type, string response);
 
 	// setter methods for dev_controller class private variables.
 	void set_d_id(string d_id);
@@ -277,7 +296,7 @@ public:
 	string get_token();
 	string get_otp();
 	string get_api_error_msg();
-	string get_api_response();
+	string get_login_manager_api_response(int response_type);
 
 	string get_user_credential_path();
 	string get_mainwindow_bg_file_path();

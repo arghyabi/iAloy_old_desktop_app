@@ -21,6 +21,7 @@ void main_window_show(int mode)
 		//mainwindow_pt->addBgImage();
 		mainwindow_pt->showFullScreen();
 		mainwindow_pt->show();
+		cout << "MainWindow show completed..." << endl;
 	}
 	else
 		mainwindow_pt->hide();

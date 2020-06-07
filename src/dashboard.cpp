@@ -148,27 +148,28 @@ void dashboard::init()
 
 			cout << "Response from web:" << response << endl;
 			int response_type;
-			if(response.substr(0,1) == "1")
+
+			if(stoi(response.substr(0,1)) == LOGIN_MANAGER_API)
 			{
-				if(device_controller_api_request_type_flag != DEVICE_CONTROLLER_LOGIN_USING_TOKEN)
+				if((stoi(response.substr(1,2)) == DEVICE_CONTROLLER_LOGIN_USING_TOKEN) && (stoi(response.substr(3,1)) == RESPONSE_SUCCESS))
 				{
 					response_type = stoi(response.substr(1,2));
-					cout << "response_type:" << response_type << endl;
+					this->set_pi_name(response.substr(4));
+				}
+				else
+					on_logout_button_clicked();
+			}
+			else if(stoi(response.substr(0,1)) == DEVICE_MANAGER_API)
+			{
+				if(stoi(response.substr(1,2)) != RESPONSE_FAILED)
+				{
+					response_type = stoi(response.substr(1,2));
 					set_device_controller_api_response(response_type, response.substr(3));
 				}
 				else
-				{
-					// for login
-					if(response.substr(1,2) != "0")
-					{
-						this->set_pi_name(response.substr(2));
-						response_type = DEVICE_CONTROLLER_LOGIN_USING_TOKEN;
-					}
-					else
-						on_logout_button_clicked();
-				}
-				update_dashboard_gui(response_type);
+					on_logout_button_clicked();
 			}
+			update_dashboard_gui(response_type);
 		}
 	);
 
@@ -184,7 +185,6 @@ void dashboard::init()
 	}
 }
 
-// contain calling statement of network->get()
 void dashboard::send_device_controller_api_request()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -201,7 +201,7 @@ void dashboard::send_device_controller_api_request()
 void dashboard::update_dashboard_gui(int response_type)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	cout << "DB-Flag:" << response_type << endl;
+
 	switch(response_type)
 	{
 		case DEVICE_CONTROLLER_LOGIN_USING_TOKEN:
@@ -229,9 +229,6 @@ void dashboard::update_dashboard_gui(int response_type)
 
 		case UPDATE_RANGE:
 			// render update range
-			break;
-
-		case GET_CONNECTED_PI_LIST:
 			break;
 
 		case UPDATE_STATUS_FOR_PI:
@@ -291,6 +288,7 @@ QJsonArray dashboard::get_json_array_from_response(int response_type)
 	QJsonDocument jsonDocument = QJsonDocument::fromJson(room_device_status_info.toUtf8());
 	QJsonObject jsonObject = jsonDocument.object();
 	QJsonValue ArrayValue;
+
 	switch(response_type)
 	{
 		case GET_ROOM_DEVICE_LIST:
@@ -337,7 +335,6 @@ void dashboard::render_dashboard_room_btn()
 	clearLayout(ui->verticalLayoutForRooms);
 
 	QJsonArray roomArray = get_json_array_from_response(GET_ROOM_DEVICE_LIST);
-
 	// creating main_room_container
 	scrollArea = new QScrollArea();
 	QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -350,7 +347,7 @@ void dashboard::render_dashboard_room_btn()
 
 	scrollAreaWidgetContents = new QWidget();
 	gridLayout = new QGridLayout(scrollAreaWidgetContents);
-	int rm = 0;
+	int rm = 0, btn_count = 0;
 
 	foreach (const QJsonValue &room_item, roomArray)
 	{
@@ -407,8 +404,8 @@ void dashboard::render_dashboard_room_btn()
 			}
 
 			room->setAlignment(Qt::AlignLeading|Qt::AlignVCenter|Qt::AlignVCenter);
+			gridLayoutForRoom = new QGridLayout(room);
 		}
-		gridLayoutForRoom = new QGridLayout(room);
 
 		QJsonArray dev_array = room_item.toObject().value("dev_list").toArray();
 
@@ -426,15 +423,16 @@ void dashboard::render_dashboard_room_btn()
 			QString slider_value = device.toObject().value("slider_value").toString();
 
 			tmp_btn_nd->pin_num = device.toObject().value("pin").toInt();
-			//tmp_btn_nd->mod_add = hex_to_int(device.toObject().value("mod_add").toString().toStdString());
-			// int mod_add_int = stoi(mod_add.toStdString().substr(2, 2), 0, 16);
 			tmp_btn_nd->mod_add = stoi(device.toObject().value("mod_add").toString().toStdString().substr(2, 2), 0, 16);
 
 			tmp_btn_nd->device_id = device_id;
 
-			verticalLayout = new QVBoxLayout();
-			verticalLayout->setSpacing(6);
-			verticalLayout->setContentsMargins(5, 20, 5, -1);
+			if(room_id != "-1")
+			{
+				verticalLayout = new QVBoxLayout();
+				verticalLayout->setSpacing(6);
+				verticalLayout->setContentsMargins(5, 20, 5, -1);
+			}
 			tmp_btn_nd->btn = new QPushButton(device_id);
 
 			signalMapper = new QSignalMapper(this);
@@ -456,9 +454,11 @@ void dashboard::render_dashboard_room_btn()
 			tmp_btn_nd->room_name = room_name;
 
 			if(room_id != "-1")
+			{
 				verticalLayout->addWidget(tmp_btn_nd->btn);
-
-			verticalLayout->setStretch(0, 3);
+				verticalLayout->setStretch(0, 3);
+				btn_count++;
+			}
 
 			if(device_is_var == "1")
 			{
@@ -513,8 +513,11 @@ void dashboard::render_dashboard_room_btn()
 				gridLayoutForRoom->addItem(horizontalSpacer, row+1, sp, 1, 1);
 			}
 
-			gridLayout->addWidget(room, rm, 0, 1, 1);
-			rm++;
+			if(btn_count)
+			{
+				gridLayout->addWidget(room, rm, 0, 1, 1);
+				rm++;
+			}
 		}
 
 	}
@@ -523,6 +526,9 @@ void dashboard::render_dashboard_room_btn()
 		verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Expanding);
 		gridLayout->addItem(verticalSpacer, rm+1, 0, 1, 1);
 	}
+
+	cout << "RM value : " << rm << endl;
+	cout << "Button count " << btn_count << endl;
 
 	scrollArea->setWidget(scrollAreaWidgetContents);
 	ui->verticalLayoutForRooms->addWidget(scrollArea);
