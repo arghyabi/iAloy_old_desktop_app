@@ -31,28 +31,31 @@ SOURCES += \
 	src/hardware.cpp \
 	src/dashboard.cpp \
 	src/settings.cpp \
-	src/dev_controller_api.cpp \
+        src/device_controller_api.cpp \
 	src/update_manager.cpp \
 	src/update_manager_thread.cpp \
         src/i2c_data.cpp \
         src/module_status.cpp \
         src/module_manager.cpp \
         src/module_manager_thread.cpp \
+        src/ialoy_data.cpp \
 
 
 HEADERS += \
+        src/main.h \
 	src/mainwindow.h \
 	src/connect_init.h \
 	src/hardware.h \
 	src/dashboard.h \
 	src/settings.h \
-	src/dev_controller_api.h \
+        src/device_controller_api.h \
 	src/update_manager.h \
 	src/update_manager_thread.h \
         src/i2c_data.h \
         src/module_status.h \
         src/module_manager.h \
         src/module_manager_thread.h \
+        src/ialoy_data.h \
 
 
 FORMS += \

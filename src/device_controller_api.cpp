@@ -95,6 +95,12 @@ void device_controller_api::set_device_controller_api_request(device_controller_
 			break;
 		}
 
+		case GET_OTHER_USERS_INFO:
+		{
+			this->req_url = this->url+"?dco="+dco;
+			break;
+		}
+
 		default:
 			break;
 	}

@@ -110,6 +110,7 @@ enum device_controller_api_request_type
 	ADD_NEW_MODULE,
 	VERIFY_PASSWORD,
 	UPDATE_PASSWORD,
+	GET_OTHER_USERS_INFO,
 	DEVICE_CONTROLLER_LOGIN_USING_TOKEN = 20,
 };
 
@@ -153,7 +154,7 @@ private:
 		get_room_device_list_response, get_room_device_status_response, update_status_response, \
 		update_range_response, get_connected_pi_list_response, update_status_for_pi_response, \
 		update_range_for_pi_response, get_i2c_data_response, add_new_module_response, verify_password_response, \
-		update_password_response;
+		update_password_response, get_other_users_info_response;
 
 	// response varibles for login manager
 	string check_pi_status_response, check_email_status_response, check_email_connected_pi_response, \
@@ -254,9 +255,18 @@ public:
 		QString url;
 	};
 
+	struct other_user_info_node
+	{
+		int u_id;
+		QString first_name;
+		QString last_name;
+		QString email;
+	};
+
 	QLinkedList<struct btn_node*> btn_list;
 	QLinkedList<struct mod_data_node*> mod_data_list;
 	QLinkedList<struct version_details_node*> version_details_list;
+	QLinkedList<struct other_user_info_node*> other_user_info_list;
 
 	// saved credential manager
 	bool saved_credential_manager();

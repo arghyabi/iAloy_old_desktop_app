@@ -82,10 +82,6 @@ void module_manager::init(QLinkedList<btn_node*> tmp_btn_list, int tab_index)
 	//////////////////////////////////////////////////////////////
 	int col = 0;
 	int row = 0;
-	int module_active_count = 0;
-	int module_available_count = 0;
-	int module_disconnected_count = 0;
-	int module_not_available_count = 0;
 
 	QString head_style = "padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px; text-align: center; background-color: #005DD5; color: #FFF;";
 	QString body_style = "border: 1px solid #ddd; padding: 4px; text-align: center;";

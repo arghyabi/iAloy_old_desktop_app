@@ -27,7 +27,6 @@ public:
 	QTimer *timer_for_get_pi_name;
 
 	explicit MainWindow(QWidget *parent = nullptr);
-	void addBgImage();
 	void status_label_set_text(string text, string color);
 	void show_reg_form();
 	void hide_reg_form();
@@ -47,6 +46,7 @@ public:
 	void render_registered_new_pi();
 	void render_login_using_token();
 	void mainwindow_reset_on_logout();
+	void other_user_login_setup(QString);
 
 	~MainWindow();
 

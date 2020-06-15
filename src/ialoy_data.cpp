@@ -236,6 +236,9 @@ void ialoy_main_data::set_device_controller_api_response(int response_type, stri
 		case UPDATE_PASSWORD:
 			this->update_password_response = resp;
 			break;
+		case GET_OTHER_USERS_INFO:
+			this->get_other_users_info_response = resp;
+			break;
 	}
 }
 
@@ -513,6 +516,9 @@ string ialoy_main_data::get_device_controller_api_response(int response_type)
 			break;
 		case UPDATE_PASSWORD:
 			return this->update_password_response;
+			break;
+		case GET_OTHER_USERS_INFO:
+			return this->get_other_users_info_response;
 			break;
 	}
 	return NULL;

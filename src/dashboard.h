@@ -75,7 +75,6 @@ public:
 	bool addModuleReq;
 
 	explicit dashboard(QWidget *parent = 0);
-	void addBgImage();
 	void init();
 	void set_dashboard_network_interface(QNetworkAccessManager *QNAM, QNetworkRequest *QNR);
 	bool dashboard_login_using_token();
@@ -101,6 +100,8 @@ signals:
 	void verify_password_response_signal(bool);
 	void update_password_response_signal(bool);
 	void settings_window_show_signal(int);
+	void get_other_user_info_response_signal(string);
+	void other_user_login_setup_signal(QString);
 
 private slots:
 	void update_time();
@@ -123,6 +124,8 @@ private slots:
 
 	void verify_password_slot(string);
 	void update_password_slot(string);
+	void get_other_users_info_slot();
+	void dashboard_request_other_user_login_slot(QString);
 
 public slots:
 	void add_new_module_api_request_slot(string);

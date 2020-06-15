@@ -18,7 +18,6 @@ void main_window_show(int mode)
 	{
 		QSize size = qApp->screens()[0]->size();
 		mainwindow_pt->resize(size);
-		//mainwindow_pt->addBgImage();
 		mainwindow_pt->showFullScreen();
 		mainwindow_pt->show();
 		cout << "MainWindow show completed..." << endl;
@@ -40,7 +39,6 @@ void dashboard_window_show(bool mode)
 	{
 		QSize size = qApp->screens()[0]->size();
 		dashboardwindow_pt->resize(size);
-		// dashboardwindow_pt->addBgImage(); // TODO: Solve the background image problem
 		dashboardwindow_pt->showFullScreen();
 		dashboardwindow_pt->show();
 		dashboardwindow_pt->init();
@@ -59,6 +57,15 @@ void update_manager_window_show(int mode)
 	}
 	else
 		update_manager_pt->hide();
+}
+
+void other_user_login_setup_call(QString email)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+
+	main_window_show(true);
+	dashboard_window_show(false);
+	mainwindow_pt->other_user_login_setup(email);
 }
 
 int main(int argc, char *argv[])
@@ -81,7 +88,6 @@ int main(int argc, char *argv[])
 	update_manager_pt = &updateManager;
 
 	main_window_show(true);
-
 	dashboard_window_show(false);
 
 	return a.exec();

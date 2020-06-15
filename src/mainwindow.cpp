@@ -15,7 +15,7 @@
 
 using namespace std;
 
-static int SetUpLineEdit_stat = 0, user_type = 0;
+static int SetUpLineEdit_stat = 0;
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -243,6 +243,7 @@ void MainWindow::render_login_using_token()
 	{
 		case LOGIN_SUCCESS:
 			cout << "Login success..." << endl;
+			ui->pi_name_label->setText(QString::fromStdString("<center><font size=3>Welcome to</font><b><br/><font size=5>"+this->get_login_manager_api_response(LOGIN_USING_TOKEN).substr(1)+"</font></b></center>"));
 			dashboard_window_show(true);
 			main_window_show(false);
 			break;
@@ -409,19 +410,19 @@ void MainWindow::render_pi_name()
 
 	get_pi_name_timer_flag = false;
 
-	if(stoi(this->get_login_manager_api_response(GET_PI_NAME).substr(0,1)) == 0)
-	{
-		status_label_set_text("", "black");
-		ui->pi_name_label->setText(QString::fromStdString("<font size=4><b>Pi not registered</b></font>"));
-		ui->SetUpLineEdit->setPlaceholderText("Enter email to register");
-	}
-	else
+	if(stoi(this->get_login_manager_api_response(GET_PI_NAME).substr(0,1)) == RESPONSE_SUCCESS)
 	{
 		this->set_pi_name(this->get_login_manager_api_response(GET_PI_NAME).substr(1));
 		ui->SetUpLineEdit->setPlaceholderText("Enter email to login");
 		ui->SetUpLineEdit->setMaxLength(50);
 		status_label_set_text("No proper saved credential found... Please login", "black");
 		ui->pi_name_label->setText(QString::fromStdString("<center><font size=3>Welcome to</font><b><br/><font size=5>"+this->get_pi_name()+"</font></b></center>"));
+	}
+	else
+	{
+		status_label_set_text("", "black");
+		ui->pi_name_label->setText(QString::fromStdString("<font size=4><b>Pi not registered</b></font>"));
+		ui->SetUpLineEdit->setPlaceholderText("Enter email to register");
 	}
 
 	ui->SetUpLineEdit->setDisabled(0);
@@ -460,21 +461,18 @@ void MainWindow::render_password_or_user_details_form()
 		}
 		case INVALID_USER_REGISTERED_PI:
 		{
-			// user_details form render.
 			status_label_set_text("Invalid user of this Pi... Please enter a registered email", "red");
 			ui->SetUpLineEdit->setText("");
 			break;
 		}
 		case PERMANENT_USER_UNREGISTERED_PI:
 		{
-			// user_details form render.
 			reg_user_type_flag = EXISTING_USER;
 			show_reg_form();
 			break;
 		}
 		case INVALID_USER_UNREGISTERED_PI:
 		{
-			// user_details form render.
 			reg_user_type_flag = NEW_USER;
 			show_reg_form();
 			break;
@@ -483,6 +481,18 @@ void MainWindow::render_password_or_user_details_form()
 			cout << "API response error" << endl;
 			break;
 	}
+}
+
+void MainWindow::other_user_login_setup(QString email)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+
+	MainWindow::set_email(email.toStdString());
+	set_api_request(CHECK_EMAIL_CONNECTED_PI);
+	send_api_request();
+
+	ui->SetUpLineEdit->setDisabled(0);
+	ui->submit_button->setDisabled(0);
 }
 
 void MainWindow::render_after_login()
@@ -528,11 +538,9 @@ void MainWindow::render_after_login()
 		break;
 
 		default:
-		{
 			ui->SetUpLineEdit->setText("");
 			status_label_set_text("Something went wrong... Please try again", "red");
-		}
-		break;
+			break;
 	}
 }
 
@@ -601,16 +609,6 @@ void MainWindow::hide_reg_form()
 	ui->form_next_btn->hide();
 }
 
-void MainWindow::addBgImage()
-{
-	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	QPixmap bkgnd(QString::fromStdString(MainWindow::get_mainwindow_bg_file_path()));
-	bkgnd = bkgnd.scaled(this->width(),this->height());
-	QPalette palette;
-	palette.setBrush(QPalette::Background, bkgnd);
-	this->setPalette(palette);
-}
-
 void MainWindow::on_submit_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
@@ -619,11 +617,9 @@ void MainWindow::on_submit_button_clicked()
 	{
 		case GET_INPUT_EMAIL_MODE:
 		{
-			// Email id proccessing section
 			if (ui->SetUpLineEdit->text() != "")
 			{
 				ui->status_label->setText("Checking account...");
-				// check email is right formatted or not
 				if(validateEmail(ui->SetUpLineEdit->text().toStdString()))
 				{
 					MainWindow::set_email(ui->SetUpLineEdit->text().toStdString());
@@ -687,8 +683,7 @@ void MainWindow::on_submit_button_clicked()
 			{
 				MainWindow::set_pi_name(ui->SetUpLineEdit->text().toStdString());
 				cout << "Pi_name : " << MainWindow::get_pi_name() << endl;
-				// show product_key enter field
-				status_label_set_text("Enter 16 digit product key to register", "black");
+				status_label_set_text("Enter 16 digit Product Key to register", "black");
 				ui->SetUpLineEdit->setPlaceholderText("Enter Product Key...");
 				ui->SetUpLineEdit->setText("");
 				ui->SetUpLineEdit->setMaxLength(16);
@@ -762,7 +757,6 @@ void MainWindow::on_form_next_btn_clicked()
 	{
 		cout << "Email : " << MainWindow::get_email() << "\nFirst name : " << MainWindow::get_first_name() << "\nLast name : " << MainWindow::get_last_name() << endl;
 	}
-
 
 	status_label_set_text("Set a Pi Name", "black");
 	ui->SetUpLineEdit->setPlaceholderText("Enter Pi Name...");

@@ -65,6 +65,17 @@ dashboard::dashboard(QWidget *parent) :
 	connect(settings_obj, SIGNAL(update_password_signal(string)), this, SLOT(update_password_slot(string)));
 	connect(this, SIGNAL(verify_password_response_signal(bool)), settings_obj, SLOT(verify_password_response_slot(bool)));
 	connect(this, SIGNAL(update_password_response_signal(bool)), settings_obj, SLOT(update_password_response_slot(bool)));
+	connect(settings_obj, SIGNAL(get_other_users_info_signal()), this, SLOT(get_other_users_info_slot()));
+	connect(this, SIGNAL(get_other_user_info_response_signal(string)), settings_obj, SLOT(get_other_user_info_response_slot(string)));
+	connect(settings_obj, SIGNAL(dashboard_request_other_user_login_signal(QString)), this, SLOT(dashboard_request_other_user_login_slot(QString)));
+}
+
+void dashboard::get_other_users_info_slot()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	timer_for_i2c_data_read_from_web->stop();
+	set_device_controller_api_request(GET_OTHER_USERS_INFO);
+	send_device_controller_api_request();
 }
 
 void dashboard::verify_password_slot(string pwd)
@@ -264,6 +275,11 @@ void dashboard::update_dashboard_gui(int response_type)
 			timer_for_i2c_data_read_from_web->start(1000);
 			break;
 
+		case GET_OTHER_USERS_INFO:
+			emit get_other_user_info_response_signal(get_device_controller_api_response(GET_OTHER_USERS_INFO));
+			timer_for_i2c_data_read_from_web->start(1000);
+			break;
+
 		default:
 			break;
 	}
@@ -328,10 +344,10 @@ void dashboard::render_dashboard_room_btn()
 
 	// store response in structure_linked_list here
 	struct btn_node *tmp_btn_nd;
+
 	if(!btn_list.isEmpty())
-	{
 		btn_list.clear();
-	}
+
 	clearLayout(ui->verticalLayoutForRooms);
 
 	QJsonArray roomArray = get_json_array_from_response(GET_ROOM_DEVICE_LIST);
@@ -787,16 +803,6 @@ void dashboard::read_i2c_data_from_module(int mod_address, int received_data)
 	}
 }
 
-void dashboard::addBgImage()
-{
-	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	QPixmap bkgnd("/usr/share/iAloy/photos/dashboard.jpg");
-	bkgnd = bkgnd.scaled(this->width(),this->height());
-	QPalette palette;
-	palette.setBrush(QPalette::Background, bkgnd);
-	this->setPalette(palette);
-}
-
 // TODO : Duplicate function from iAloy_main_data
 int dashboard::hex_to_int(string hex)
 {
@@ -910,6 +916,16 @@ void dashboard::on_logout_button_clicked()
 	main_window_show(true);
 	dashboard_window_show(false);
 	mainwindow_reset_on_logout();
+}
+
+void dashboard::dashboard_request_other_user_login_slot(QString email)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+
+	system("mv /usr/share/iAloy/.conf/credential.json /usr/share/iAloy/.conf/credential_old.json");
+	timer_for_i2c_data_read_from_web->stop();
+	timer_for_i2c_data_read_from_mod->stop();
+	other_user_login_setup_call(email);
 }
 
 void dashboard::on_module_current_status_btn_clicked()
