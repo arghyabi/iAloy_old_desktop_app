@@ -1,0 +1,3 @@
+
+#HARDWARE = atmega328
+HARDWARE = attiny88

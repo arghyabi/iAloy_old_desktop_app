@@ -1,0 +1,55 @@
+#!/bin/sh
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+PURPLE='\033[0;34m'
+NC='\033[0m'
+
+if ls ATTinyCore > /dev/null; then
+	echo "\n${GREEN}ATTinyCore is already present${NC}\n"
+else
+	echo "\n${RED}ATTinyCore is not present\n${GREEN}Cloning...${NC}\n"
+	git clone https://github.com/SpenceKonde/ATTinyCore.git
+fi
+
+if [ $(dpkg -s arduino | grep -c "ok installed") -ne 0 ]; then
+	echo "${GREEN}arduino package is  already installed${NC}\n"
+else
+	echo "${YELLOW}arduino is not installed.\nInstalling package ...${NC}\n"
+	sudo apt-get update
+	sudo apt-get install arduino -y
+	if [ $(dpkg -s arduino | grep -c "ok installed") -ne 0 ]; then
+		echo "\n${GREEN}arduino package installation successful${NC}\n\n"
+	else
+		echo "\n${RED}arduino package installtion failed... Do it manually.${NC}\n\n"
+	fi
+fi
+
+
+if [ $(dpkg -s arduino-mk | grep -c "ok installed") -ne 0 ]; then
+	echo "${GREEN}arduino-mk package is  already installed${NC}\n"
+else
+	echo "${YELLOW}arduino-mk is not installed.\nInstalling package ...${NC}\n"
+	sudo apt-get update
+	sudo apt-get install arduino-mk -y
+	if [ $(dpkg -s arduino-mk | grep -c "ok installed") -ne 0 ]; then
+		echo "\n${GREEN}arduino-mk package installation successful${NC}\n\n"
+	else
+		echo "\n${RED}arduino-mk package installtion failed... Do it manually.${NC}\n\n"
+	fi
+fi
+
+
+if [ $(dpkg -s avrdude | grep -c "ok installed") -ne 0 ]; then
+	echo "${GREEN}avrdude package is  already installed${NC}\n"
+else
+	echo "${YELLOW}avrdude is not installed.\nInstalling package ...${NC}\n"
+	sudo apt-get update
+	sudo apt-get install avrdude -y
+	if [ $(dpkg -s avrdude | grep -c "ok installed") -ne 0 ]; then
+		echo "\n${GREEN}avrdude package installation successful${NC}\n\n"
+	else
+		echo "\n${RED}avrdude package installtion failed... Do it manually.${NC}\n\n"
+	fi
+fi
