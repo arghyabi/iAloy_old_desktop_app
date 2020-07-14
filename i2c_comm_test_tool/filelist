@@ -1,0 +1,35 @@
+CPPFILE 	= \
+	main.cpp \
+
+
+UICPPFILE 	= \
+	mainwindow.cpp \
+
+
+CPPOBJFILE	= \
+	main.o \
+
+
+UIFILE 		= \
+	mainwindow.ui \
+
+
+UIHFILE 	= \
+	mainwindow.h \
+
+
+UIMHFILE 	= \
+	ui_mainwindow.h \
+
+
+UIMOCCPP 	= \
+	moc_mainwindow.cpp \
+
+
+UIMOCOBJ 	= \
+	moc_mainwindow.o \
+
+
+UIOBJFILE 	= \
+	mainwindow.o \
+
