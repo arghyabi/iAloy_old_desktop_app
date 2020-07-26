@@ -12,61 +12,112 @@ Features :
 TODO: Update manager should be updated.
 
 5. Settings
-    a. Network
-        i. Wifi,
-        ii. Proxy,
-    b. display
-        i. fonts,
-        ii. resulation,
-        iii. brightness
-    c. date & time
-    d. Users
-    e. about
+	a. Network
+		i. Wifi,
+		ii. Proxy,
+	b. display
+		i. fonts,
+		ii. resulation,
+		iii. brightness
+	c. date & time
+	d. Users
+	e. about
 
 ** Module flash button in head menu
 
 Status bar:
-    a. Online status [lbl] ------------- done
-    b. IP address [lbl] ----------------
-    c. Available updates [btn] ---------
-            [BG-Color: yellow-> new_update || button->hide()]
-            [icon: ]
-    d. New module info [btn] -----------
-            [BG-Color: yellow-> new_added || button->hide()]
-            [icon: IC with "+"]
-    e. Module current status [btn] -----
-            [BG-Color: green-> ok || red-> !ok]
-            [icon: IC -> ok || IC with "!" -> !ok]
-    f. Virtual keyboard [btn] ----------
+	a. Online status [lbl] ------------- done
+	b. IP address [lbl] ---------------- done
+	c. Available updates [btn] ---------
+			[BG-Color: yellow-> new_update || button->hide()]
+			[icon: ]
+	d. New module info [btn] -----------
+			[BG-Color: yellow-> new_added || button->hide()]
+			[icon: IC with "+"]
+	e. Module current status [btn] -----
+			[BG-Color: green-> ok || red-> !ok]
+			[icon: IC -> ok || IC with "!" -> !ok]
+	f. Virtual keyboard [btn] ----------
 
-Room device UI update:
-    a. Scroll bar area,
-    b. Group box area as room,
-    c. Overall scrollableonly.
+Update Manager: [done]
+	a. Current version status render not perfect,
+	b. Update status should be in two lines,
+	c. Already update in fetch time should be remove.
+
+Power icon: [done]
+	a. Pop up window for reboot, power off, cancel,
+
+Hidden icons: [done]
+	a. wifi,
+	b. Virtual Keyboard,
+	c. Settings,
+
+Footter: (follow feature above) [done]
+	a. Update status functionality should be added for update notifier.
+	b. Module status icon color change.
+
+Dashboard : [done]
+a. Logout confirmation,
 
 
+Timmer space[&nbsp;] should be added for fine rendering. [done]
 
-OTP-Handleing
-    a. OTP life time 5mins
-    b. If resend happend within life time, same OTP send & update time in DB [resend button should be added]
-    c. OTP verification should delete all the perspective entry of the valid email
+Slider option temporarily disabled from UI only. [done]
 
-**************
-TODO : Dashboard login using token error aco = 10
-**************
+*********************************************************
+LOGIN FOR iAloy_Desktop_app_v3
+*********************************************************
+iAloy_Desktop_app_v3 login architecture
+	login:
+		validate authintacation, create & store token
+		if(Online)
+			web-login-request: send pi_login request with parameters [email, pi_address, token]
+			web-validation: validate request parameters and create session [$_SESSION['pi'] = $pi_id]
+			web-request: continuously request db-changes
+			DB_Web_changes status table : db_change_status_table [pi_id, table_id]
+										{auto delete on successfull fetch operation}
+			A. db-changes check: [Sync : web to local] [continuous call]
+					1. pi,
+					2. users,
+					3. pi_user_connections,
+					4. guest_user,
+					5. room,
+					6. module_types,
+					7. new_module,
+					8. module,
+					9. room_module_pin,
+					10. devices,
+					11. gu_controls.
 
-/////////////////////////////////////////////////////////////////////////
+			B. Status-change request: [Sync : local to web] [Event call]
+					1. pi,
+					2. user,
+					3. guest_user,
+					4. new_module, [Sync : on_link_button_click]
+					5. devices,
+					6. gu_controls,
 
-case 1: current_web == prev_web => no change in web
-case 2: current_mod == prev_mod => no change in mod
-case 3: current_web == current_mod => no change needed
+		else
+			continue with local database
 
-algo:
-foreach(int mod_Add, all_mod_Add)
-    if(current_web != current_mod) //<=TODO
-        if(current_mod != prev_mod) // Done [i2c_data::read_i2c_data()]
-            prev_mod = current_mod
-            send_data_to_web_with_switch_chagne_status // api call
-        else if(current_web != prev_web) // Done [dashboard::render_i2c_data()]
-            prev_web = current_web
-            send_i2c_data_to_module_signal(mod_Add, data_to_send);
+iAloy_Desktop_app_v3 synchronization:
+	Web interface [mostly] disable when system is offline.
+	When online again web database synced with local database.
+	Online and Offline status will be decidable by checking last_request_time field
+
+
+*********************************************************
+
+
+---------------------------------------------------------
+PRODUCT KEY MANAGEMENT SYSTEM
+---------------------------------------------------------
+
+* Product key can be purchasable online only by the registered users,
+* The product key is only merged with the buyer account,
+* Product key is not shareable,
+* The part of the product key will be invisible, due to security enhancement,
+* The list of product key can be visible and maintain from the
+	product_key management section of the user account.
+
+---------------------------------------------------------

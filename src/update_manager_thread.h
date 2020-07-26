@@ -25,9 +25,11 @@ private:
 	QNetworkReply *webResponse;
 	QString des = "/usr/share/iAloy/.temp/iAloy_update.zip";
 	QString latest_version;
+	QString current_version;
 	QString selected_version;
 	QString ver_details;
 	int total_size;
+	bool check_update_available;
 	QString read_current_version();
 	void write_latest_version(QString current_ver, QString latest_ver);
 	void parse_fetched_data(QString val);
@@ -42,9 +44,11 @@ signals:
 	void download_progressbar_update_signal(int, int);
 	void download_update_tarball_complete();
 	void untar_dowload_tarball_complete();
+	void check_update_available_response_for_parent_signal(bool);
 
 public slots:
 	void fetch_update_status_slot(bool);
+	void check_update_available_slot();
 	void download_update_tarball_slot(QString, int, QString);
 
 	void error(QNetworkReply::NetworkError err);

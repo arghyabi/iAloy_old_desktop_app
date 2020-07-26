@@ -41,6 +41,7 @@
 #include "module_status.h"
 #include "module_manager.h"
 #include "settings.h"
+#include "update_manager_thread.h"
 
 using namespace std;
 
@@ -102,9 +103,13 @@ signals:
 	void settings_window_show_signal(int);
 	void get_other_user_info_response_signal(string);
 	void other_user_login_setup_signal(QString);
+	void read_all_i2c_module_state_signal(int*);
+	void check_update_available_signal();
 
 private slots:
 	void update_time();
+	void auto_module_status_check();
+	void auto_update_available_check();
 	void ip_address_update();
 	void on_power_tool_button_clicked();
 	void on_settings_tool_button_clicked();
@@ -126,13 +131,16 @@ private slots:
 	void update_password_slot(string);
 	void get_other_users_info_slot();
 	void dashboard_request_other_user_login_slot(QString);
+	void on_available_update_btn_clicked();
 
 public slots:
 	void add_new_module_api_request_slot(string);
+	void check_update_available_response_for_parent_slot(bool);
 
 private:
 	Ui::dashboard *ui;
 	int counter_for_ip_check;
+	int counter_for_module_status_check;
 
 	QJsonArray get_json_array_from_response(int);
 	int hex_to_int(string hex);

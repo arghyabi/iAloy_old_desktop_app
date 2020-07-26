@@ -12,6 +12,7 @@ update_manager_thread::update_manager_thread(QObject *parent) : QObject(parent)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 
+	check_update_available = false;
 	NetworkManager = new QNetworkAccessManager();
 	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply)
 		{
@@ -26,16 +27,27 @@ update_manager_thread::update_manager_thread(QObject *parent) : QObject(parent)
 
 		parse_fetched_data(val);
 
-		QString current_version = read_current_version();
+		current_version = read_current_version();
 		cout << "current version:" << current_version.toStdString() << endl;
 		cout << "latest version:" << latest_version.toStdString() << endl;
 
-		write_latest_version(current_version, latest_version);
-
-		if(current_version == latest_version)
-			emit fetch_update_status_need_update(version_details_list, true, is_downloaded);
+		if(check_update_available)
+		{
+			check_update_available = false;
+			if(current_version == latest_version)
+				emit check_update_available_response_for_parent_signal(false);
+			else
+				emit check_update_available_response_for_parent_signal(true);
+		}
 		else
-			emit fetch_update_status_need_update(version_details_list, false, is_downloaded);
+		{
+			write_latest_version(current_version, latest_version);
+
+			if(current_version == latest_version)
+				emit fetch_update_status_need_update(version_details_list, true, is_downloaded);
+			else
+				emit fetch_update_status_need_update(version_details_list, false, is_downloaded);
+		}
 	}
 	);
 }
@@ -119,6 +131,14 @@ void update_manager_thread::fetch_update_status_slot(bool is_downloaded)
 	this->is_downloaded = is_downloaded;
 	NetworkRequest.setUrl(QString::fromStdString("http://ialoy.arghyabiswas.com/update_manager?upmc=1"));
 	NetworkManager->get(NetworkRequest);
+}
+
+void update_manager_thread::check_update_available_slot()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	check_update_available = true;
+	fetch_update_status_slot(false);
+	cout << "Latest version : " << latest_version.toStdString() << "\nCurrent version : " << current_version.toStdString() << endl;
 }
 
 void update_manager_thread::download_update_tarball_slot(QString download_url, int download_size, QString selected_ver)

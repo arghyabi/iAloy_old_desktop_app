@@ -32,6 +32,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->ialoy_tag_line_label->setText("<font size=4 color='#415c76'><b>Smart Home for Smart Future</b></font>");
 	ui->pi_name_label->setText(QString::fromStdString("<center><font size=3>Welcome to</font><b><br/><font size=5>"+this->get_pi_name()+"</font></b></center>"));
 
+	ui->wifi_tool_button->hide();
+	ui->settings_tool_button->hide();
+	ui->keyboard_tool_button->hide();
+
 	QTimer *timer_for_datatime_mm = new QTimer(this);
 	QTimer *timer_for_get_pi_name = new QTimer(this);
 
@@ -45,11 +49,15 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->keyboard_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_keyboad_icon_path())));
 	ui->app_update_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_update_icon_path())));
 	ui->power_tool_button->setIcon(QIcon(QString::fromStdString(MainWindow::get_power_icon_path())));
-
-	ui->available_update_btn->setIcon(QIcon(QString::fromStdString(MainWindow::get_ic_plus_brown_icon_path())));
+	ui->available_update_btn->setIcon(QIcon(QString::fromStdString(MainWindow::get_update_brown_icon_path())));
+	ui->available_update_btn->hide();
 
 	settings *settings_obj = new settings();
 	connect(this, SIGNAL(settings_window_show_signal(int)), settings_obj, SLOT(init(int)));
+
+	update_manager_thread *update_manager_thrd_obj = new update_manager_thread();
+	connect(this, SIGNAL(check_update_available_signal()), update_manager_thrd_obj, SLOT(check_update_available_slot()));
+	connect(update_manager_thrd_obj, SIGNAL(check_update_available_response_for_parent_signal(bool)), this, SLOT(check_update_available_response_for_parent_slot(bool)));
 
 	NetworkManager = new QNetworkAccessManager();
 	QObject::connect(NetworkManager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply)
@@ -117,7 +125,13 @@ void MainWindow::update_time()
 	QDateTime dateTime = dateTime.currentDateTime();
 	QString timeString = dateTime.toString("hh:mm:ss ap");
 	QString dateString = dateTime.toString("dd-MMMM-yyyy");
-	ui->time_label->setText("<font size=4><b>"+timeString+"</b></font><br/>  "+dateString);
+	ui->time_label->setText("<font size=4><b>"+timeString+"</b></font><br/>&nbsp;&nbsp;&nbsp;"+dateString);
+}
+
+void MainWindow::auto_update_available_check()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	emit check_update_available_signal();
 }
 
 void MainWindow::ip_address_update()
@@ -138,8 +152,19 @@ void MainWindow::ip_address_update()
 		ui->ip_address_label->setText("<font style=\"color:#204A87;\">&nbsp;&nbsp;IP:<b>"+IP+"</b></font>");
 
 		system("rm -rf ip_add.txt");
+
+		auto_update_available_check();
 	}
 	counter_for_ip_check++;
+}
+
+void MainWindow::check_update_available_response_for_parent_slot(bool update_available)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	if(update_available)
+		ui->available_update_btn->show();
+	else
+		ui->available_update_btn->hide();
 }
 
 void MainWindow::mainwindow_reset_on_logout()
@@ -789,11 +814,33 @@ void MainWindow::on_passsword_toggle_stateChanged(int arg1)
 void MainWindow::on_power_tool_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	QMessageBox msgBox;
+	QAbstractButton *power_off_button, *restart_button;
+
+	msgBox.addButton(tr("Cancel"), QMessageBox::NoRole);
+	restart_button = msgBox.addButton(tr("Reboot"), QMessageBox::YesRole);
+	power_off_button = msgBox.addButton(tr("Power Off"), QMessageBox::YesRole);
+
+	msgBox.setStyleSheet("QPushButton{padding: 10px; background-color:#3465A4; color: #FFF;}QMessageBox{height: auto; width: auto; padding-left: 20px; padding-right: 20px;}");
+	msgBox.setText("<center><font style=\"font-size: 20px; font-weight:bold;\">Power Off</font></center>");
+	msgBox.exec();
+
+	if (msgBox.clickedButton() == power_off_button)
+	{
 #ifdef ARC_TYPE
-	system("reboot");
+		system("poweroff");
 #else
-	this->close();
+		this->close();
 #endif
+	}
+	else if(msgBox.clickedButton() == restart_button)
+	{
+#ifdef ARC_TYPE
+		system("reboot");
+#else
+		this->close();
+#endif
+	}
 }
 
 void MainWindow::on_keyboard_tool_button_clicked()
@@ -813,6 +860,12 @@ void MainWindow::on_settings_tool_button_clicked()
 }
 
 void MainWindow::on_app_update_button_clicked()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	update_manager_window_show(true);
+}
+
+void MainWindow::on_available_update_btn_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	update_manager_window_show(true);

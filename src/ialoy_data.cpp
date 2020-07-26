@@ -394,6 +394,12 @@ string ialoy_main_data::get_update_icon_path()
 	return this->update_icon_path;
 }
 
+string ialoy_main_data::get_update_brown_icon_path()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	return this->update_brown_icon_path;
+}
+
 string ialoy_main_data::get_power_icon_path()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;

@@ -461,8 +461,8 @@ color: rgb(89, 14, 14);</string>
       <item>
        <widget class="QToolButton" name="new_module_info_btn">
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(237, 212, 0);
-color: rgb(89, 14, 14);</string>
+         <string notr="true">background-color: rgb(13, 118, 29);
+color: rgb(255, 255, 255);</string>
         </property>
         <property name="text">
          <string>...</string>

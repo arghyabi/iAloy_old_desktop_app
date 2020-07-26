@@ -173,6 +173,9 @@ void update_manager::fetch_update_status_need_update_render_slot(QLinkedList<str
 			download_size = version_details_nd->size;
 			download_url = version_details_nd->url;
 			latest_version = version_details_nd->version;
+			ui->version_details->setText("<b>Details : </b>"+version_details_nd->details);
+			console_print("Current Version: " + read_current_version());
+			console_print("Latest Version: " + latest_version);
 			start_flag = false;
 		}
 		if(is_downloaded && downloaded_version == version_details_nd->version)
@@ -187,9 +190,6 @@ void update_manager::fetch_update_status_need_update_render_slot(QLinkedList<str
 	ui->version_list_combo_box->show();
 
 	render_version_details();
-
-	console_print("Current Version: " + read_current_version());
-	console_print("Latest Version: " + latest_version);
 	ui->progressBar->setTextVisible(true);
 	ui->progressBar->setFormat("Overall: 0%");
 	ui->progressBar->setAlignment(Qt::AlignCenter);
@@ -203,7 +203,7 @@ void update_manager::fetch_update_status_need_update_render_slot(QLinkedList<str
 
 	if(is_downloaded)
 	{
-		ui->update_status->setText("<font size=4 color='#1963dd'>Version <b>"+downloaded_version+"</b> already downloaded. Please restart to apply changes.</font>");
+		ui->update_status->setText("<font size=4 color='#1963dd'><b>"+downloaded_version+"</b> already downloaded.<br>Please restart to apply changes.</font>");
 		ui->restart_btn->show();
 	}
 	else
@@ -255,7 +255,7 @@ void update_manager::finished_render_slot()
 	ui->update_btn->show();
 	console_print("Extracting is complete.");
 	console_print("Please restart the system to complete the installation process.");
-	ui->update_status->setText("<font size=4 color='#1963dd'>Download completed. Please restart to apply changes.</font>");
+	ui->update_status->setText("<font size=4 color='#1963dd'>Download completed.<br>Restart to apply changes.</font>");
 	ui->restart_btn->show();
 }
 
@@ -281,7 +281,6 @@ void update_manager::on_cancel_btn_clicked()
 	ui->update_btn->hide();
 	ui->console_area->setText("");
 	ui->console_area->hide();
-	ui->version_status->setText("Connecting...");
 	ui->download_progress->hide();
 	ui->progressBar->hide();
 	ui->restart_btn->hide();

@@ -13,6 +13,7 @@ dashboard::dashboard(QWidget *parent) :
 	addModuleReq = false;
 
 	counter_for_ip_check = 3600;
+	counter_for_module_status_check = 300;
 
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 
@@ -24,6 +25,7 @@ dashboard::dashboard(QWidget *parent) :
 	connect(timer_for_datetime, SIGNAL(timeout()), this, SLOT(update_time()));
 	connect(timer_for_i2c_data_read_from_web, SIGNAL(timeout()), this, SLOT(get_i2c_web_status()));
 	connect(timer_for_datetime, SIGNAL(timeout()), this, SLOT(ip_address_update()));
+	connect(timer_for_datetime, SIGNAL(timeout()), this, SLOT(auto_module_status_check()));
 	timer_for_datetime->start(1000);
 
 	ui->settings_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_settings_icon_path())));
@@ -33,9 +35,15 @@ dashboard::dashboard(QWidget *parent) :
 	ui->power_tool_button->setIcon(QIcon(QString::fromStdString(dashboard::get_power_icon_path())));
 
 	ui->module_current_status_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_normal_icon_path())));
-	ui->new_module_info_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_plus_brown_icon_path())));
-	ui->available_update_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_warning_icon_path())));
+	ui->new_module_info_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_plus_white_icon_path())));
 	ui->module_current_status_btn->hide();
+
+	ui->available_update_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_update_brown_icon_path())));
+	ui->available_update_btn->hide();
+
+	ui->wifi_tool_button->hide();
+	ui->settings_tool_button->hide();
+	ui->keyboard_tool_button->hide();
 
 	i2c_data *i2c_thread_obj = new i2c_data(this);
 	// TODO: Warining comes from thread. but working on main thread.
@@ -44,6 +52,7 @@ dashboard::dashboard(QWidget *parent) :
 	connect(this, SIGNAL(send_i2c_data_to_module_signal(int, int)), i2c_thread_obj, SLOT(write_i2c_data(int, int)));
 	connect(this, SIGNAL(read_request_i2c_data_from_module_signal(int, int)), i2c_thread_obj, SLOT(read_i2c_data(int, int)));
 	connect(i2c_thread_obj, SIGNAL(receive_i2c_data_from_module(int, int)), this, SLOT(read_i2c_data_from_module(int, int)));
+	connect(this, SIGNAL(read_all_i2c_module_state_signal(int*)), i2c_thread_obj, SLOT(read_all_i2c_module_state(int*)));
 
 	timer_for_i2c_data_read_from_mod = new QTimer(this);
 	connect(timer_for_i2c_data_read_from_mod, SIGNAL(timeout()), this, SLOT(read_request_i2c_data_from_module()));
@@ -68,6 +77,10 @@ dashboard::dashboard(QWidget *parent) :
 	connect(settings_obj, SIGNAL(get_other_users_info_signal()), this, SLOT(get_other_users_info_slot()));
 	connect(this, SIGNAL(get_other_user_info_response_signal(string)), settings_obj, SLOT(get_other_user_info_response_slot(string)));
 	connect(settings_obj, SIGNAL(dashboard_request_other_user_login_signal(QString)), this, SLOT(dashboard_request_other_user_login_slot(QString)));
+
+	update_manager_thread *update_manager_thrd_obj = new update_manager_thread();
+	connect(this, SIGNAL(check_update_available_signal()), update_manager_thrd_obj, SLOT(check_update_available_slot()));
+	connect(update_manager_thrd_obj, SIGNAL(check_update_available_response_for_parent_signal(bool)), this, SLOT(check_update_available_response_for_parent_slot(bool)));
 }
 
 void dashboard::get_other_users_info_slot()
@@ -111,7 +124,7 @@ void dashboard::update_time()
 	QDateTime dateTime = dateTime.currentDateTime();
 	QString timeString = dateTime.toString("hh:mm:ss ap");
 	QString dateString = dateTime.toString("dd-MMMM-yyyy");
-	ui->time_label->setText("<font size=4><b>"+timeString+"</b></font><br/>  "+dateString);
+	ui->time_label->setText("<font size=4><b>"+timeString+"</b></font><br/>&nbsp;&nbsp;&nbsp;"+dateString);
 }
 
 void dashboard::new_module_linked_slot()
@@ -119,6 +132,50 @@ void dashboard::new_module_linked_slot()
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	set_device_controller_api_request(GET_ROOM_DEVICE_LIST);
 	send_device_controller_api_request();
+}
+
+void dashboard::auto_module_status_check()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	if(counter_for_module_status_check >= 300)
+	{
+		counter_for_module_status_check = 0;
+		int status_array[117];
+		emit read_all_i2c_module_state_signal(status_array);
+		bool is_module_status_ok = true;
+		struct btn_node *btn_nd;
+
+		foreach(btn_nd, btn_list)
+		{
+			if(status_array[btn_nd->mod_add] == 0)
+			{
+				is_module_status_ok = false;
+				break;
+			}
+		}
+
+		if(is_module_status_ok)
+		{
+			// green
+			ui->module_current_status_btn->setStyleSheet("background-color: rgb(13, 118, 29); \
+															color: rgb(255, 255, 255);");
+			ui->module_current_status_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_normal_icon_path())));
+		}
+		else
+		{
+			// red
+			ui->module_current_status_btn->setStyleSheet("background-color: rgb(204, 0, 0); \
+															color: rgb(89, 14, 14);");
+			ui->module_current_status_btn->setIcon(QIcon(QString::fromStdString(dashboard::get_ic_warning_icon_path())));
+		}
+	}
+	counter_for_module_status_check++;
+}
+
+void dashboard::auto_update_available_check()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	emit check_update_available_signal();
 }
 
 void dashboard::ip_address_update()
@@ -139,8 +196,19 @@ void dashboard::ip_address_update()
 		ui->ip_address_label->setText("<font style=\"color:#204A87;\">&nbsp;&nbsp;IP:<b>"+IP+"</b></font>");
 
 		system("rm -rf ip_add.txt");
+
+		auto_update_available_check();
 	}
 	counter_for_ip_check++;
+}
+
+void dashboard::check_update_available_response_for_parent_slot(bool update_available)
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	if(update_available)
+		ui->available_update_btn->show();
+	else
+		ui->available_update_btn->hide();
 }
 
 // init method contain network->get()
@@ -476,6 +544,23 @@ void dashboard::render_dashboard_room_btn()
 				btn_count++;
 			}
 
+			// temporary code
+
+			if(device_is_var == "1")
+			{
+				tmp_btn_nd->slider_val = stoi(slider_value.toStdString());
+				tmp_btn_nd->is_var = true;
+			}
+			else
+			{
+				tmp_btn_nd->slider_val = 0;
+				tmp_btn_nd->is_var = false;
+			}
+
+			/*
+
+			// Slider rendering [temporary disabled]
+
 			if(device_is_var == "1")
 			{
 				tmp_btn_nd->slider = new QSlider(room);
@@ -491,6 +576,7 @@ void dashboard::render_dashboard_room_btn()
 					verticalLayout->addWidget(tmp_btn_nd->slider);
 				tmp_btn_nd->label = NULL;
 				tmp_btn_nd->is_var = true;
+
 			}
 			else
 			{
@@ -505,6 +591,7 @@ void dashboard::render_dashboard_room_btn()
 				tmp_btn_nd->slider_val = 0;
 				tmp_btn_nd->is_var = false;
 			}
+			*/
 			if(room_id != "-1")
 				gridLayoutForRoom->addLayout(verticalLayout, row, col, 1, 1);
 
@@ -535,7 +622,6 @@ void dashboard::render_dashboard_room_btn()
 				rm++;
 			}
 		}
-
 	}
 	if(rm)
 	{
@@ -548,6 +634,9 @@ void dashboard::render_dashboard_room_btn()
 
 	scrollArea->setWidget(scrollAreaWidgetContents);
 	ui->verticalLayoutForRooms->addWidget(scrollArea);
+
+	counter_for_module_status_check = 300;
+	auto_module_status_check();
 
 	cout << "------------- Room device render success --------------------" << endl;
 	get_i2c_web_status();
@@ -586,12 +675,14 @@ void dashboard::render_dashboard_room_btn_state()
 						// turning btn off
 						btn_nd->btn->setStyleSheet("padding: 10%;background-color: #525252;color: #FFF;");
 					}
-					// checking is_var enabled or not
+					/*
+					// checking is_var enabled or not [temporary disabled]
 					if(btn_nd->is_var)
 					{
 						btn_nd->slider->setValue(stoi(device_var_value.toStdString()));
 						btn_nd->slider_val = stoi(device_var_value.toStdString());
 					}
+					*/
 				}
 			}
 		}
@@ -877,12 +968,33 @@ int dashboard::hex_to_int(string hex)
 void dashboard::on_power_tool_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	QMessageBox msgBox;
+	QAbstractButton *logout_button, *restart_button;
+
+	msgBox.addButton(tr("Cancel"), QMessageBox::NoRole);
+	restart_button = msgBox.addButton(tr("Reboot"), QMessageBox::YesRole);
+	logout_button = msgBox.addButton(tr("Power Off"), QMessageBox::YesRole);
+
+	msgBox.setStyleSheet("QPushButton{padding: 10px; background-color:#3465A4; color: #FFF;}QMessageBox{height: auto; width: auto; padding-left: 20px; padding-right: 20px;}");
+	msgBox.setText("<center><font style=\"font-size: 20px; font-weight:bold;\">Power Off</font></center>");
+	msgBox.exec();
+
+	if (msgBox.clickedButton() == logout_button)
+	{
 #ifdef ARC_TYPE
-	//system("reboot");
-	this->close();
+		system("poweroff");
 #else
-	this->close();
+		this->close();
 #endif
+	}
+	else if(msgBox.clickedButton() == restart_button)
+	{
+#ifdef ARC_TYPE
+		system("reboot");
+#else
+		this->close();
+#endif
+	}
 }
 
 void dashboard::on_settings_tool_button_clicked()
@@ -910,12 +1022,26 @@ void dashboard::on_app_update_button_clicked()
 void dashboard::on_logout_button_clicked()
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
-	system("mv /usr/share/iAloy/.conf/credential.json /usr/share/iAloy/.conf/credential_old.json");
-	timer_for_i2c_data_read_from_web->stop();
-	timer_for_i2c_data_read_from_mod->stop();
-	main_window_show(true);
-	dashboard_window_show(false);
-	mainwindow_reset_on_logout();
+
+	QMessageBox msgBox;
+	QAbstractButton *logout_button;
+
+	msgBox.addButton(tr("Cancel"), QMessageBox::NoRole);
+	logout_button = msgBox.addButton(tr("Logout"), QMessageBox::YesRole);
+
+	msgBox.setStyleSheet("QPushButton{padding: 10px; background-color:#3465A4; color: #FFF;}QMessageBox{height: auto; width: auto; padding-left: 20px; padding-right: 20px;}");
+	msgBox.setText("<center><font style=\"font-size: 16px; font-weight:bold;\">Do you want to Logout?</font></center>");
+	msgBox.exec();
+
+	if (msgBox.clickedButton() == logout_button)
+	{
+		system("mv /usr/share/iAloy/.conf/credential.json /usr/share/iAloy/.conf/credential_old.json");
+		timer_for_i2c_data_read_from_web->stop();
+		timer_for_i2c_data_read_from_mod->stop();
+		main_window_show(true);
+		dashboard_window_show(false);
+		mainwindow_reset_on_logout();
+	}
 }
 
 void dashboard::dashboard_request_other_user_login_slot(QString email)
@@ -944,4 +1070,10 @@ void dashboard::refresh_module_manager_slot(int index)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	emit module_manager_window_show_signal(btn_list, index);
+}
+
+void dashboard::on_available_update_btn_clicked()
+{
+	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
+	update_manager_window_show(true);
 }

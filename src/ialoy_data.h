@@ -178,6 +178,7 @@ private:
 	string settings_icon = "setting.png";
 	string wifi_icon = "wifi.png";
 	string update_icon = "update.png";
+	string update_brown_icon = "update_brown.png";
 	string power_icon = "power.png";
 	string ic_normal_icon = "ic_normal.png";
 	string ic_plus_brown_icon = "ic_plus_brown.png";
@@ -193,6 +194,7 @@ private:
 	string settings_icon_path = user + share + iAloy_folder + photos_folder + settings_icon;
 	string wifi_icon_path = user + share + iAloy_folder + photos_folder + wifi_icon;
 	string update_icon_path = user + share + iAloy_folder + photos_folder + update_icon;
+	string update_brown_icon_path = user + share + iAloy_folder + photos_folder + update_brown_icon;
 	string power_icon_path = user + share + iAloy_folder + photos_folder + power_icon;
 	string ic_narmal_icon_path = user + share + iAloy_folder + photos_folder + ic_normal_icon;
 	string ic_plus_brown_icon_path = user + share + iAloy_folder + photos_folder + ic_plus_brown_icon;
@@ -313,6 +315,7 @@ public:
 	string get_dashboard_bg_file_path();
 	string get_keyboad_icon_path();
 	string get_update_icon_path();
+	string get_update_brown_icon_path();
 	string get_settings_icon_path();
 	string get_wifi_icon_path();
 	string get_power_icon_path();

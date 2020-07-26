@@ -13,6 +13,7 @@
 
 #include "connect_init.h"
 #include "ialoy_data.h"
+#include "update_manager_thread.h"
 
 namespace Ui {
 class MainWindow;
@@ -64,9 +65,13 @@ private slots:
 	void on_settings_tool_button_clicked();
 	void on_app_update_button_clicked();
 	void on_power_tool_button_clicked();
+	void auto_update_available_check();
+	void on_available_update_btn_clicked();
+	void check_update_available_response_for_parent_slot(bool);
 
 signals:
 	void settings_window_show_signal(int);
+	void check_update_available_signal();
 
 private:
 	Ui::MainWindow *ui;
