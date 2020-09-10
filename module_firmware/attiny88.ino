@@ -22,56 +22,6 @@ byte temp = B00000000;
 byte temp2 = B00000000;
 
 
-void setup() {
-	pinMode(Tx, OUTPUT);
-	pinMode(Rx, OUTPUT);
-	pinMode(extra_2, OUTPUT);
-	for (int i = 0; i < 8; i++) {
-		pinMode(sw[i], INPUT);
-		pinMode(led[i], OUTPUT);
-		//digitalWrite(led[i], swt_a[i]);
-	}
-
-	Wire.begin(0x06);                // join i2c bus with address #4
-	Wire.onReceive(receiveEvent); // register event
-	Wire.onRequest(requestEvent);
-
-
-	for (int i = 0; i < 8; i++) {
-		swt_a[i] = EEPROM.read(i);
-	}
-}
-
-
-///////////////////////////////////////////////////////////////////
-void loop() {
-	for (int i = 0; i < 8; i++) {
-		int reading = digitalRead(sw[i]);
-		if (reading != last_switch_state[i]) {
-			lastDebounceTime[i] = millis();
-		}
-
-		if ((millis() - lastDebounceTime[i]) > debounceDelay) {
-			if (reading != state[i]) {
-				state[i] = reading;
-				if (state[i] == HIGH) {
-					swt_a[i] = !swt_a[i];
-
-				}
-			}
-		}
-		digitalWrite(led[i], swt_a[i]);
-		last_switch_state[i] = reading;
-	}
-
-	if ((millis() - last_data_come) > eeprom_time) {
-		for (int i = 0; i < 8; i++) {
-			EEPROM.update(i, swt_a[i]);
-			digitalWrite(extra_2, 1);
-		}
-	}
-	digitalWrite(extra_2, 0);
-}
 
 
 ///////////////////////////////////////////////////////////////////
@@ -122,4 +72,56 @@ void receiveEvent() {               //recieve the data from RPi
 
 		digitalWrite(Rx, LOW);
 	}
+}
+
+
+void setup() {
+	pinMode(Tx, OUTPUT);
+	pinMode(Rx, OUTPUT);
+	pinMode(extra_2, OUTPUT);
+	for (int i = 0; i < 8; i++) {
+		pinMode(sw[i], INPUT);
+		pinMode(led[i], OUTPUT);
+		//digitalWrite(led[i], swt_a[i]);
+	}
+
+	Wire.begin(0x06);                // join i2c bus with address #4
+	Wire.onReceive(receiveEvent); // register event
+	Wire.onRequest(requestEvent);
+
+
+	for (int i = 0; i < 8; i++) {
+		swt_a[i] = EEPROM.read(i);
+	}
+}
+
+
+///////////////////////////////////////////////////////////////////
+void loop() {
+	for (int i = 0; i < 8; i++) {
+		int reading = digitalRead(sw[i]);
+		if (reading != last_switch_state[i]) {
+			lastDebounceTime[i] = millis();
+		}
+
+		if ((millis() - lastDebounceTime[i]) > debounceDelay) {
+			if (reading != state[i]) {
+				state[i] = reading;
+				if (state[i] == HIGH) {
+					swt_a[i] = !swt_a[i];
+
+				}
+			}
+		}
+		digitalWrite(led[i], swt_a[i]);
+		last_switch_state[i] = reading;
+	}
+
+	if ((millis() - last_data_come) > eeprom_time) {
+		for (int i = 0; i < 8; i++) {
+			//EEPROM.update(i, swt_a[i]);
+			digitalWrite(extra_2, 1);
+		}
+	}
+	digitalWrite(extra_2, 0);
 }
