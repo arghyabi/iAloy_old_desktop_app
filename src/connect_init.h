@@ -18,7 +18,7 @@ class ialoy_web_api : public ialoy_main_data
 {
 
 private:
-	string protocol = "http://";
+	string protocol = "https://";
 	string sub_domain = "ialoy";
 	string domain = "arghyabiswas.com/";
 	string req_manager = "login_manager";

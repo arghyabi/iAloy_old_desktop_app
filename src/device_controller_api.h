@@ -17,7 +17,7 @@ class device_controller_api : public ialoy_web_api
 {
 
 private:
-	string protocol = "http://";
+	string protocol = "https://";
 	string sub_domain = "ialoy";
 	string domain = "arghyabiswas.com/";
 	string dco_req_manager = "device_controller";

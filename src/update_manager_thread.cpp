@@ -129,7 +129,7 @@ void update_manager_thread::fetch_update_status_slot(bool is_downloaded)
 {
 	cout << ">>>> " << __PRETTY_FUNCTION__ << endl;
 	this->is_downloaded = is_downloaded;
-	NetworkRequest.setUrl(QString::fromStdString("http://ialoy.arghyabiswas.com/update_manager?upmc=1"));
+	NetworkRequest.setUrl(QString::fromStdString("https://ialoy.arghyabiswas.com/update_manager?upmc=1"));
 	NetworkManager->get(NetworkRequest);
 }
 

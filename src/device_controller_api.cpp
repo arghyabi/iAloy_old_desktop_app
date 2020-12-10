@@ -22,7 +22,7 @@ void device_controller_api::set_device_controller_api_request(device_controller_
 	{
 		case DEVICE_CONTROLLER_LOGIN_USING_TOKEN:
 			{
-				string login_url = "http://ialoy.arghyabiswas.com/login_manager";
+				string login_url = "https://ialoy.arghyabiswas.com/login_manager";
 				this->req_url = login_url + "?aco=20&email=" + this->get_email() + "&token=" + QUrl::toPercentEncoding(this->get_token().c_str()).constData() + "&pi_add=" + this->get_pi_add();
 				break;
 			}
